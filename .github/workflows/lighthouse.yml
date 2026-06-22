@@ -1,0 +1,35 @@
+name: Lighthouse
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    name: Lighthouse budgets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          DATABASE_URL: postgres://user:pass@localhost:5432/pointsy
+          AUTH_SECRET: ci-placeholder-secret-at-least-32-characters-long
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./lighthouserc.json
+        env:
+          DATABASE_URL: postgres://user:pass@localhost:5432/pointsy
+          AUTH_SECRET: ci-placeholder-secret-at-least-32-characters-long

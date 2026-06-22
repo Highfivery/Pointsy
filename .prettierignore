@@ -1,0 +1,11 @@
+.next
+out
+build
+coverage
+playwright-report
+test-results
+drizzle
+node_modules
+public/sw.js
+pnpm-lock.yaml
+package-lock.json
