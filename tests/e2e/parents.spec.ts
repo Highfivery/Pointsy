@@ -67,8 +67,9 @@ test("a co-parent joins via an invite code and shares the dashboard", async ({
 
   // The co-parent sees both parents but cannot remove anyone (not the owner).
   await page.getByRole("link", { name: "Parents" }).click();
-  await expect(page.getByText("Alex")).toBeVisible();
-  await expect(page.getByText("Sam")).toBeVisible();
+  await expect(page).toHaveURL(/\/manage\/parents$/);
+  await expect(page.getByText("Alex", { exact: true })).toBeVisible();
+  await expect(page.getByText("Sam", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: /^remove/i })).toHaveCount(0);
 });
 
@@ -103,7 +104,8 @@ test("the owner can remove a co-parent", async ({ page }) => {
   await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.getByRole("link", { name: "Parents" }).click();
-  await expect(page.getByText("Sam")).toBeVisible();
+  await expect(page).toHaveURL(/\/manage\/parents$/);
+  await expect(page.getByText("Sam", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: /remove sam/i }).click();
-  await expect(page.getByText("Sam")).toHaveCount(0);
+  await expect(page.getByText("Sam", { exact: true })).toHaveCount(0);
 });

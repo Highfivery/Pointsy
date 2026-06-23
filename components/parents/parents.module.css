@@ -73,6 +73,10 @@
   color: var(--color-text);
 }
 
+.name {
+  font-weight: 700;
+}
+
 .rowEmail {
   font-size: 0.875rem;
   color: var(--color-text-muted);
