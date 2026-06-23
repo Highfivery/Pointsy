@@ -1,6 +1,6 @@
 import { and, eq, isNotNull } from "drizzle-orm";
 import type { Database } from "@/lib/db/types";
-import { people, type Person } from "@/lib/db/schema";
+import { people, families, type Person } from "@/lib/db/schema";
 import { hashSecret, verifySecret } from "@/lib/auth/password";
 import {
   getFamilyByCode,
@@ -123,14 +123,11 @@ export interface FamilyLookup {
  * profile picker. Returns only non-sensitive fields (no email/hash). Null if the
  * code doesn't match a family.
  */
-export async function lookupFamilyByCode(
+async function pickerMembers(
   db: Database,
-  code: string,
-): Promise<FamilyLookup | null> {
-  const family = await getFamilyByCode(db, code);
-  if (!family) return null;
-
-  const members = await db
+  familyId: string,
+): Promise<PickerMember[]> {
+  return db
     .select({
       id: people.id,
       name: people.name,
@@ -141,14 +138,43 @@ export async function lookupFamilyByCode(
     .from(people)
     .where(
       and(
-        eq(people.familyId, family.id),
+        eq(people.familyId, familyId),
         eq(people.isActive, true),
         isNotNull(people.pinHash),
       ),
     )
     .orderBy(people.sortOrder, people.createdAt);
+}
 
-  return { familyId: family.id, familyName: family.name, members };
+export async function lookupFamilyByCode(
+  db: Database,
+  code: string,
+): Promise<FamilyLookup | null> {
+  const family = await getFamilyByCode(db, code);
+  if (!family) return null;
+  return {
+    familyId: family.id,
+    familyName: family.name,
+    members: await pickerMembers(db, family.id),
+  };
+}
+
+/** Same as {@link lookupFamilyByCode} but keyed by familyId (device memory). */
+export async function lookupFamilyById(
+  db: Database,
+  familyId: string,
+): Promise<FamilyLookup | null> {
+  const [family] = await db
+    .select()
+    .from(families)
+    .where(eq(families.id, familyId))
+    .limit(1);
+  if (!family) return null;
+  return {
+    familyId: family.id,
+    familyName: family.name,
+    members: await pickerMembers(db, family.id),
+  };
 }
 
 export type PinResult =

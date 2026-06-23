@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { getDb } from "@/lib/db/client";
 import { createSession, destroySession } from "@/lib/auth/session";
+import { rememberFamily } from "@/lib/auth/device";
 import {
   registerFamily,
   authenticateParent,
@@ -36,6 +37,7 @@ export async function signUpAction(
       personId: result.personId,
       role: "parent",
     });
+    await rememberFamily(result.familyId);
   } catch (err) {
     if (err instanceof EmailTakenError) {
       return { fieldErrors: { email: err.message } };
@@ -69,6 +71,7 @@ export async function signInAction(
     personId: parent.id,
     role: "parent",
   });
+  await rememberFamily(parent.familyId);
   redirect("/dashboard");
 }
 

@@ -9,13 +9,21 @@ import {
   type SendableSubscription,
 } from "./service";
 
-/** Push is a graceful no-op until the VAPID keys are configured. */
+/** Push is a graceful no-op until the VAPID keypair is configured. */
 export function isPushConfigured(): boolean {
-  return Boolean(
-    env.NEXT_PUBLIC_VAPID_PUBLIC_KEY &&
-    env.VAPID_PRIVATE_KEY &&
-    env.VAPID_SUBJECT,
-  );
+  return Boolean(env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY);
+}
+
+/**
+ * VAPID requires a contact "subject" (a URL/mailto sent to the browser's push
+ * service). It's an operator contact, not user data, so we derive it from the
+ * deployment URL automatically — nothing for the operator to configure, and no
+ * personal address baked in. `VAPID_SUBJECT` can override it if ever needed.
+ */
+function vapidSubject(): string {
+  if (env.VAPID_SUBJECT) return env.VAPID_SUBJECT;
+  const url = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  return url ? `https://${url}` : "https://pointsy.app";
 }
 
 let configured = false;
@@ -23,9 +31,8 @@ function ensureConfigured(): boolean {
   if (configured) return true;
   const pub = env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
   const priv = env.VAPID_PRIVATE_KEY;
-  const subject = env.VAPID_SUBJECT;
-  if (!pub || !priv || !subject) return false;
-  webpush.setVapidDetails(subject, pub, priv);
+  if (!pub || !priv) return false;
+  webpush.setVapidDetails(vapidSubject(), pub, priv);
   configured = true;
   return true;
 }

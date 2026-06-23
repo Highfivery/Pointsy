@@ -49,17 +49,14 @@ async function signOut(page: Page) {
 
 test.describe("kids & PIN auth", () => {
   test("parent adds a kid; kid signs in with their PIN", async ({ page }) => {
-    const code = await signUpParent(page);
+    await signUpParent(page);
     await expectNoA11yViolations(page, "/manage/kids (before add)");
 
     await addKid(page, "Kiddo", "4321");
     await signOut(page);
 
-    // Kid signs in via the profile picker.
+    // The device remembers the family, so the picker shows immediately.
     await page.goto("/enter");
-    await page.getByLabel("Family code").fill(code);
-    await page.getByRole("button", { name: /continue/i }).click();
-
     await expect(page.getByRole("button", { name: /Kiddo/i })).toBeVisible();
     await expectNoA11yViolations(page, "/enter picker");
 
@@ -75,13 +72,11 @@ test.describe("kids & PIN auth", () => {
   });
 
   test("a wrong PIN is rejected", async ({ page }) => {
-    const code = await signUpParent(page);
+    await signUpParent(page);
     await addKid(page, "Kiddo", "4321");
     await signOut(page);
 
     await page.goto("/enter");
-    await page.getByLabel("Family code").fill(code);
-    await page.getByRole("button", { name: /continue/i }).click();
     await page.getByRole("button", { name: /Kiddo/i }).click();
     await page.getByLabel(/enter your pin/i).fill("0000");
     await page.getByRole("button", { name: /let.?s go/i }).click();

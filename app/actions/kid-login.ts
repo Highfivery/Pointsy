@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { getDb } from "@/lib/db/client";
 import { createSession } from "@/lib/auth/session";
+import { rememberFamily, forgetFamily } from "@/lib/auth/device";
 import {
   verifyPin,
   lookupFamilyByCode,
@@ -16,7 +17,16 @@ export async function lookupFamilyAction(
 ): Promise<FamilyLookup | null> {
   const parsed = familyCodeSchema.safeParse(code);
   if (!parsed.success) return null;
-  return lookupFamilyByCode(getDb(), parsed.data);
+  const family = await lookupFamilyByCode(getDb(), parsed.data);
+  // Remember the family on this device so the picker shows without re-typing
+  // the code next time (including after sign-out).
+  if (family) await rememberFamily(family.familyId);
+  return family;
+}
+
+/** Drop this device's family association ("Use a different family"). */
+export async function forgetFamilyAction(): Promise<void> {
+  await forgetFamily();
 }
 
 export interface KidSignInState {

@@ -1,12 +1,18 @@
 import { Sparkles, ArrowRight } from "lucide-react";
-import { RememberedFamily } from "@/components/landing/RememberedFamily";
+import { getKnownFamily } from "@/lib/auth/device";
+import { PickerScreen } from "@/components/enter/PickerScreen";
 import styles from "./page.module.css";
 
-export default function Home() {
+export default async function Home() {
+  // A device that's already used Pointsy goes straight to its family's profile
+  // picker (PIN required) — never the marketing page or a sign-in form.
+  const family = await getKnownFamily();
+  if (family) return <PickerScreen initialFamily={family} />;
+
+  // Brand-new visitor: marketing + the ways in.
   return (
     <main id="main" className={styles.main}>
       <section className={styles.hero}>
-        <RememberedFamily />
         <p className={styles.badge}>
           <Sparkles size={18} aria-hidden="true" />
           <span>Pointsy</span>
@@ -26,7 +32,7 @@ export default function Home() {
             Parent sign in
           </a>
           <a className={styles.secondary} href="/enter">
-            Kids&rsquo; PIN sign-in
+            Join with a family code
           </a>
         </div>
       </section>
