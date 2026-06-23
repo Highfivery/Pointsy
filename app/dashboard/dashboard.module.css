@@ -68,18 +68,23 @@
   color: var(--color-primary);
 }
 
+.manageNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
 .manageLink {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   min-height: var(--tap-target);
-  padding: 0 var(--space-6);
+  padding: 0 var(--space-5);
   font-weight: 700;
   color: var(--color-primary-text);
   background: var(--color-primary);
   border-radius: var(--radius-full);
   text-decoration: none;
-  align-self: flex-start;
 }
 
 .note {

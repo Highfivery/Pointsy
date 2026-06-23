@@ -78,15 +78,23 @@ export const updateKidSchema = z.object({
 /* -------------------------------------------------------------- catalog */
 
 export const choreSchema = z.object({
-  name: z.string().trim().min(1).max(60),
+  name: z.string().trim().min(1, "Name is required.").max(60),
   emoji: emojiSchema,
-  points: z.number().int().min(0).max(100000),
+  points: z.coerce
+    .number()
+    .int("Points must be a whole number.")
+    .min(0)
+    .max(100000),
 });
 
 export const rewardSchema = z.object({
-  name: z.string().trim().min(1).max(60),
+  name: z.string().trim().min(1, "Name is required.").max(60),
   emoji: emojiSchema,
-  cost: z.number().int().min(0).max(100000),
+  cost: z.coerce
+    .number()
+    .int("Cost must be a whole number.")
+    .min(0)
+    .max(100000),
   description: z.string().trim().max(280).optional(),
 });
 
