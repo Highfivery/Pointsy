@@ -1,0 +1,72 @@
+.pad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.label {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.dots {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.dot,
+.dotFilled {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+}
+
+.dot {
+  background: var(--color-border);
+}
+
+.dotFilled {
+  background: var(--color-primary);
+}
+
+.keys {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 18rem;
+}
+
+.key,
+.keyAux {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  user-select: none;
+}
+
+.key:active {
+  background: var(--color-primary-weak);
+}
+
+.keyAux {
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+}
+
+.key:disabled,
+.keyAux:disabled {
+  opacity: 0.45;
+  cursor: default;
+}

@@ -8,7 +8,7 @@ import {
   type KidSignInState,
 } from "@/app/actions/kid-login";
 import type { FamilyLookup, PickerMember } from "@/lib/people/service";
-import { Field } from "@/components/auth/Field";
+import { PinPad } from "@/components/auth/PinPad";
 import { IconByName } from "@/components/icons/registry";
 import form from "@/components/auth/auth-form.module.css";
 import styles from "./enter.module.css";
@@ -141,14 +141,12 @@ export function KidLogin({
           <form action={pinAction} className={form.form} noValidate>
             <input type="hidden" name="familyId" value={family.familyId} />
             <input type="hidden" name="personId" value={selected.id} />
-            <Field
-              label="Enter your PIN"
+            <PinPad
+              key={pinState.error ?? "pin"}
               name="pin"
-              type="password"
-              inputMode="numeric"
-              autoComplete="off"
-              maxLength={4}
-              required
+              label="Enter your PIN"
+              autoSubmit
+              disabled={pinPending}
             />
             {pinState.error ? (
               <p role="alert" className={form.formError}>
