@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ServiceWorkerUpdater } from "@/components/pwa/ServiceWorkerUpdater";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -20,6 +21,19 @@ export const metadata: Metadata = {
   },
   description:
     "A simple, friendly way for families to earn and redeem points. Parents reward good habits; kids watch their points grow.",
+  // iOS uses apple-touch-icon (not the manifest) for the Home Screen icon.
+  icons: {
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Pointsy",
+    statusBarStyle: "default",
+  },
 };
 
 export const viewport: Viewport = {
@@ -44,6 +58,7 @@ export default function RootLayout({
           Skip to content
         </a>
         {children}
+        <ServiceWorkerUpdater />
       </body>
     </html>
   );
