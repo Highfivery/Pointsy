@@ -39,7 +39,7 @@ export default async function ChoresPage() {
                   name: c.name,
                   emoji: c.emoji,
                   value: c.points,
-                  description: null,
+                  description: c.description,
                   isActive: c.isActive,
                   limitPeriod: c.limitPeriod,
                   limitCount: c.limitCount,

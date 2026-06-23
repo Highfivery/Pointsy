@@ -15,7 +15,7 @@ import {
  * depth.
  */
 const PARENT_PREFIXES = ["/dashboard", "/manage", "/award"];
-const KID_PREFIXES = ["/me", "/redeem"];
+const KID_PREFIXES = ["/me", "/redeem", "/submit"];
 const AUTH_PAGES = ["/sign-in", "/sign-up"];
 
 function matches(pathname: string, prefixes: string[]) {
@@ -93,6 +93,7 @@ export const config = {
     "/award/:path*",
     "/me/:path*",
     "/redeem/:path*",
+    "/submit/:path*",
     "/sign-in",
     "/sign-up",
   ],

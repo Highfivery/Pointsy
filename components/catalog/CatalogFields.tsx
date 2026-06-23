@@ -102,16 +102,14 @@ export function CatalogFields({ kind, errors, defaults }: CatalogFieldsProps) {
         </div>
       ) : null}
 
-      {!isChore ? (
-        <Field
-          label="Description (optional)"
-          name="description"
-          defaultValue={defaults?.description ?? ""}
-          autoComplete="off"
-          maxLength={280}
-          error={errors?.description}
-        />
-      ) : null}
+      <Field
+        label="Description (optional)"
+        name="description"
+        defaultValue={defaults?.description ?? ""}
+        autoComplete="off"
+        maxLength={280}
+        error={errors?.description}
+      />
     </>
   );
 }

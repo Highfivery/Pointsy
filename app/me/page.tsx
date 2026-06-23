@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LogOut, Gift } from "lucide-react";
+import { LogOut, Gift, ClipboardCheck, X } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
 import { getDb } from "@/lib/db/client";
 import { getPersonById } from "@/lib/db/queries";
 import { getBalance, listKidActivity } from "@/lib/points/service";
 import { getAvailable } from "@/lib/redemptions/service";
+import {
+  getPendingPoints,
+  listKidSubmissions,
+} from "@/lib/submissions/service";
+import { cancelSubmissionAction } from "@/app/actions/submissions";
 import { IconByName } from "@/components/icons/registry";
 import { ActivityList } from "@/components/points/ActivityList";
 import { EnableNotifications } from "@/components/push/EnableNotifications";
@@ -24,11 +29,15 @@ export default async function MePage() {
   const me = await getPersonById(db, session.familyId, session.personId);
   if (!me) redirect("/enter");
 
-  const [balance, available, activity] = await Promise.all([
-    getBalance(db, session.familyId, session.personId),
-    getAvailable(db, session.familyId, session.personId),
-    listKidActivity(db, session.familyId, session.personId, 15),
-  ]);
+  const [balance, available, pendingPoints, submissions, activity] =
+    await Promise.all([
+      getBalance(db, session.familyId, session.personId),
+      getAvailable(db, session.familyId, session.personId),
+      getPendingPoints(db, session.familyId, session.personId),
+      listKidSubmissions(db, session.familyId, session.personId, 20),
+      listKidActivity(db, session.familyId, session.personId, 15),
+    ]);
+  const waiting = submissions.filter((s) => s.status === "pending");
 
   return (
     <main id="main" className={styles.main}>
@@ -60,12 +69,49 @@ export default async function MePage() {
               ? "Earn points for chores and good habits!"
               : "Keep up the great work!"}
         </p>
+        {pendingPoints > 0 ? (
+          <p className={styles.pending}>
+            +{pendingPoints} waiting for approval
+          </p>
+        ) : null}
       </section>
 
-      <Link href="/redeem" className={styles.redeemLink}>
-        <Gift size={18} aria-hidden="true" />
-        Redeem rewards
-      </Link>
+      <div className={styles.actions}>
+        <Link href="/submit" className={styles.actionLink}>
+          <ClipboardCheck size={18} aria-hidden="true" />
+          Log a chore
+        </Link>
+        <Link href="/redeem" className={styles.actionLink}>
+          <Gift size={18} aria-hidden="true" />
+          Redeem rewards
+        </Link>
+      </div>
+
+      {waiting.length > 0 ? (
+        <section aria-labelledby="waiting-heading">
+          <h2 id="waiting-heading" className={styles.activityTitle}>
+            Waiting for approval
+          </h2>
+          <ul className={styles.waitList}>
+            {waiting.map((s) => (
+              <li key={s.id} className={styles.waitRow}>
+                <span className={styles.waitText}>{s.choreName}</span>
+                <span className={styles.waitPts}>+{s.points}</span>
+                <form action={cancelSubmissionAction}>
+                  <input type="hidden" name="submissionId" value={s.id} />
+                  <button
+                    type="submit"
+                    className={styles.cancelBtn}
+                    aria-label={`Cancel ${s.choreName}`}
+                  >
+                    <X size={16} aria-hidden="true" />
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <section aria-labelledby="activity-heading">
         <h2 id="activity-heading" className={styles.activityTitle}>

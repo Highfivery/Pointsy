@@ -43,6 +43,20 @@
       "when": 1782249044183,
       "tag": "0005_chore_limits_and_timezone",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1782252880633,
+      "tag": "0006_chore_submissions",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1782253277605,
+      "tag": "0007_chore_description",
+      "breakpoints": true
     }
   ]
 }
