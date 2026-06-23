@@ -13,6 +13,8 @@ export interface ChoreInput {
   name: string;
   emoji: string;
   points: number;
+  limitPeriod?: "none" | "day" | "week";
+  limitCount?: number;
 }
 
 export interface RewardInput {
@@ -50,6 +52,8 @@ export async function createChore(
       name: input.name.trim(),
       emoji: input.emoji,
       points: input.points,
+      limitPeriod: input.limitPeriod ?? "none",
+      limitCount: input.limitCount ?? 1,
       sortOrder: existing.length,
     })
     .returning();
@@ -64,7 +68,13 @@ export async function updateChore(
 ): Promise<void> {
   await db
     .update(chores)
-    .set({ name: input.name.trim(), emoji: input.emoji, points: input.points })
+    .set({
+      name: input.name.trim(),
+      emoji: input.emoji,
+      points: input.points,
+      limitPeriod: input.limitPeriod ?? "none",
+      limitCount: input.limitCount ?? 1,
+    })
     .where(and(eq(chores.familyId, familyId), eq(chores.id, id)));
 }
 

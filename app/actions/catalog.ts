@@ -30,6 +30,8 @@ function parseChore(formData: FormData) {
     name: formData.get("name"),
     emoji: formData.get("emoji"),
     points: formData.get("points"),
+    limitPeriod: formData.get("limitPeriod") ?? "none",
+    limitCount: formData.get("limitCount") ?? 1,
   });
 }
 

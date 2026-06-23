@@ -36,6 +36,13 @@
       "when": 1782240683354,
       "tag": "0004_parent_avatar_default",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1782249044183,
+      "tag": "0005_chore_limits_and_timezone",
+      "breakpoints": true
     }
   ]
 }

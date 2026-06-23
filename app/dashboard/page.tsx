@@ -30,6 +30,7 @@ import {
 import { IconByName } from "@/components/icons/registry";
 import { SetPinForm } from "@/components/account/SetPinForm";
 import { EnableNotifications } from "@/components/push/EnableNotifications";
+import { FamilyTimezone } from "@/components/family/FamilyTimezone";
 import { families } from "@/lib/db/schema";
 import styles from "./dashboard.module.css";
 
@@ -218,6 +219,10 @@ export default async function DashboardPage() {
             shared device. You can still use email + password anytime.
           </p>
           <SetPinForm hasPin={!!me.pinHash} />
+        </details>
+        <details className={styles.pinDetails}>
+          <summary className={styles.pinSummary}>Family time zone</summary>
+          <FamilyTimezone current={family.timezone} />
         </details>
       </section>
 

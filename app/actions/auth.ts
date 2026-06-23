@@ -31,7 +31,11 @@ export async function signUpAction(
   if (!parsed.success) return { fieldErrors: toFieldErrors(parsed.error) };
 
   try {
-    const result = await registerFamily(getDb(), parsed.data);
+    const tz = formData.get("timezone");
+    const result = await registerFamily(getDb(), {
+      ...parsed.data,
+      timezone: typeof tz === "string" ? tz : undefined,
+    });
     await createSession({
       familyId: result.familyId,
       personId: result.personId,

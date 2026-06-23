@@ -4,6 +4,7 @@ import { families, people, type Family, type Person } from "@/lib/db/schema";
 import { hashSecret, verifySecret } from "./password";
 import { generateFamilyCode } from "./family-code";
 import { DEFAULT_PARENT_AVATAR_ICON } from "@/lib/icons";
+import { normalizeTimezone } from "@/lib/timezone";
 
 /** Bump when the ToS/Privacy wording materially changes (recorded per parent). */
 export const CONSENT_VERSION = "2026-06-22";
@@ -20,6 +21,7 @@ export interface RegisterFamilyInput {
   parentName: string;
   email: string;
   password: string;
+  timezone?: string;
 }
 
 export interface RegisterFamilyResult {
@@ -32,6 +34,7 @@ export interface RegisterFamilyResult {
 async function insertFamilyWithUniqueCode(
   tx: Database,
   name: string,
+  timezone: string,
 ): Promise<Family> {
   for (let attempt = 0; attempt < 10; attempt++) {
     const code = generateFamilyCode(name);
@@ -43,7 +46,7 @@ async function insertFamilyWithUniqueCode(
     if (existing.length === 0) {
       const [family] = await tx
         .insert(families)
-        .values({ name, code })
+        .values({ name, code, timezone })
         .returning();
       return family;
     }
@@ -74,6 +77,7 @@ export async function registerFamily(
     const family = await insertFamilyWithUniqueCode(
       tx,
       input.familyName.trim(),
+      normalizeTimezone(input.timezone),
     );
     const [parent] = await tx
       .insert(people)

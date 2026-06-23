@@ -104,6 +104,14 @@ export const choreSchema = z.object({
     .int("Points must be a whole number.")
     .min(0)
     .max(100000),
+  /** How often a kid may claim it. "none" = unlimited; count applies otherwise. */
+  limitPeriod: z.enum(["none", "day", "week"]).default("none"),
+  limitCount: z.coerce
+    .number()
+    .int("Enter a whole number.")
+    .min(1, "Must be at least 1.")
+    .max(50, "That's a lot — keep it 50 or under.")
+    .default(1),
 });
 
 export const rewardSchema = z.object({

@@ -41,6 +41,8 @@ export default async function ChoresPage() {
                   value: c.points,
                   description: null,
                   isActive: c.isActive,
+                  limitPeriod: c.limitPeriod,
+                  limitCount: c.limitCount,
                 }}
               />
             </li>
