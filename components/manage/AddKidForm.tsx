@@ -3,8 +3,10 @@
 import { useActionState, useEffect, useRef } from "react";
 import { addKidAction } from "@/app/actions/people";
 import { Field } from "@/components/auth/Field";
+import { IconPicker } from "@/components/icons/IconPicker";
+import { AVATAR_ICON_KEYS, DEFAULT_AVATAR_ICON } from "@/lib/icons";
 import type { FormState } from "@/lib/validation/form";
-import { COLOR_OPTIONS, DEFAULT_AVATAR, DEFAULT_COLOR } from "./options";
+import { COLOR_OPTIONS, DEFAULT_COLOR } from "./options";
 import form from "@/components/auth/auth-form.module.css";
 import styles from "./manage.module.css";
 
@@ -31,14 +33,11 @@ export function AddKidForm() {
           error={state.fieldErrors?.name}
           required
         />
-        <Field
-          label="Avatar (emoji)"
+        <IconPicker
           name="avatar"
-          defaultValue={DEFAULT_AVATAR}
-          autoComplete="off"
-          maxLength={8}
-          error={state.fieldErrors?.avatar}
-          required
+          label="Avatar"
+          options={AVATAR_ICON_KEYS}
+          defaultValue={DEFAULT_AVATAR_ICON}
         />
 
         <div className={form.field}>

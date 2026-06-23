@@ -8,6 +8,7 @@ import {
 } from "@/app/actions/kid-login";
 import type { FamilyLookup, PickerMember } from "@/lib/people/service";
 import { Field } from "@/components/auth/Field";
+import { IconByName } from "@/components/icons/registry";
 import form from "@/components/auth/auth-form.module.css";
 import styles from "./enter.module.css";
 
@@ -119,9 +120,8 @@ export function KidLogin() {
           <span
             className={styles.bigAvatar}
             style={{ background: selected.color }}
-            aria-hidden="true"
           >
-            {selected.avatar}
+            <IconByName name={selected.avatar} size={40} />
           </span>
           <p className={styles.whoName}>Hi {selected.name}!</p>
         </div>
@@ -170,9 +170,8 @@ export function KidLogin() {
                 <span
                   className={styles.bigAvatar}
                   style={{ background: m.color }}
-                  aria-hidden="true"
                 >
-                  {m.avatar}
+                  <IconByName name={m.avatar} size={40} />
                 </span>
                 <span className={styles.profileName}>{m.name}</span>
               </button>

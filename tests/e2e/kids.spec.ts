@@ -35,6 +35,7 @@ async function addKid(page: Page, name: string, pin: string) {
   await page.getByRole("link", { name: /^kids$/i }).click();
   await expect(page).toHaveURL(/\/manage\/kids$/);
   await page.getByLabel("Name").fill(name);
+  await page.getByRole("radio", { name: "Cat", exact: true }).check();
   await page.getByLabel("4-digit PIN").fill(pin);
   await page.getByRole("button", { name: /add child/i }).click();
   await expect(page.getByText(name)).toBeVisible();

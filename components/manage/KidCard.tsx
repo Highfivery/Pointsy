@@ -7,6 +7,9 @@ import {
   toggleKidActiveAction,
 } from "@/app/actions/people";
 import { Field } from "@/components/auth/Field";
+import { IconPicker } from "@/components/icons/IconPicker";
+import { IconByName } from "@/components/icons/registry";
+import { AVATAR_ICON_KEYS } from "@/lib/icons";
 import type { FormState } from "@/lib/validation/form";
 import { COLOR_OPTIONS } from "./options";
 import form from "@/components/auth/auth-form.module.css";
@@ -35,12 +38,8 @@ export function KidCard({ kid }: { kid: KidCardData }) {
   return (
     <section className={styles.card} aria-label={`Manage ${kid.name}`}>
       <div className={styles.kidHead}>
-        <span
-          className={styles.avatar}
-          style={{ background: kid.color }}
-          aria-hidden="true"
-        >
-          {kid.avatar}
+        <span className={styles.avatar} style={{ background: kid.color }}>
+          <IconByName name={kid.avatar} size={26} />
         </span>
         <span className={styles.kidName}>{kid.name}</span>
         {!kid.isActive ? (
@@ -59,13 +58,11 @@ export function KidCard({ kid }: { kid: KidCardData }) {
             error={editState.fieldErrors?.name}
             required
           />
-          <Field
-            label="Avatar (emoji)"
+          <IconPicker
             name="avatar"
+            label="Avatar"
+            options={AVATAR_ICON_KEYS}
             defaultValue={kid.avatar}
-            maxLength={8}
-            error={editState.fieldErrors?.avatar}
-            required
           />
           <div className={form.field}>
             <label htmlFor={`color-${kid.id}`} className={form.label}>
