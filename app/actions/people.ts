@@ -15,6 +15,21 @@ import { toFieldErrors, type FormState } from "@/lib/validation/form";
 const MANAGE_PATH = "/manage/kids";
 const idSchema = z.string().uuid();
 
+/** A parent sets/changes their own quick sign-in PIN (for the profile picker). */
+export async function setMyPinAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const session = await requireParent();
+  const pin = pinSchema.safeParse(formData.get("pin"));
+  if (!pin.success)
+    return { fieldErrors: { pin: pin.error.issues[0].message } };
+
+  await setPin(getDb(), session.familyId, session.personId, pin.data);
+  revalidatePath("/dashboard");
+  return { ok: true };
+}
+
 export async function addKidAction(
   _prev: FormState,
   formData: FormData,
