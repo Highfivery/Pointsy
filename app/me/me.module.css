@@ -62,18 +62,31 @@
   color: var(--color-text-muted);
 }
 
-.points {
-  font-size: 4rem;
-  font-weight: 800;
-  line-height: 1;
-  color: var(--color-primary);
-}
-
+.points,
 .pointsNeg {
   font-size: 4rem;
   font-weight: 800;
   line-height: 1;
+  animation: pointsPop 0.4s ease-out;
+}
+
+.points {
+  color: var(--color-primary);
+}
+
+.pointsNeg {
   color: var(--color-danger);
+}
+
+@keyframes pointsPop {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .activityTitle {
