@@ -24,6 +24,9 @@ export default function Home() {
             Sign in
           </a>
         </div>
+        <p className={styles.kidLink}>
+          Already set up? <a href="/enter">Kids sign in with a PIN</a>
+        </p>
       </section>
     </main>
   );

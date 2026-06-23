@@ -1,7 +1,6 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import type { z } from "zod";
 import { getDb } from "@/lib/db/client";
 import { createSession, destroySession } from "@/lib/auth/session";
 import {
@@ -10,19 +9,11 @@ import {
   EmailTakenError,
 } from "@/lib/auth/register";
 import { signUpSchema, signInSchema } from "@/lib/validation/schemas";
+import { toFieldErrors } from "@/lib/validation/form";
 
 export interface AuthState {
   error?: string;
   fieldErrors?: Record<string, string>;
-}
-
-function toFieldErrors(error: z.ZodError): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const issue of error.issues) {
-    const key = String(issue.path[0] ?? "form");
-    if (!out[key]) out[key] = issue.message;
-  }
-  return out;
 }
 
 export async function signUpAction(

@@ -1,0 +1,130 @@
+.main {
+  width: 100%;
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+.title {
+  font-size: clamp(1.5rem, 6vw, 2rem);
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.cardTitle {
+  font-size: 1.1rem;
+  color: var(--color-text);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.kidHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  font-size: 1.6rem;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.kidName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.inactive {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-warning);
+  text-transform: uppercase;
+}
+
+.disclosure {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-3);
+}
+
+.summary {
+  min-height: var(--tap-target);
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.select {
+  min-height: var(--tap-target);
+  padding: 0 var(--space-3);
+  font-size: 1rem;
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.secondaryBtn {
+  min-height: var(--tap-target);
+  padding: 0 var(--space-4);
+  font-weight: 600;
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.success {
+  font-weight: 600;
+  color: var(--color-success);
+}
+
+.empty {
+  color: var(--color-text-muted);
+}

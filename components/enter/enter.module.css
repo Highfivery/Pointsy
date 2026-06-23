@@ -1,0 +1,112 @@
+.main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+}
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 26rem;
+}
+
+.title {
+  font-size: clamp(1.6rem, 6vw, 2rem);
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.subtitle {
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.picker,
+.pinStep {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.familyName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: var(--space-3);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.profileBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--tap-target);
+  padding: var(--space-4) var(--space-2);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+}
+
+.profileBtn:hover {
+  border-color: var(--color-primary);
+}
+
+.profileName {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.bigAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  font-size: 2.2rem;
+  border-radius: var(--radius-full);
+}
+
+.who {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.whoName {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.textBtn {
+  align-self: flex-start;
+  min-height: var(--tap-target);
+  padding: 0 var(--space-2);
+  font-weight: 600;
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.empty {
+  color: var(--color-text-muted);
+}

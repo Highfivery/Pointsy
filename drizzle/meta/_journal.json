@@ -8,6 +8,13 @@
       "when": 1782170848100,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1782177240127,
+      "tag": "0001_pin_lockout",
+      "breakpoints": true
     }
   ]
 }

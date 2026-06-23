@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { eq } from "drizzle-orm";
-import { LogOut } from "lucide-react";
+import { LogOut, Users } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
 import { getDb } from "@/lib/db/client";
@@ -49,9 +50,14 @@ export default async function DashboardPage() {
         <p className={styles.code}>{family.code}</p>
       </section>
 
+      <Link href="/manage/kids" className={styles.manageLink}>
+        <Users size={18} aria-hidden="true" />
+        Manage kids
+      </Link>
+
       <p className={styles.note}>
-        More coming soon — add your kids, build a chore catalog, set up rewards,
-        and start awarding points.
+        More coming soon — build a chore catalog, set up rewards, and start
+        awarding points.
       </p>
     </main>
   );

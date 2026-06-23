@@ -76,6 +76,15 @@
   color: var(--color-text);
 }
 
+.kidLink {
+  margin-top: var(--space-2);
+  color: var(--color-text-muted);
+}
+
+.kidLink a {
+  font-weight: 600;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .primary:hover,
   .secondary:hover {
