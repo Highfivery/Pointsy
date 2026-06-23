@@ -51,7 +51,11 @@ export default async function DashboardPage() {
       </section>
 
       <nav className={styles.manageNav} aria-label="Manage">
-        <Link href="/manage/kids" className={styles.manageLink}>
+        <Link
+          href="/manage/kids"
+          className={styles.manageLink}
+          aria-label="Kids"
+        >
           <span className={styles.manageIcon}>
             <Users size={22} aria-hidden="true" />
           </span>
@@ -65,7 +69,11 @@ export default async function DashboardPage() {
             className={styles.manageChevron}
           />
         </Link>
-        <Link href="/manage/chores" className={styles.manageLink}>
+        <Link
+          href="/manage/chores"
+          className={styles.manageLink}
+          aria-label="Chores"
+        >
           <span className={styles.manageIcon}>
             <ListChecks size={22} aria-hidden="true" />
           </span>
@@ -79,7 +87,11 @@ export default async function DashboardPage() {
             className={styles.manageChevron}
           />
         </Link>
-        <Link href="/manage/rewards" className={styles.manageLink}>
+        <Link
+          href="/manage/rewards"
+          className={styles.manageLink}
+          aria-label="Rewards"
+        >
           <span className={styles.manageIcon}>
             <Gift size={22} aria-hidden="true" />
           </span>
