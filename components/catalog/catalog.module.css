@@ -1,0 +1,97 @@
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 1.6rem;
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.headText {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.value {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.desc {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.reorder {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-3);
+}
+
+.deleteWrap {
+  margin-left: auto;
+}
+
+.deleteSummary {
+  min-height: var(--tap-target);
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  color: var(--color-danger);
+  cursor: pointer;
+}
+
+.deleteForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.warn {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.dangerBtn {
+  min-height: var(--tap-target);
+  padding: 0 var(--space-4);
+  font-weight: 700;
+  color: var(--color-primary-text);
+  background: var(--color-danger);
+  border: 2px solid transparent;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}

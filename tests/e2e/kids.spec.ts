@@ -32,7 +32,7 @@ async function signUpParent(page: Page): Promise<string> {
 }
 
 async function addKid(page: Page, name: string, pin: string) {
-  await page.getByRole("link", { name: /manage kids/i }).click();
+  await page.getByRole("link", { name: /^kids$/i }).click();
   await expect(page).toHaveURL(/\/manage\/kids$/);
   await page.getByLabel("Name").fill(name);
   await page.getByLabel("4-digit PIN").fill(pin);
