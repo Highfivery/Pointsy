@@ -18,6 +18,7 @@ import {
   timestamp,
   index,
   uniqueIndex,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 
 /* ------------------------------------------------------------------ enums */
@@ -43,6 +44,12 @@ export const families = pgTable("families", {
   name: text("name").notNull(),
   /** Short, human-friendly join/login code, e.g. "MARSH-7Q2". */
   code: text("code").notNull().unique(),
+  /** The creating parent — protected: can't be removed, and only they may
+      remove other parents. Set just after the first parent is created.
+      `AnyPgColumn` annotation breaks the families↔people circular inference. */
+  ownerId: uuid("owner_id").references((): AnyPgColumn => people.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -239,6 +246,32 @@ export const pushSubscriptions = pgTable(
   ],
 );
 
+/* ----------------------------------------------------- parent invites */
+
+export const parentInvites = pgTable(
+  "parent_invites",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    familyId: uuid("family_id")
+      .notNull()
+      .references(() => families.id, { onDelete: "cascade" }),
+    /** SHA-256 of the normalised invite code; the code itself is shown once. */
+    codeHash: text("code_hash").notNull().unique(),
+    createdBy: uuid("created_by").references(() => people.id, {
+      onDelete: "set null",
+    }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    redeemedAt: timestamp("redeemed_at", { withTimezone: true }),
+    redeemedBy: uuid("redeemed_by").references(() => people.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [index("parent_invites_family_idx").on(t.familyId)],
+);
+
 /* ------------------------------------------------------------------ types */
 
 export type Family = typeof families.$inferSelect;
@@ -255,6 +288,8 @@ export type LedgerEntry = typeof ledger.$inferSelect;
 export type NewLedgerEntry = typeof ledger.$inferInsert;
 export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect;
 export type NewPushSubscriptionRow = typeof pushSubscriptions.$inferInsert;
+export type ParentInvite = typeof parentInvites.$inferSelect;
+export type NewParentInvite = typeof parentInvites.$inferInsert;
 
 export const schema = {
   families,
@@ -264,6 +299,7 @@ export const schema = {
   redemptions,
   ledger,
   pushSubscriptions,
+  parentInvites,
   roleEnum,
   ledgerTypeEnum,
   redemptionStatusEnum,

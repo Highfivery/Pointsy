@@ -1,0 +1,252 @@
+.main {
+  width: 100%;
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  align-self: flex-start;
+  min-height: var(--tap-target);
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.intro {
+  margin-top: calc(-1 * var(--space-4));
+  color: var(--color-text-muted);
+}
+
+.sectionTitle {
+  margin-bottom: var(--space-3);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* --- parents list --- */
+
+.list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.rowName {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.rowEmail {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.badge {
+  padding: 2px var(--space-2);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-primary);
+  background: var(--color-primary-weak);
+  border-radius: var(--radius-full);
+}
+
+.ownerBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px var(--space-2);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+.removeForm {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.remove {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--tap-target);
+  padding: 0 var(--space-3);
+  font-weight: 600;
+  color: var(--color-danger);
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.remove:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.removeError {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-danger);
+}
+
+/* --- invites --- */
+
+.invite {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.inviteBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  align-self: flex-start;
+  min-height: var(--tap-target);
+  padding: 0 var(--space-6);
+  font-weight: 600;
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.inviteBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.codeBox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+}
+
+.codeLabel {
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.codeRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.code {
+  font-family: var(--font-geist-mono, ui-monospace), SFMono-Regular, monospace;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
+}
+
+.copyBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--tap-target);
+  padding: 0 var(--space-4);
+  font-weight: 600;
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.codeHint {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.inviteList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.inviteRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.inviteMeta {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.revoke {
+  min-height: var(--tap-target);
+  padding: 0 var(--space-3);
+  font-weight: 600;
+  color: var(--color-danger);
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+}

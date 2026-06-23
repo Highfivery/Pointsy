@@ -87,6 +87,12 @@ export async function registerFamily(
       })
       .returning();
 
+    // The creating parent is the protected family owner.
+    await tx
+      .update(families)
+      .set({ ownerId: parent.id })
+      .where(eq(families.id, family.id));
+
     return {
       familyId: family.id,
       personId: parent.id,
@@ -110,7 +116,14 @@ export async function authenticateParent(
     .where(eq(people.email, email.trim().toLowerCase()))
     .limit(1);
 
-  if (!parent || parent.role !== "parent" || !parent.passwordHash) return null;
+  if (
+    !parent ||
+    parent.role !== "parent" ||
+    !parent.passwordHash ||
+    !parent.isActive
+  ) {
+    return null;
+  }
 
   const ok = await verifySecret(parent.passwordHash, password);
   return ok ? parent : null;
