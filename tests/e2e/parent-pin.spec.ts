@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { enterPin } from "./_helpers";
 
 function uniqueEmail() {
   return `parent.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
@@ -40,8 +41,7 @@ test("a parent sets a PIN and signs in via the profile picker", async ({
 
   // Sign back in through the picker straight from home.
   await page.getByRole("button", { name: /Pat/i }).click();
-  await page.getByLabel(/enter your pin/i).fill("1122");
-  await page.getByRole("button", { name: /let.?s go/i }).click();
+  await enterPin(page, "1122");
 
   // A parent lands on the dashboard.
   await expect(page).toHaveURL(/\/dashboard$/);

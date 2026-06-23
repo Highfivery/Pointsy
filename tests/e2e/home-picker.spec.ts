@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { enterPin } from "./_helpers";
 import AxeBuilder from "@axe-core/playwright";
 
 function uniqueEmail() {
@@ -62,8 +63,7 @@ test("a kid cannot open the parent dashboard by URL", async ({ page }) => {
   await page.getByRole("button", { name: /sign out/i }).click();
   await expect(page).toHaveURL(/\/$/);
   await page.getByRole("button", { name: /Kiddo/i }).click();
-  await page.getByLabel(/enter your pin/i).fill("4321");
-  await page.getByRole("button", { name: /let.?s go/i }).click();
+  await enterPin(page, "4321");
   await expect(page).toHaveURL(/\/me$/);
 
   // The kid types the parent dashboard URL → bounced to their own home.
@@ -137,9 +137,8 @@ test("a known device shows the PIN-gated profile picker at / — never marketing
 
   // A PIN is required to reach a dashboard.
   await page.getByRole("button", { name: /Robin/i }).click();
-  await expect(page.getByLabel(/enter your pin/i)).toBeVisible();
-  await page.getByLabel(/enter your pin/i).fill("4321");
-  await page.getByRole("button", { name: /let.?s go/i }).click();
+  await expect(page.getByText("Enter your PIN")).toBeVisible();
+  await enterPin(page, "4321");
   await expect(page).toHaveURL(/\/dashboard$/);
 });
 

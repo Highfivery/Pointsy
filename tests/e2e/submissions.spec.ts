@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { enterPin } from "./_helpers";
 
 function uniqueEmail() {
   return `sub.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
@@ -48,8 +49,7 @@ test("kid logs a chore, parent approves, points are added", async ({
   await page.getByRole("button", { name: /sign out/i }).click();
   await expect(page).toHaveURL(/\/$/);
   await page.getByRole("button", { name: /Kiddo/i }).click();
-  await page.getByLabel(/enter your pin/i).fill("4321");
-  await page.getByRole("button", { name: /let.?s go/i }).click();
+  await enterPin(page, "4321");
   await expect(page).toHaveURL(/\/me$/);
 
   // Kid logs the chore.

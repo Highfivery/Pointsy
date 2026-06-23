@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { enterPin } from "./_helpers";
 import AxeBuilder from "@axe-core/playwright";
 
 function uniqueEmail() {
@@ -61,8 +62,7 @@ test.describe("kids & PIN auth", () => {
     await expectNoA11yViolations(page, "/enter picker");
 
     await page.getByRole("button", { name: /Kiddo/i }).click();
-    await page.getByLabel(/enter your pin/i).fill("4321");
-    await page.getByRole("button", { name: /let.?s go/i }).click();
+    await enterPin(page, "4321");
 
     await expect(page).toHaveURL(/\/me$/);
     await expect(
@@ -78,8 +78,7 @@ test.describe("kids & PIN auth", () => {
 
     await page.goto("/enter");
     await page.getByRole("button", { name: /Kiddo/i }).click();
-    await page.getByLabel(/enter your pin/i).fill("0000");
-    await page.getByRole("button", { name: /let.?s go/i }).click();
+    await enterPin(page, "0000");
 
     await expect(page.getByText(/isn.?t right|try/i)).toBeVisible();
     await expect(page).toHaveURL(/\/enter$/);

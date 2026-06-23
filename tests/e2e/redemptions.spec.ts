@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { enterPin } from "./_helpers";
 import AxeBuilder from "@axe-core/playwright";
 
 function uniqueEmail() {
@@ -83,8 +84,7 @@ test.describe("redemption loop", () => {
     // Kid signs in and redeems (device remembers the family → picker directly).
     await page.goto("/enter");
     await page.getByRole("button", { name: /Kiddo/i }).click();
-    await page.getByLabel(/enter your pin/i).fill("4321");
-    await page.getByRole("button", { name: /let.?s go/i }).click();
+    await enterPin(page, "4321");
     await expect(page).toHaveURL(/\/me$/);
 
     await page.getByRole("link", { name: /redeem rewards/i }).click();
