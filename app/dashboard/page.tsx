@@ -37,6 +37,7 @@ export const metadata: Metadata = { title: "Dashboard" };
 export default async function DashboardPage() {
   const session = await getSession();
   if (!session) redirect("/sign-in");
+  if (session.role !== "parent") redirect("/me");
 
   const db = getDb();
   const [family] = await db

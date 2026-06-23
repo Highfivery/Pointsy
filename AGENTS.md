@@ -40,8 +40,17 @@ Zod (validation) · Serwist (PWA) · Vitest + PGlite + Playwright/axe.
    already associated with a family (the `pointsy_family` cookie) — must **never**
    see the marketing page, a sign-in form, or a "re-enter your family code" step
    as the home screen. The root `/` resolves to the PIN-gated family **profile
-   picker** for known devices and marketing **only** for brand-new ones. Any change
-   to routing/entry/auth must keep an E2E asserting this for both states.
+   picker** for known devices and marketing **only** for brand-new ones. The home
+   is resolved from the **session first, cookie second** — so a logged-in user is
+   recognised even with no cookie. E2E **must** cover the _logged-in_ home (active
+   session, and active session with the cookie cleared), not just the signed-out
+   one.
+9. **Enforce role isolation on every protected route.** A kid session must never
+   reach a parent route (`/dashboard`, `/manage`, `/award`) and a parent session
+   must never reach a kid route (`/me`, `/redeem`) — enforced in the proxy **and**
+   re-checked in the page (`session.role !== "parent" → redirect`). Any new
+   protected page adds the role guard, and an E2E must hit the wrong-role URL
+   directly and assert the redirect (a session cookie alone is not authorisation).
 
 ## Conventions
 

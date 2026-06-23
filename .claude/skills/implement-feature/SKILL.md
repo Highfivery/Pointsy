@@ -41,5 +41,9 @@ attach the screenshots to the PR. Typecheck/lint passing is NOT UI verification.
 
 **Auth/entry rule:** a signed-in user, or a device that already knows a family,
 must never land on marketing or a sign-in form — `/` is the PIN-gated profile
-picker for them. If you touch routing/entry/auth, verify both the new-device and
-known-device home states (AGENTS.md invariant 8).
+picker for them (resolved from session first, cookie second). If you touch
+routing/entry/auth, test the home in **all** of: new device, signed-out known
+device, **logged-in** (active session), and active session with the family
+cookie cleared. Also test **role isolation** — open a parent URL with a kid
+session (and vice-versa) and assert the redirect. A session cookie is not
+authorisation. (AGENTS.md invariants 8 & 9.)
