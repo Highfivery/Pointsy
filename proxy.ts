@@ -2,9 +2,10 @@ import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth/token";
 
 /**
- * Edge middleware: gate protected routes and bounce signed-in users away from
- * the auth pages. Uses the edge-safe token verifier (jose) — no DB access here;
- * pages re-check the session (and role) server-side as defense in depth.
+ * Edge proxy (Next 16's renamed middleware): gate protected routes and bounce
+ * signed-in users away from the auth pages. Uses the edge-safe token verifier
+ * (jose) — no DB access here; pages re-check the session (and role)
+ * server-side as defense in depth.
  */
 const PARENT_PREFIXES = ["/dashboard", "/manage", "/award"];
 const KID_PREFIXES = ["/me", "/redeem"];
@@ -14,7 +15,7 @@ function matches(pathname: string, prefixes: string[]) {
   return prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const secret = process.env.AUTH_SECRET;
   const token = req.cookies.get(SESSION_COOKIE)?.value;
@@ -26,7 +27,6 @@ export async function middleware(req: NextRequest) {
 
   if ((inParentArea || inKidArea) && !session) {
     const url = req.nextUrl.clone();
-    // Kids recover via the profile picker; parents via the email sign-in page.
     url.pathname = inKidArea ? "/enter" : "/sign-in";
     return NextResponse.redirect(url);
   }
