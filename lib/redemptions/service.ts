@@ -132,8 +132,8 @@ export async function decideRedemption(
   decision: "approved" | "denied",
   decidedBy: string,
   note?: string,
-): Promise<void> {
-  await db.transaction(async (tx) => {
+): Promise<Redemption> {
+  return db.transaction(async (tx) => {
     const [r] = await tx
       .select()
       .from(redemptions)
@@ -168,6 +168,7 @@ export async function decideRedemption(
         note: note?.trim() || null,
       })
       .where(eq(redemptions.id, r.id));
+    return r;
   });
 }
 

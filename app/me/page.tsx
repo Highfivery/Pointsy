@@ -10,6 +10,7 @@ import { getBalance, listKidActivity } from "@/lib/points/service";
 import { getAvailable } from "@/lib/redemptions/service";
 import { IconByName } from "@/components/icons/registry";
 import { ActivityList } from "@/components/points/ActivityList";
+import { EnableNotifications } from "@/components/push/EnableNotifications";
 import styles from "./me.module.css";
 
 export const metadata: Metadata = { title: "My points" };
@@ -79,6 +80,8 @@ export default async function MePage() {
           }))}
         />
       </section>
+
+      <EnableNotifications />
     </main>
   );
 }

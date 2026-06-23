@@ -28,6 +28,7 @@ import {
 } from "@/app/actions/redemptions";
 import { IconByName } from "@/components/icons/registry";
 import { SetPinForm } from "@/components/account/SetPinForm";
+import { EnableNotifications } from "@/components/push/EnableNotifications";
 import { families } from "@/lib/db/schema";
 import styles from "./dashboard.module.css";
 
@@ -275,9 +276,7 @@ export default async function DashboardPage() {
         </Link>
       </nav>
 
-      <p className={styles.note}>
-        More coming soon — start awarding points and let kids redeem rewards.
-      </p>
+      <EnableNotifications />
     </main>
   );
 }
