@@ -69,6 +69,12 @@ export const addKidSchema = z.object({
   pin: pinSchema,
 });
 
+export const updateKidSchema = z.object({
+  name: personNameSchema,
+  avatar: emojiSchema,
+  color: colorSchema,
+});
+
 /* -------------------------------------------------------------- catalog */
 
 export const choreSchema = z.object({

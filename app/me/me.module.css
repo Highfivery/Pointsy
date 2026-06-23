@@ -1,12 +1,11 @@
 .main {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: var(--space-6);
   width: 100%;
-  max-width: 32rem;
+  max-width: 28rem;
   margin: 0 auto;
   padding: var(--space-6) var(--space-4) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
 }
 
 .header {
@@ -16,15 +15,14 @@
   gap: var(--space-4);
 }
 
-.eyebrow {
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
-}
-
-.title {
-  font-size: clamp(1.5rem, 6vw, 2rem);
-  letter-spacing: -0.02em;
-  color: var(--color-text);
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: 2rem;
+  border-radius: var(--radius-full);
 }
 
 .signOut {
@@ -41,48 +39,36 @@
   cursor: pointer;
 }
 
+.title {
+  font-size: clamp(1.8rem, 8vw, 2.4rem);
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
 .card {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
   padding: var(--space-6);
+  text-align: center;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
 }
 
-.cardTitle {
-  font-size: 1.3rem;
-  color: var(--color-text);
+.pointsLabel {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.points {
+  font-size: 4rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-primary);
 }
 
 .muted {
   color: var(--color-text-muted);
-}
-
-.code {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 1.6rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--color-primary);
-}
-
-.manageLink {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: var(--tap-target);
-  padding: 0 var(--space-6);
-  font-weight: 700;
-  color: var(--color-primary-text);
-  background: var(--color-primary);
-  border-radius: var(--radius-full);
-  text-decoration: none;
-  align-self: flex-start;
-}
-
-.note {
-  color: var(--color-text-muted);
-  line-height: 1.5;
 }

@@ -69,6 +69,10 @@ export const people = pgTable(
     passwordHash: text("password_hash"),
     /** Kids (and optionally parents) — 4-digit PIN, argon2id. */
     pinHash: text("pin_hash"),
+    /** Failed PIN attempts since the last success (drives lockout). */
+    pinFailedAttempts: integer("pin_failed_attempts").notNull().default(0),
+    /** When set and in the future, PIN sign-in is locked until this time. */
+    pinLockedUntil: timestamp("pin_locked_until", { withTimezone: true }),
     sortOrder: integer("sort_order").notNull().default(0),
     isActive: boolean("is_active").notNull().default(true),
     /** Parents only — when guardian consent was recorded. */
