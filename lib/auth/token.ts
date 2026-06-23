@@ -5,6 +5,9 @@ import { jwtVerify } from "jose";
  * can run in middleware as well as server actions.
  */
 export const SESSION_COOKIE = "pointsy_session";
+/** Device→family memory (familyId only, no secret); edge-safe constant. */
+export const FAMILY_COOKIE = "pointsy_family";
+export const FAMILY_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
 export interface SessionPayload {
   familyId: string;

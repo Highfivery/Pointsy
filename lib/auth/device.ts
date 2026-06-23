@@ -1,6 +1,8 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { getDb } from "@/lib/db/client";
+import { getSession } from "./session";
+import { FAMILY_COOKIE, FAMILY_COOKIE_MAX_AGE } from "./token";
 import { lookupFamilyById, type FamilyLookup } from "@/lib/people/service";
 
 /**
@@ -9,9 +11,6 @@ import { lookupFamilyById, type FamilyLookup } from "@/lib/people/service";
  * picker (no re-typing the family code). Holds the familyId only — never any
  * secret — so it's safe as a long-lived cookie.
  */
-const FAMILY_COOKIE = "pointsy_family";
-const ONE_YEAR_SEC = 60 * 60 * 24 * 365;
-
 export async function rememberFamily(familyId: string): Promise<void> {
   const store = await cookies();
   store.set(FAMILY_COOKIE, familyId, {
@@ -19,7 +18,7 @@ export async function rememberFamily(familyId: string): Promise<void> {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: ONE_YEAR_SEC,
+    maxAge: FAMILY_COOKIE_MAX_AGE,
   });
 }
 
@@ -33,9 +32,15 @@ export async function forgetFamily(): Promise<void> {
   store.delete(FAMILY_COOKIE);
 }
 
-/** The family this device is associated with (for the profile picker), or null. */
+/**
+ * The family whose profile picker the home page should show, or null.
+ * Resolved from the **session first** (a signed-in user is always recognized,
+ * even on a device whose cookie predates this feature) and the device cookie
+ * second (so a signed-out shared device still shows its picker).
+ */
 export async function getKnownFamily(): Promise<FamilyLookup | null> {
-  const familyId = await getRememberedFamilyId();
+  const session = await getSession();
+  const familyId = session?.familyId ?? (await getRememberedFamilyId());
   if (!familyId) return null;
   return lookupFamilyById(getDb(), familyId);
 }
