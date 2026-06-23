@@ -72,13 +72,37 @@ test("a kid cannot open the parent dashboard by URL", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /Hi Kiddo/i })).toBeVisible();
 });
 
-test("a brand-new device sees the marketing home", async ({ page }) => {
+test("a brand-new device sees the marketing home with clear ways in", async ({
+  page,
+}) => {
   await page.goto("/");
   await expect(
     page.getByRole("heading", { name: /points that make chores fun/i }),
   ).toBeVisible();
   await expect(
     page.getByRole("link", { name: /create your family/i }),
+  ).toBeVisible();
+  // Family code and co-parent invite are distinct, correctly-routed entries.
+  await expect(
+    page.getByRole("link", { name: /kids & family/i }),
+  ).toHaveAttribute("href", "/enter");
+  await expect(
+    page.getByRole("link", { name: /invited as a co-parent/i }),
+  ).toHaveAttribute("href", "/join");
+});
+
+test("the family-code step has matching copy (no 'tap your name')", async ({
+  page,
+}) => {
+  await page.goto("/enter");
+  await expect(
+    page.getByRole("heading", { name: /find your family/i }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Family code")).toBeVisible();
+  await expect(page.getByText(/tap your name/i)).toHaveCount(0);
+  // Co-parents who land here have an escape hatch to the invite flow.
+  await expect(
+    page.getByRole("link", { name: /invited as a co-parent/i }),
   ).toBeVisible();
 });
 

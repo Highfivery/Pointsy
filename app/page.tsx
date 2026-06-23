@@ -1,4 +1,10 @@
-import { Sparkles, ArrowRight } from "lucide-react";
+import {
+  Sparkles,
+  ArrowRight,
+  UsersRound,
+  Mail,
+  ChevronRight,
+} from "lucide-react";
 import { getKnownFamily } from "@/lib/auth/device";
 import { PickerScreen } from "@/components/enter/PickerScreen";
 import styles from "./page.module.css";
@@ -31,9 +37,50 @@ export default async function Home() {
           <a className={styles.secondary} href="/sign-in">
             Parent sign in
           </a>
-          <a className={styles.secondary} href="/enter">
-            Join with a family code
-          </a>
+        </div>
+
+        <div className={styles.joining}>
+          <h2 className={styles.joinTitle}>Already part of a family?</h2>
+          <ul className={styles.joinList}>
+            <li>
+              <a href="/enter" className={styles.joinLink}>
+                <span className={styles.joinIcon}>
+                  <UsersRound size={22} aria-hidden="true" />
+                </span>
+                <span className={styles.joinText}>
+                  <span className={styles.joinLabel}>Kids &amp; family</span>
+                  <span className={styles.joinHint}>
+                    Enter your family code
+                  </span>
+                </span>
+                <ChevronRight
+                  size={20}
+                  aria-hidden="true"
+                  className={styles.joinChevron}
+                />
+              </a>
+            </li>
+            <li>
+              <a href="/join" className={styles.joinLink}>
+                <span className={styles.joinIcon}>
+                  <Mail size={22} aria-hidden="true" />
+                </span>
+                <span className={styles.joinText}>
+                  <span className={styles.joinLabel}>
+                    Invited as a co-parent?
+                  </span>
+                  <span className={styles.joinHint}>
+                    Enter your invite code
+                  </span>
+                </span>
+                <ChevronRight
+                  size={20}
+                  aria-hidden="true"
+                  className={styles.joinChevron}
+                />
+              </a>
+            </li>
+          </ul>
         </div>
       </section>
     </main>
