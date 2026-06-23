@@ -13,6 +13,7 @@ export interface ChoreInput {
   name: string;
   emoji: string;
   points: number;
+  description?: string;
   limitPeriod?: "none" | "day" | "week";
   limitCount?: number;
 }
@@ -52,6 +53,7 @@ export async function createChore(
       name: input.name.trim(),
       emoji: input.emoji,
       points: input.points,
+      description: input.description?.trim() || null,
       limitPeriod: input.limitPeriod ?? "none",
       limitCount: input.limitCount ?? 1,
       sortOrder: existing.length,
@@ -72,6 +74,7 @@ export async function updateChore(
       name: input.name.trim(),
       emoji: input.emoji,
       points: input.points,
+      description: input.description?.trim() || null,
       limitPeriod: input.limitPeriod ?? "none",
       limitCount: input.limitCount ?? 1,
     })

@@ -42,6 +42,12 @@ export const choreLimitPeriodEnum = pgEnum("chore_limit_period", [
   "day",
   "week",
 ]);
+export const submissionStatusEnum = pgEnum("submission_status", [
+  "pending",
+  "approved",
+  "rejected",
+  "cancelled",
+]);
 
 /* --------------------------------------------------------------- families */
 
@@ -116,6 +122,8 @@ export const chores = pgTable(
       .references(() => families.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     emoji: text("emoji").notNull().default("✅"),
+    /** Optional short description shown to kids. */
+    description: text("description"),
     /** Default award value (overridable at award time). */
     points: integer("points").notNull(),
     /** Per-kid claim limit when a kid submits this chore. "none" = unlimited. */
@@ -284,6 +292,42 @@ export const parentInvites = pgTable(
   (t) => [index("parent_invites_family_idx").on(t.familyId)],
 );
 
+/* -------------------------------------------------- chore submissions */
+
+export const choreSubmissions = pgTable(
+  "chore_submissions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    familyId: uuid("family_id")
+      .notNull()
+      .references(() => families.id, { onDelete: "cascade" }),
+    /** The kid who logged the chore. */
+    personId: uuid("person_id")
+      .notNull()
+      .references(() => people.id, { onDelete: "cascade" }),
+    choreId: uuid("chore_id").references(() => chores.id, {
+      onDelete: "set null",
+    }),
+    /** Snapshot at submit time — catalog edits don't change a pending claim. */
+    choreName: text("chore_name").notNull(),
+    points: integer("points").notNull(),
+    status: submissionStatusEnum("status").notNull().default("pending"),
+    /** Family-local date ("YYYY-MM-DD") for daily/weekly limit counting. */
+    localDate: text("local_date").notNull(),
+    decidedBy: uuid("decided_by").references(() => people.id, {
+      onDelete: "set null",
+    }),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("chore_submissions_family_idx").on(t.familyId),
+    index("chore_submissions_person_idx").on(t.personId),
+  ],
+);
+
 /* ------------------------------------------------------------------ types */
 
 export type Family = typeof families.$inferSelect;
@@ -302,6 +346,8 @@ export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect;
 export type NewPushSubscriptionRow = typeof pushSubscriptions.$inferInsert;
 export type ParentInvite = typeof parentInvites.$inferSelect;
 export type NewParentInvite = typeof parentInvites.$inferInsert;
+export type ChoreSubmission = typeof choreSubmissions.$inferSelect;
+export type NewChoreSubmission = typeof choreSubmissions.$inferInsert;
 
 export const schema = {
   families,
@@ -312,8 +358,10 @@ export const schema = {
   ledger,
   pushSubscriptions,
   parentInvites,
+  choreSubmissions,
   roleEnum,
   ledgerTypeEnum,
   redemptionStatusEnum,
   choreLimitPeriodEnum,
+  submissionStatusEnum,
 };

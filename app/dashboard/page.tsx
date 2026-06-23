@@ -27,6 +27,8 @@ import {
   decideRedemptionAction,
   fulfillRedemptionAction,
 } from "@/app/actions/redemptions";
+import { listPendingSubmissions } from "@/lib/submissions/service";
+import { decideSubmissionAction } from "@/app/actions/submissions";
 import { IconByName } from "@/components/icons/registry";
 import { SetPinForm } from "@/components/account/SetPinForm";
 import { EnableNotifications } from "@/components/push/EnableNotifications";
@@ -50,10 +52,11 @@ export default async function DashboardPage() {
   const me = await getPersonById(db, session.familyId, session.personId);
   if (!family || !me) redirect("/sign-in");
 
-  const [kids, pending, awaiting] = await Promise.all([
+  const [kids, pending, awaiting, choreSubs] = await Promise.all([
     getKidBalances(db, session.familyId),
     listPendingRedemptions(db, session.familyId),
     listAwaitingFulfillment(db, session.familyId),
+    listPendingSubmissions(db, session.familyId),
   ]);
 
   return (
@@ -115,6 +118,58 @@ export default async function DashboardPage() {
                   >
                     <X size={16} aria-hidden="true" />
                     Deny
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {choreSubs.length > 0 ? (
+        <section aria-labelledby="chore-approvals-heading">
+          <h2 id="chore-approvals-heading" className={styles.sectionTitle}>
+            Chore approvals
+          </h2>
+          <ul className={styles.queueList}>
+            {choreSubs.map((s) => (
+              <li key={s.id} className={styles.queueCard}>
+                <span
+                  className={styles.kidAvatar}
+                  style={{ background: s.color }}
+                >
+                  <IconByName name={s.avatar} size={22} />
+                </span>
+                <span className={styles.queueText}>
+                  <span className={styles.queueTitle}>
+                    {s.kidName} did {s.choreName}
+                  </span>
+                  <span className={styles.queueMeta}>+{s.points} pts</span>
+                </span>
+                <form
+                  action={decideSubmissionAction}
+                  className={styles.queueActions}
+                >
+                  <input type="hidden" name="submissionId" value={s.id} />
+                  <button
+                    type="submit"
+                    name="decision"
+                    value="approved"
+                    className={styles.approveBtn}
+                    aria-label={`Approve ${s.choreName} for ${s.kidName}`}
+                  >
+                    <Check size={16} aria-hidden="true" />
+                    Approve
+                  </button>
+                  <button
+                    type="submit"
+                    name="decision"
+                    value="rejected"
+                    className={styles.denyBtn}
+                    aria-label={`Reject ${s.choreName} for ${s.kidName}`}
+                  >
+                    <X size={16} aria-hidden="true" />
+                    Reject
                   </button>
                 </form>
               </li>
