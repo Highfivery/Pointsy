@@ -44,13 +44,13 @@ test.describe("chore & reward catalog", () => {
     await add.getByLabel("Emoji").fill("🛏️");
     await add.getByLabel("Points").fill("5");
     await add.getByRole("button", { name: /add chore/i }).click();
-    await expect(page.getByText("Made bed")).toBeVisible();
+    await expect(page.getByText("Made bed", { exact: true })).toBeVisible();
     await expect(page.getByText("5 pts")).toBeVisible();
 
     await add.getByLabel("Name").fill("Dishes");
     await add.getByLabel("Points").fill("10");
     await add.getByRole("button", { name: /add chore/i }).click();
-    await expect(page.getByText("Dishes")).toBeVisible();
+    await expect(page.getByText("Dishes", { exact: true })).toBeVisible();
     expect(await itemOrder(page)).toEqual(["Made bed", "Dishes"]);
 
     // Reorder: move the first chore down.
@@ -76,7 +76,7 @@ test.describe("chore & reward catalog", () => {
     await add.getByLabel(/description/i).fill("30 minutes");
     await add.getByRole("button", { name: /add reward/i }).click();
 
-    await expect(page.getByText("Screen time")).toBeVisible();
+    await expect(page.getByText("Screen time", { exact: true })).toBeVisible();
     await expect(page.getByText("30 pts")).toBeVisible();
     await expect(page.getByText("30 minutes")).toBeVisible();
   });
