@@ -4,37 +4,73 @@ import { useEffect, useState } from "react";
 import { setFamilyTimezoneAction } from "@/app/actions/family";
 import styles from "./family.module.css";
 
-const COMMON = [
+/**
+ * A curated, DETERMINISTIC list of common IANA zones. We deliberately do NOT use
+ * `Intl.supportedValuesOf("timeZone")` here: the server (Node) and browser can
+ * return different lists, which causes a hydration mismatch in this SSR'd client
+ * component. The exact family zone is still captured automatically (below).
+ */
+const TIMEZONES = [
   "UTC",
-  "America/New_York",
-  "America/Chicago",
-  "America/Denver",
-  "America/Los_Angeles",
-  "America/Anchorage",
   "Pacific/Honolulu",
+  "America/Anchorage",
+  "America/Los_Angeles",
+  "America/Denver",
+  "America/Phoenix",
+  "America/Chicago",
+  "America/New_York",
+  "America/Toronto",
+  "America/Halifax",
+  "America/Mexico_City",
+  "America/Bogota",
+  "America/Lima",
+  "America/Sao_Paulo",
+  "America/Argentina/Buenos_Aires",
+  "Atlantic/Reykjavik",
   "Europe/London",
+  "Europe/Dublin",
+  "Europe/Lisbon",
+  "Europe/Madrid",
   "Europe/Paris",
   "Europe/Berlin",
+  "Europe/Amsterdam",
+  "Europe/Rome",
+  "Europe/Zurich",
+  "Europe/Stockholm",
+  "Europe/Warsaw",
+  "Europe/Athens",
+  "Europe/Helsinki",
+  "Europe/Istanbul",
+  "Europe/Moscow",
+  "Africa/Casablanca",
+  "Africa/Lagos",
+  "Africa/Johannesburg",
+  "Africa/Nairobi",
+  "Africa/Cairo",
+  "Asia/Jerusalem",
+  "Asia/Dubai",
+  "Asia/Karachi",
+  "Asia/Kolkata",
+  "Asia/Dhaka",
+  "Asia/Bangkok",
+  "Asia/Jakarta",
+  "Asia/Singapore",
+  "Asia/Hong_Kong",
+  "Asia/Shanghai",
+  "Asia/Tokyo",
+  "Asia/Seoul",
+  "Australia/Perth",
+  "Australia/Adelaide",
   "Australia/Sydney",
+  "Pacific/Auckland",
 ];
-
-function allZones(): string[] {
-  const sv = (Intl as { supportedValuesOf?: (k: string) => string[] })
-    .supportedValuesOf;
-  try {
-    const z = sv?.("timeZone");
-    if (z && z.length) return z;
-  } catch {
-    /* not supported */
-  }
-  return COMMON;
-}
 
 export function FamilyTimezone({ current }: { current: string }) {
   const [tz, setTz] = useState(current);
   const [saved, setSaved] = useState(false);
 
   // Auto-detect once for families that never set a timezone (still "UTC").
+  // Runs only on the client, in an effect — no render-time, no hydration risk.
   useEffect(() => {
     if (current !== "UTC") return;
     const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -45,8 +81,7 @@ export function FamilyTimezone({ current }: { current: string }) {
     })();
   }, [current]);
 
-  const zones = allZones();
-  const list = zones.includes(tz) ? zones : [tz, ...zones];
+  const list = TIMEZONES.includes(tz) ? TIMEZONES : [tz, ...TIMEZONES];
 
   async function onChange(value: string) {
     setTz(value);
