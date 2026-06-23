@@ -9,12 +9,23 @@ import {
   Gift,
   ChevronRight,
   Plus,
+  Check,
+  X,
+  PackageCheck,
 } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
 import { getDb } from "@/lib/db/client";
 import { getPersonById } from "@/lib/db/queries";
 import { getKidBalances } from "@/lib/points/service";
+import {
+  listPendingRedemptions,
+  listAwaitingFulfillment,
+} from "@/lib/redemptions/service";
+import {
+  decideRedemptionAction,
+  fulfillRedemptionAction,
+} from "@/app/actions/redemptions";
 import { IconByName } from "@/components/icons/registry";
 import { families } from "@/lib/db/schema";
 import styles from "./dashboard.module.css";
@@ -34,7 +45,11 @@ export default async function DashboardPage() {
   const me = await getPersonById(db, session.familyId, session.personId);
   if (!family || !me) redirect("/sign-in");
 
-  const kids = await getKidBalances(db, session.familyId);
+  const [kids, pending, awaiting] = await Promise.all([
+    getKidBalances(db, session.familyId),
+    listPendingRedemptions(db, session.familyId),
+    listAwaitingFulfillment(db, session.familyId),
+  ]);
 
   return (
     <main id="main" className={styles.main}>
@@ -50,6 +65,58 @@ export default async function DashboardPage() {
           </button>
         </form>
       </header>
+
+      {pending.length > 0 ? (
+        <section aria-labelledby="pending-heading">
+          <h2 id="pending-heading" className={styles.sectionTitle}>
+            Pending approvals
+          </h2>
+          <ul className={styles.queueList}>
+            {pending.map((p) => (
+              <li key={p.id} className={styles.queueCard}>
+                <span
+                  className={styles.kidAvatar}
+                  style={{ background: p.color }}
+                >
+                  <IconByName name={p.avatar} size={22} />
+                </span>
+                <span className={styles.queueText}>
+                  <span className={styles.queueTitle}>
+                    {p.kidName} wants {p.rewardName}
+                  </span>
+                  <span className={styles.queueMeta}>{p.cost} pts</span>
+                </span>
+                <form
+                  action={decideRedemptionAction}
+                  className={styles.queueActions}
+                >
+                  <input type="hidden" name="redemptionId" value={p.id} />
+                  <button
+                    type="submit"
+                    name="decision"
+                    value="approved"
+                    className={styles.approveBtn}
+                    aria-label={`Approve ${p.rewardName} for ${p.kidName}`}
+                  >
+                    <Check size={16} aria-hidden="true" />
+                    Approve
+                  </button>
+                  <button
+                    type="submit"
+                    name="decision"
+                    value="denied"
+                    className={styles.denyBtn}
+                    aria-label={`Deny ${p.rewardName} for ${p.kidName}`}
+                  >
+                    <X size={16} aria-hidden="true" />
+                    Deny
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <section aria-labelledby="kids-heading">
         <h2 id="kids-heading" className={styles.sectionTitle}>
@@ -91,6 +158,41 @@ export default async function DashboardPage() {
           </p>
         )}
       </section>
+
+      {awaiting.length > 0 ? (
+        <section aria-labelledby="awaiting-heading">
+          <h2 id="awaiting-heading" className={styles.sectionTitle}>
+            Awaiting delivery
+          </h2>
+          <ul className={styles.queueList}>
+            {awaiting.map((a) => (
+              <li key={a.id} className={styles.queueCard}>
+                <span
+                  className={styles.kidAvatar}
+                  style={{ background: a.color }}
+                >
+                  <IconByName name={a.avatar} size={22} />
+                </span>
+                <span className={styles.queueText}>
+                  <span className={styles.queueTitle}>
+                    {a.kidName} · {a.rewardName}
+                  </span>
+                  <span className={styles.queueMeta}>
+                    {a.cost} pts · approved
+                  </span>
+                </span>
+                <form action={fulfillRedemptionAction}>
+                  <input type="hidden" name="redemptionId" value={a.id} />
+                  <button type="submit" className={styles.deliverBtn}>
+                    <PackageCheck size={16} aria-hidden="true" />
+                    Delivered
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <section className={styles.card} aria-labelledby="family-heading">
         <h2 id="family-heading" className={styles.cardTitle}>

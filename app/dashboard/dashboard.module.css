@@ -215,6 +215,78 @@
   flex-shrink: 0;
 }
 
+.queueList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.queueCard {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.queueText {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 8rem;
+}
+
+.queueTitle {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.queueMeta {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.queueActions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.approveBtn,
+.denyBtn,
+.deliverBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--tap-target);
+  padding: 0 var(--space-4);
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.approveBtn {
+  color: var(--color-primary-text);
+  background: var(--color-success);
+}
+
+.denyBtn {
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border-color: var(--color-border);
+}
+
+.deliverBtn {
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .kidCard:hover {
     border-color: var(--color-primary);

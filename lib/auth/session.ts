@@ -68,3 +68,9 @@ export async function requireParent(): Promise<SessionPayload> {
   if (session.role !== "parent") throw new Error("Forbidden: parents only");
   return session;
 }
+
+export async function requireKid(): Promise<SessionPayload> {
+  const session = await requireSession();
+  if (session.role !== "kid") throw new Error("Forbidden: kids only");
+  return session;
+}
