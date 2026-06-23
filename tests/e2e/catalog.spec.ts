@@ -41,7 +41,7 @@ test.describe("chore & reward catalog", () => {
 
     const add = page.getByRole("region", { name: /add a chore/i });
     await add.getByLabel("Name").fill("Made bed");
-    await add.getByLabel("Emoji").fill("🛏️");
+    await add.getByRole("radio", { name: "Make bed", exact: true }).check();
     await add.getByLabel("Points").fill("5");
     await add.getByRole("button", { name: /add chore/i }).click();
     await expect(page.getByText("Made bed", { exact: true })).toBeVisible();
@@ -71,7 +71,7 @@ test.describe("chore & reward catalog", () => {
 
     const add = page.getByRole("region", { name: /add a reward/i });
     await add.getByLabel("Name").fill("Screen time");
-    await add.getByLabel("Emoji").fill("📺");
+    await add.getByRole("radio", { name: "TV time", exact: true }).check();
     await add.getByLabel("Cost (points)").fill("30");
     await add.getByLabel(/description/i).fill("30 minutes");
     await add.getByRole("button", { name: /add reward/i }).click();

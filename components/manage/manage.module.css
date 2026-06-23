@@ -60,7 +60,7 @@
   justify-content: center;
   width: 3rem;
   height: 3rem;
-  font-size: 1.6rem;
+  color: #fff;
   border-radius: var(--radius-full);
   flex-shrink: 0;
 }

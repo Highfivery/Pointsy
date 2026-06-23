@@ -9,6 +9,7 @@ import {
   deleteCatalogItemAction,
 } from "@/app/actions/catalog";
 import { CatalogFields, type CatalogKind } from "./CatalogFields";
+import { IconByName } from "@/components/icons/registry";
 import type { FormState } from "@/lib/validation/form";
 import form from "@/components/auth/auth-form.module.css";
 import manage from "@/components/manage/manage.module.css";
@@ -40,8 +41,8 @@ export function CatalogItemCard({
   return (
     <section className={manage.card} aria-label={`Manage ${item.name}`}>
       <div className={styles.head}>
-        <span className={styles.emoji} aria-hidden="true">
-          {item.emoji}
+        <span className={styles.emoji}>
+          <IconByName name={item.emoji} size={26} />
         </span>
         <div className={styles.headText}>
           <span className={manage.kidName}>{item.name}</span>

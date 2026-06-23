@@ -11,4 +11,3 @@ export const COLOR_OPTIONS = [
 ] as const;
 
 export const DEFAULT_COLOR = COLOR_OPTIONS[0].value;
-export const DEFAULT_AVATAR = "🙂";

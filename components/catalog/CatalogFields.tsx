@@ -1,6 +1,13 @@
 "use client";
 
 import { Field } from "@/components/auth/Field";
+import { IconPicker } from "@/components/icons/IconPicker";
+import {
+  CHORE_ICON_KEYS,
+  REWARD_ICON_KEYS,
+  DEFAULT_CHORE_ICON,
+  DEFAULT_REWARD_ICON,
+} from "@/lib/icons";
 
 export type CatalogKind = "chore" | "reward";
 
@@ -29,14 +36,14 @@ export function CatalogFields({ kind, errors, defaults }: CatalogFieldsProps) {
         error={errors?.name}
         required
       />
-      <Field
-        label="Emoji"
+      <IconPicker
         name="emoji"
-        defaultValue={defaults?.emoji ?? (isChore ? "✅" : "🎁")}
-        autoComplete="off"
-        maxLength={8}
-        error={errors?.emoji}
-        required
+        label="Icon"
+        options={isChore ? CHORE_ICON_KEYS : REWARD_ICON_KEYS}
+        defaultValue={
+          defaults?.emoji ??
+          (isChore ? DEFAULT_CHORE_ICON : DEFAULT_REWARD_ICON)
+        }
       />
       <Field
         label={isChore ? "Points" : "Cost (points)"}

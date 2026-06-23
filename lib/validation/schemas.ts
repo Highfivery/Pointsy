@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isIconKey } from "@/lib/icons";
 
 /**
  * Zod schemas validate every server-action boundary (SPEC §3 security
@@ -27,6 +28,7 @@ export const personNameSchema = z
   .max(40);
 
 export const emojiSchema = z.string().trim().min(1).max(8);
+export const iconSchema = z.string().refine(isIconKey, "Pick an icon.");
 export const colorSchema = z
   .string()
   .regex(/^#[0-9a-fA-F]{6}$/, "Use a hex color like #6366f1.");
@@ -64,14 +66,14 @@ export const familyCodeSchema = z
 
 export const addKidSchema = z.object({
   name: personNameSchema,
-  avatar: emojiSchema,
+  avatar: iconSchema,
   color: colorSchema,
   pin: pinSchema,
 });
 
 export const updateKidSchema = z.object({
   name: personNameSchema,
-  avatar: emojiSchema,
+  avatar: iconSchema,
   color: colorSchema,
 });
 
@@ -79,7 +81,7 @@ export const updateKidSchema = z.object({
 
 export const choreSchema = z.object({
   name: z.string().trim().min(1, "Name is required.").max(60),
-  emoji: emojiSchema,
+  emoji: iconSchema,
   points: z.coerce
     .number()
     .int("Points must be a whole number.")
@@ -89,7 +91,7 @@ export const choreSchema = z.object({
 
 export const rewardSchema = z.object({
   name: z.string().trim().min(1, "Name is required.").max(60),
-  emoji: emojiSchema,
+  emoji: iconSchema,
   cost: z.coerce
     .number()
     .int("Cost must be a whole number.")

@@ -5,6 +5,7 @@ import { getSession } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
 import { getDb } from "@/lib/db/client";
 import { getPersonById } from "@/lib/db/queries";
+import { IconByName } from "@/components/icons/registry";
 import styles from "./me.module.css";
 
 export const metadata: Metadata = { title: "My points" };
@@ -20,12 +21,8 @@ export default async function MePage() {
   return (
     <main id="main" className={styles.main}>
       <header className={styles.header}>
-        <span
-          className={styles.avatar}
-          style={{ background: me.color }}
-          aria-hidden="true"
-        >
-          {me.avatar}
+        <span className={styles.avatar} style={{ background: me.color }}>
+          <IconByName name={me.avatar} size={28} />
         </span>
         <form action={signOutAction}>
           <button type="submit" className={styles.signOut}>
