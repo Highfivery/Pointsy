@@ -1,10 +1,12 @@
 import { Sparkles, ArrowRight } from "lucide-react";
+import { RememberedFamily } from "@/components/landing/RememberedFamily";
 import styles from "./page.module.css";
 
 export default function Home() {
   return (
     <main id="main" className={styles.main}>
       <section className={styles.hero}>
+        <RememberedFamily />
         <p className={styles.badge}>
           <Sparkles size={18} aria-hidden="true" />
           <span>Pointsy</span>
@@ -21,12 +23,12 @@ export default function Home() {
             <ArrowRight size={18} aria-hidden="true" />
           </a>
           <a className={styles.secondary} href="/sign-in">
-            Sign in
+            Parent sign in
+          </a>
+          <a className={styles.secondary} href="/enter">
+            Kids&rsquo; PIN sign-in
           </a>
         </div>
-        <p className={styles.kidLink}>
-          Already set up? <a href="/enter">Kids sign in with a PIN</a>
-        </p>
       </section>
     </main>
   );

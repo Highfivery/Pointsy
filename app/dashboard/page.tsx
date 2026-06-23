@@ -27,6 +27,7 @@ import {
   fulfillRedemptionAction,
 } from "@/app/actions/redemptions";
 import { IconByName } from "@/components/icons/registry";
+import { SetPinForm } from "@/components/account/SetPinForm";
 import { families } from "@/lib/db/schema";
 import styles from "./dashboard.module.css";
 
@@ -199,9 +200,22 @@ export default async function DashboardPage() {
           {family.name}
         </h2>
         <p className={styles.muted}>
-          Share this code so family members can join on a new device:
+          Kids sign in at the <Link href="/enter">PIN sign-in page</Link> —
+          share this code so a new device can join:
         </p>
         <p className={styles.code}>{family.code}</p>
+        <details className={styles.pinDetails}>
+          <summary className={styles.pinSummary}>
+            {me.pinHash
+              ? "Change your sign-in PIN"
+              : "Set a sign-in PIN for yourself"}
+          </summary>
+          <p className={styles.muted}>
+            Adds you to the profile picker so you can sign in with a PIN on a
+            shared device. You can still use email + password anytime.
+          </p>
+          <SetPinForm hasPin={!!me.pinHash} />
+        </details>
       </section>
 
       <nav className={styles.manageNav} aria-label="Manage">
