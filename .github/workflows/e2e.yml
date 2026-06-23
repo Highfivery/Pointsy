@@ -16,6 +16,28 @@ jobs:
   playwright:
     name: Playwright (mobile + desktop) + axe
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pointsy
+          POSTGRES_PASSWORD: pointsy
+          POSTGRES_DB: pointsy
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # Standard Postgres service → the app uses the node-postgres driver
+      # (auto-selected for non-Neon URLs). No external credentials needed.
+      DATABASE_URL: postgres://pointsy:pointsy@localhost:5432/pointsy
+      AUTH_SECRET: ci-placeholder-secret-at-least-32-characters-long
+
     steps:
       - uses: actions/checkout@v7
 
@@ -26,6 +48,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Apply database migrations
+        run: npm run db:migrate
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium webkit
 
@@ -33,11 +58,6 @@ jobs:
         run: npm run test:e2e
         env:
           CI: "true"
-          # The current E2E flows hit only static, non-DB pages. When flows that
-          # touch the database are added, provision a Neon branch here (via the
-          # neondatabase/create-branch-action) and pass its pooled URL instead.
-          DATABASE_URL: postgres://user:pass@localhost:5432/pointsy
-          AUTH_SECRET: ci-placeholder-secret-at-least-32-characters-long
 
       - name: Upload Playwright report
         if: ${{ !cancelled() }}

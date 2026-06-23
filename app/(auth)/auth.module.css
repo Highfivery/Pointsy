@@ -1,0 +1,36 @@
+.main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 26rem;
+}
+
+.title {
+  font-size: clamp(1.6rem, 6vw, 2rem);
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.subtitle {
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.alt {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+}
+
+.alt a {
+  font-weight: 600;
+}
