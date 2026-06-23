@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { eq } from "drizzle-orm";
-import { LogOut, Users, ListChecks, Gift } from "lucide-react";
+import { LogOut, Users, ListChecks, Gift, ChevronRight } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
 import { getDb } from "@/lib/db/client";
@@ -51,17 +51,59 @@ export default async function DashboardPage() {
       </section>
 
       <nav className={styles.manageNav} aria-label="Manage">
-        <Link href="/manage/kids" className={styles.manageLink}>
-          <Users size={18} aria-hidden="true" />
-          Kids
+        <Link
+          href="/manage/kids"
+          className={styles.manageLink}
+          aria-label="Kids"
+        >
+          <span className={styles.manageIcon}>
+            <Users size={22} aria-hidden="true" />
+          </span>
+          <span className={styles.manageText}>
+            <span className={styles.manageLabel}>Kids</span>
+            <span className={styles.manageHint}>Profiles &amp; PINs</span>
+          </span>
+          <ChevronRight
+            size={20}
+            aria-hidden="true"
+            className={styles.manageChevron}
+          />
         </Link>
-        <Link href="/manage/chores" className={styles.manageLink}>
-          <ListChecks size={18} aria-hidden="true" />
-          Chores
+        <Link
+          href="/manage/chores"
+          className={styles.manageLink}
+          aria-label="Chores"
+        >
+          <span className={styles.manageIcon}>
+            <ListChecks size={22} aria-hidden="true" />
+          </span>
+          <span className={styles.manageText}>
+            <span className={styles.manageLabel}>Chores</span>
+            <span className={styles.manageHint}>Ways to earn points</span>
+          </span>
+          <ChevronRight
+            size={20}
+            aria-hidden="true"
+            className={styles.manageChevron}
+          />
         </Link>
-        <Link href="/manage/rewards" className={styles.manageLink}>
-          <Gift size={18} aria-hidden="true" />
-          Rewards
+        <Link
+          href="/manage/rewards"
+          className={styles.manageLink}
+          aria-label="Rewards"
+        >
+          <span className={styles.manageIcon}>
+            <Gift size={22} aria-hidden="true" />
+          </span>
+          <span className={styles.manageText}>
+            <span className={styles.manageLabel}>Rewards</span>
+            <span className={styles.manageHint}>Things to redeem</span>
+          </span>
+          <ChevronRight
+            size={20}
+            aria-hidden="true"
+            className={styles.manageChevron}
+          />
         </Link>
       </nav>
 
