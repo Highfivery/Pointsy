@@ -12,6 +12,7 @@ import {
   Check,
   X,
   PackageCheck,
+  UserPlus,
 } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
@@ -268,6 +269,24 @@ export default async function DashboardPage() {
           <span className={styles.manageText}>
             <span className={styles.manageLabel}>Rewards</span>
             <span className={styles.manageHint}>Things to redeem</span>
+          </span>
+          <ChevronRight
+            size={20}
+            aria-hidden="true"
+            className={styles.manageChevron}
+          />
+        </Link>
+        <Link
+          href="/manage/parents"
+          className={styles.manageLink}
+          aria-label="Parents"
+        >
+          <span className={styles.manageIcon}>
+            <UserPlus size={22} aria-hidden="true" />
+          </span>
+          <span className={styles.manageText}>
+            <span className={styles.manageLabel}>Parents</span>
+            <span className={styles.manageHint}>Invite a co-parent</span>
           </span>
           <ChevronRight
             size={20}

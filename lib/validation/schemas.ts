@@ -50,6 +50,23 @@ export const signInSchema = z.object({
   password: z.string().min(1, "Enter your password."),
 });
 
+export const inviteCodeSchema = z
+  .string()
+  .trim()
+  .min(4, "Enter your invite code.")
+  .max(40, "That doesn't look like a valid invite code.");
+
+/** A co-parent redeeming an invite code by creating their own login. */
+export const joinFamilySchema = z.object({
+  code: inviteCodeSchema,
+  name: personNameSchema,
+  email: emailSchema,
+  password: passwordSchema,
+  consent: z
+    .boolean()
+    .refine((v) => v === true, "Parental consent is required to continue."),
+});
+
 export const kidSignInSchema = z.object({
   familyId: z.string().uuid(),
   personId: z.string().uuid(),

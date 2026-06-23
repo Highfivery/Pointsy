@@ -22,6 +22,13 @@
       "when": 1782224428197,
       "tag": "0002_push_subscriptions",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1782236086915,
+      "tag": "0003_parents_and_invites",
+      "breakpoints": true
     }
   ]
 }
