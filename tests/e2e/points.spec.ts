@@ -64,10 +64,13 @@ test.describe("points engine", () => {
     await expect(page.getByText("5 pts")).toBeVisible();
 
     // Custom award.
+    const custom = page.locator("details", {
+      has: page.getByText("Award custom points"),
+    });
     await page.getByText("Award custom points").click();
-    await page.getByLabel("Points").fill("3");
-    await page.getByLabel("Reason").fill("Helped out");
-    await page.getByRole("button", { name: /^award points$/i }).click();
+    await custom.getByLabel("Points").fill("3");
+    await custom.getByLabel("Reason").fill("Helped out");
+    await custom.getByRole("button", { name: /^award points$/i }).click();
     await expect(page.getByText("8 pts")).toBeVisible();
   });
 
@@ -81,10 +84,13 @@ test.describe("points engine", () => {
     await page.getByRole("link", { name: /kiddo/i }).click();
     await expect(page).toHaveURL(/\/award\//);
 
+    const adjust = page.locator("details", {
+      has: page.getByText("Adjust points"),
+    });
     await page.getByText("Adjust points").click();
-    await page.getByLabel("Amount").fill("-4");
-    await page.getByLabel("Reason").fill("Penalty");
-    await page.getByRole("button", { name: /apply adjustment/i }).click();
+    await adjust.getByLabel("Amount").fill("-4");
+    await adjust.getByLabel("Reason").fill("Penalty");
+    await adjust.getByRole("button", { name: /apply adjustment/i }).click();
     await expect(page.getByText("-4 pts")).toBeVisible();
   });
 });
