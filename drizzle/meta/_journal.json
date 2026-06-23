@@ -15,6 +15,13 @@
       "when": 1782177240127,
       "tag": "0001_pin_lockout",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782224428197,
+      "tag": "0002_push_subscriptions",
+      "breakpoints": true
     }
   ]
 }

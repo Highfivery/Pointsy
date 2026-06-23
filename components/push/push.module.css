@@ -1,0 +1,35 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: flex-start;
+}
+
+.on,
+.off {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  padding: 0 var(--space-5);
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.on {
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+  border: 2px solid transparent;
+}
+
+.off {
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+}
+
+.error {
+  font-weight: 600;
+  color: var(--color-danger);
+}

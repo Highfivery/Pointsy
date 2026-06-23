@@ -11,6 +11,8 @@ import {
   fulfillRedemption,
   InsufficientPointsError,
 } from "@/lib/redemptions/service";
+import { getPersonById } from "@/lib/db/queries";
+import { notifyParents, notifyPerson } from "@/lib/push/send";
 
 const idSchema = z.string().uuid();
 const decisionSchema = z.enum(["approved", "denied"]);
@@ -24,8 +26,9 @@ export async function requestRedemptionAction(
   const rewardId = idSchema.safeParse(formData.get("rewardId"));
   if (!rewardId.success) return;
 
+  let redemption;
   try {
-    await requestRedemption(
+    redemption = await requestRedemption(
       getDb(),
       session.familyId,
       session.personId,
@@ -35,6 +38,19 @@ export async function requestRedemptionAction(
     // Affordability can change between render and submit; the page revalidates
     // and reflects the new state. Re-throw anything unexpected.
     if (!(err instanceof InsufficientPointsError)) throw err;
+  }
+
+  if (redemption) {
+    const kid = await getPersonById(
+      getDb(),
+      session.familyId,
+      session.personId,
+    );
+    await notifyParents(getDb(), session.familyId, {
+      title: "Reward requested",
+      body: `${kid?.name ?? "A child"} wants ${redemption.rewardName}`,
+      url: "/dashboard",
+    });
   }
   revalidatePath("/redeem");
   revalidatePath("/me");
@@ -61,13 +77,20 @@ export async function decideRedemptionAction(
   const decision = decisionSchema.safeParse(formData.get("decision"));
   if (!id.success || !decision.success) return;
 
-  await decideRedemption(
+  const redemption = await decideRedemption(
     getDb(),
     session.familyId,
     id.data,
     decision.data,
     session.personId,
   );
+  if (decision.data === "approved") {
+    await notifyPerson(getDb(), session.familyId, redemption.personId, {
+      title: "Reward approved! 🎉",
+      body: `Your ${redemption.rewardName} was approved.`,
+      url: "/me",
+    });
+  }
   revalidatePath("/dashboard");
 }
 

@@ -12,6 +12,10 @@ const schema = z.object({
   DATABASE_URL: z.string().url().optional(),
   /** 32+ byte secret used to sign session JWTs (HS256). */
   AUTH_SECRET: z.string().min(32).optional(),
+  /** Web Push (VAPID). Push is disabled gracefully when these are unset. */
+  NEXT_PUBLIC_VAPID_PUBLIC_KEY: z.string().optional(),
+  VAPID_PRIVATE_KEY: z.string().optional(),
+  VAPID_SUBJECT: z.string().optional(),
   NODE_ENV: z
     .enum(["development", "test", "production"])
     .default("development"),

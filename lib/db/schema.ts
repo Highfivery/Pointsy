@@ -213,6 +213,32 @@ export const ledger = pgTable(
   ],
 );
 
+/* ------------------------------------------------- push subscriptions */
+
+export const pushSubscriptions = pgTable(
+  "push_subscriptions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    familyId: uuid("family_id")
+      .notNull()
+      .references(() => families.id, { onDelete: "cascade" }),
+    personId: uuid("person_id")
+      .notNull()
+      .references(() => people.id, { onDelete: "cascade" }),
+    /** Web Push subscription fields. */
+    endpoint: text("endpoint").notNull().unique(),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("push_subs_family_idx").on(t.familyId),
+    index("push_subs_person_idx").on(t.personId),
+  ],
+);
+
 /* ------------------------------------------------------------------ types */
 
 export type Family = typeof families.$inferSelect;
@@ -227,6 +253,8 @@ export type Redemption = typeof redemptions.$inferSelect;
 export type NewRedemption = typeof redemptions.$inferInsert;
 export type LedgerEntry = typeof ledger.$inferSelect;
 export type NewLedgerEntry = typeof ledger.$inferInsert;
+export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect;
+export type NewPushSubscriptionRow = typeof pushSubscriptions.$inferInsert;
 
 export const schema = {
   families,
@@ -235,6 +263,7 @@ export const schema = {
   rewards,
   redemptions,
   ledger,
+  pushSubscriptions,
   roleEnum,
   ledgerTypeEnum,
   redemptionStatusEnum,

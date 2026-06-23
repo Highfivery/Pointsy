@@ -7,6 +7,20 @@ import { requireParent } from "@/lib/auth/session";
 import { awardChore, awardCustom, adjustPoints } from "@/lib/points/service";
 import { customAwardSchema, adjustSchema } from "@/lib/validation/schemas";
 import { toFieldErrors, type FormState } from "@/lib/validation/form";
+import { notifyPerson } from "@/lib/push/send";
+
+async function notifyKidEarned(
+  familyId: string,
+  kidId: string,
+  amount: number,
+  reason: string,
+) {
+  await notifyPerson(getDb(), familyId, kidId, {
+    title: "You earned points! 🎉",
+    body: `+${amount} for ${reason}`,
+    url: "/me",
+  });
+}
 
 const idSchema = z.string().uuid();
 
@@ -23,12 +37,18 @@ export async function awardChoreAction(formData: FormData): Promise<void> {
   const choreId = idSchema.safeParse(formData.get("choreId"));
   if (!kidId.success || !choreId.success) return;
 
-  await awardChore(
+  const entry = await awardChore(
     getDb(),
     session.familyId,
     kidId.data,
     choreId.data,
     session.personId,
+  );
+  await notifyKidEarned(
+    session.familyId,
+    kidId.data,
+    entry.amount,
+    entry.reason,
   );
   revalidateFor(kidId.data);
 }
@@ -57,6 +77,12 @@ export async function awardCustomAction(
   } catch {
     return { error: "Could not award points. Please try again." };
   }
+  await notifyKidEarned(
+    session.familyId,
+    parsed.data.kidId,
+    parsed.data.amount,
+    parsed.data.reason,
+  );
   revalidateFor(parsed.data.kidId);
   return { ok: true };
 }
