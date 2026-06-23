@@ -22,10 +22,11 @@
   --color-primary-text: #ffffff;
   --color-primary-weak: #eef2ff;
 
-  /* Semantic — verified ≥ 7:1 with white text */
-  --color-success: #15803d;
-  --color-danger: #b91c1c;
-  --color-warning: #92400e;
+  /* Semantic — 900-shades, verified ≥ 7:1 BOTH as text on light surfaces and
+     as a background with white text (1.4.6 enhanced contrast). */
+  --color-success: #14532d;
+  --color-danger: #7f1d1d;
+  --color-warning: #78350f;
 
   /* Focus ring — high-visibility (2.4.7 / AAA 2.4.11) */
   --focus-ring: 3px solid #1d4ed8;

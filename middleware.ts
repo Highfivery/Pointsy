@@ -6,7 +6,7 @@ import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth/token";
  * the auth pages. Uses the edge-safe token verifier (jose) — no DB access here;
  * pages re-check the session (and role) server-side as defense in depth.
  */
-const PARENT_PREFIXES = ["/dashboard", "/manage"];
+const PARENT_PREFIXES = ["/dashboard", "/manage", "/award"];
 const KID_PREFIXES = ["/me"];
 const AUTH_PAGES = ["/sign-in", "/sign-up"];
 
@@ -44,6 +44,7 @@ export const config = {
   matcher: [
     "/dashboard/:path*",
     "/manage/:path*",
+    "/award/:path*",
     "/me/:path*",
     "/sign-in",
     "/sign-up",

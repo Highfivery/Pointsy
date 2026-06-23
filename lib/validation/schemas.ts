@@ -102,11 +102,23 @@ export const rewardSchema = z.object({
 
 /* ---------------------------------------------------- points & redemptions */
 
-export const awardCustomSchema = z.object({
+export const customAwardSchema = z.object({
   kidId: z.string().uuid(),
-  amount: z
+  amount: z.coerce
     .number()
-    .int()
+    .int("Use a whole number.")
+    .min(1, "Enter a positive amount.")
+    .max(100000),
+  reason: z.string().trim().min(1, "Add a reason.").max(140),
+});
+
+export const adjustSchema = z.object({
+  kidId: z.string().uuid(),
+  amount: z.coerce
+    .number()
+    .int("Use a whole number.")
+    .min(-100000)
+    .max(100000)
     .refine((n) => n !== 0, "Amount can't be zero."),
   reason: z.string().trim().min(1, "Add a reason.").max(140),
 });

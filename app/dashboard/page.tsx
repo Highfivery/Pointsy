@@ -2,11 +2,20 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { eq } from "drizzle-orm";
-import { LogOut, Users, ListChecks, Gift, ChevronRight } from "lucide-react";
+import {
+  LogOut,
+  Users,
+  ListChecks,
+  Gift,
+  ChevronRight,
+  Plus,
+} from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
 import { getDb } from "@/lib/db/client";
 import { getPersonById } from "@/lib/db/queries";
+import { getKidBalances } from "@/lib/points/service";
+import { IconByName } from "@/components/icons/registry";
 import { families } from "@/lib/db/schema";
 import styles from "./dashboard.module.css";
 
@@ -25,6 +34,8 @@ export default async function DashboardPage() {
   const me = await getPersonById(db, session.familyId, session.personId);
   if (!family || !me) redirect("/sign-in");
 
+  const kids = await getKidBalances(db, session.familyId);
+
   return (
     <main id="main" className={styles.main}>
       <header className={styles.header}>
@@ -39,6 +50,47 @@ export default async function DashboardPage() {
           </button>
         </form>
       </header>
+
+      <section aria-labelledby="kids-heading">
+        <h2 id="kids-heading" className={styles.sectionTitle}>
+          Your kids
+        </h2>
+        {kids.length > 0 ? (
+          <ul className={styles.kidList}>
+            {kids.map((k) => (
+              <li key={k.id}>
+                <Link href={`/award/${k.id}`} className={styles.kidCard}>
+                  <span
+                    className={styles.kidAvatar}
+                    style={{ background: k.color }}
+                  >
+                    <IconByName name={k.avatar} size={24} />
+                  </span>
+                  <span className={styles.kidInfo}>
+                    <span className={styles.kidCardName}>{k.name}</span>
+                    <span
+                      className={
+                        k.balance < 0 ? styles.kidBalanceNeg : styles.kidBalance
+                      }
+                    >
+                      {k.balance} pts
+                    </span>
+                  </span>
+                  <span className={styles.awardChip}>
+                    <Plus size={16} aria-hidden="true" />
+                    Award
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className={styles.muted}>
+            <Link href="/manage/kids">Add your kids</Link> to start awarding
+            points.
+          </p>
+        )}
+      </section>
 
       <section className={styles.card} aria-labelledby="family-heading">
         <h2 id="family-heading" className={styles.cardTitle}>
