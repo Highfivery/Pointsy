@@ -3,6 +3,7 @@ import type { Database } from "@/lib/db/types";
 import { families, people, type Family, type Person } from "@/lib/db/schema";
 import { hashSecret, verifySecret } from "./password";
 import { generateFamilyCode } from "./family-code";
+import { DEFAULT_PARENT_AVATAR_ICON } from "@/lib/icons";
 
 /** Bump when the ToS/Privacy wording materially changes (recorded per parent). */
 export const CONSENT_VERSION = "2026-06-22";
@@ -80,6 +81,7 @@ export async function registerFamily(
         familyId: family.id,
         role: "parent",
         name: input.parentName.trim(),
+        avatar: DEFAULT_PARENT_AVATAR_ICON,
         email,
         passwordHash,
         consentAt: new Date(),

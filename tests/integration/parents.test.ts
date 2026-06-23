@@ -15,6 +15,7 @@ import {
   CannotRemoveParentError,
   INVITE_TTL_MS,
 } from "@/lib/parents/service";
+import { getPersonById } from "@/lib/db/queries";
 import { createTestDb, type TestDb } from "../helpers/test-db";
 
 async function newFamily(db: TestDb["db"], name = "Fam", ownerEmail?: string) {
@@ -52,6 +53,12 @@ describe("parents & invites", () => {
     expect(parents.map((p) => p.name).sort()).toEqual(["Owner", "Robin"]);
     expect(parents.find((p) => p.id === fam.personId)?.isOwner).toBe(true);
     expect(parents.find((p) => p.id === res.personId)?.isOwner).toBe(false);
+
+    // Both parents default to the neutral person avatar.
+    const owner = await getPersonById(db, fam.familyId, fam.personId);
+    const coParent = await getPersonById(db, res.familyId, res.personId);
+    expect(owner?.avatar).toBe("person");
+    expect(coParent?.avatar).toBe("person");
   });
 
   it("invites are single-use", async () => {

@@ -8,6 +8,7 @@
  */
 
 export const AVATAR_ICON_KEYS = [
+  "person",
   "smile",
   "cat",
   "dog",
@@ -69,6 +70,8 @@ export const REWARD_ICON_KEYS = [
 ] as const;
 
 export const DEFAULT_AVATAR_ICON = "smile";
+/** Parents default to a neutral person icon (they don't pick an avatar). */
+export const DEFAULT_PARENT_AVATAR_ICON = "person";
 export const DEFAULT_CHORE_ICON = "star";
 export const DEFAULT_REWARD_ICON = "gift";
 
