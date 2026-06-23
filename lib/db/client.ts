@@ -1,10 +1,18 @@
-import { Pool as NeonPool } from "@neondatabase/serverless";
+import ws from "ws";
+import { neonConfig, Pool as NeonPool } from "@neondatabase/serverless";
 import { drizzle as neonDrizzle } from "drizzle-orm/neon-serverless";
 import { Pool as PgPool } from "pg";
 import { drizzle as pgDrizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
 import type { Database } from "./types";
 import { requireEnv } from "@/lib/env";
+
+// The neon-serverless driver needs a WebSocket. Node < 22 has no global
+// WebSocket, so fall back to the `ws` package — keeps local dev working on any
+// Node version (native WebSocket is used on Node 22+ and on Vercel).
+if (typeof globalThis.WebSocket === "undefined") {
+  neonConfig.webSocketConstructor = ws;
+}
 
 /**
  * Lazily-initialised database client.
