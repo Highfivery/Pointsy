@@ -1,0 +1,163 @@
+.awardHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  color: #fff;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.who {
+  display: flex;
+  flex-direction: column;
+}
+
+.kidName {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.balance {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.balanceNeg {
+  font-weight: 700;
+  color: var(--color-danger);
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--space-3);
+}
+
+.choreGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: var(--space-3);
+}
+
+.choreBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  padding: var(--space-4) var(--space-2);
+  text-align: center;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+}
+
+.choreBtn:hover {
+  border-color: var(--color-primary);
+}
+
+.choreIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  color: var(--color-primary);
+  background: var(--color-primary-weak);
+  border-radius: var(--radius-md);
+}
+
+.choreName {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.chorePoints {
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+.extra {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+}
+
+.extraSummary {
+  min-height: var(--tap-target);
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.success {
+  font-weight: 600;
+  color: var(--color-success);
+}
+
+.activity {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.activityRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.activityText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.activityReason {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.activityMeta {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.amountPos {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--color-success);
+  white-space: nowrap;
+}
+
+.amountNeg {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--color-danger);
+  white-space: nowrap;
+}
+
+.empty {
+  color: var(--color-text-muted);
+}

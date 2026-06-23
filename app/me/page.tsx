@@ -5,7 +5,9 @@ import { getSession } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
 import { getDb } from "@/lib/db/client";
 import { getPersonById } from "@/lib/db/queries";
+import { getBalance, listKidActivity } from "@/lib/points/service";
 import { IconByName } from "@/components/icons/registry";
+import { ActivityList } from "@/components/points/ActivityList";
 import styles from "./me.module.css";
 
 export const metadata: Metadata = { title: "My points" };
@@ -15,8 +17,14 @@ export default async function MePage() {
   if (!session) redirect("/enter");
   if (session.role !== "kid") redirect("/dashboard");
 
-  const me = await getPersonById(getDb(), session.familyId, session.personId);
+  const db = getDb();
+  const me = await getPersonById(db, session.familyId, session.personId);
   if (!me) redirect("/enter");
+
+  const [balance, activity] = await Promise.all([
+    getBalance(db, session.familyId, session.personId),
+    listKidActivity(db, session.familyId, session.personId, 15),
+  ]);
 
   return (
     <main id="main" className={styles.main}>
@@ -38,10 +46,28 @@ export default async function MePage() {
         <h2 id="points-heading" className={styles.pointsLabel}>
           Your points
         </h2>
-        <p className={styles.points}>0</p>
-        <p className={styles.muted}>
-          Earn points for chores and good habits — coming soon!
+        <p className={balance < 0 ? styles.pointsNeg : styles.points}>
+          {balance}
         </p>
+        <p className={styles.muted}>
+          {balance === 0
+            ? "Earn points for chores and good habits!"
+            : "Keep up the great work!"}
+        </p>
+      </section>
+
+      <section aria-labelledby="activity-heading">
+        <h2 id="activity-heading" className={styles.activityTitle}>
+          Recent
+        </h2>
+        <ActivityList
+          entries={activity.map((e) => ({
+            id: e.id,
+            amount: e.amount,
+            reason: e.reason,
+            createdAt: e.createdAt,
+          }))}
+        />
       </section>
     </main>
   );

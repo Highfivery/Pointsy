@@ -69,6 +69,20 @@
   color: var(--color-primary);
 }
 
+.pointsNeg {
+  font-size: 4rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-danger);
+}
+
+.activityTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
+}
+
 .muted {
   color: var(--color-text-muted);
 }
