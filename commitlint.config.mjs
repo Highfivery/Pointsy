@@ -6,7 +6,9 @@
 const config = {
   extends: ["@commitlint/config-conventional"],
   rules: {
+    // Allow long lines in the body/footer (URLs, co-author trailers, context).
     "body-max-line-length": [0, "always"],
+    "footer-max-line-length": [0, "always"],
   },
 };
 
