@@ -99,6 +99,7 @@ test.describe("redemption loop", () => {
     // Kid signs out.
     await page.goto("/me");
     await page.getByRole("button", { name: /sign out/i }).click();
+    await expect(page).toHaveURL(/\/$/); // wait for sign-out to complete
 
     // Parent signs in and approves.
     await page.goto("/sign-in");
