@@ -45,6 +45,7 @@ test.describe("parent auth", () => {
     await page.getByRole("button", { name: /create family/i }).click();
     await expect(page).toHaveURL(/\/dashboard$/);
     await page.getByRole("button", { name: /sign out/i }).click();
+    await expect(page).toHaveURL(/\/$/); // wait for sign-out to complete
 
     await page.goto("/sign-in");
     await page.getByLabel("Email").fill(email);

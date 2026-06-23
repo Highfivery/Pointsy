@@ -33,7 +33,13 @@ export function getDb(): Database {
   if (chooseDriver(url) === "neon") {
     _db = neonDrizzle(new NeonPool({ connectionString: url }), { schema });
   } else {
-    _db = pgDrizzle(new PgPool({ connectionString: url }), { schema });
+    const pool = new PgPool({ connectionString: url });
+    // node-postgres emits 'error' on idle clients; without a handler an idle
+    // connection drop would crash the process with an uncaught exception.
+    pool.on("error", (err) => {
+      console.error("Postgres pool error:", err.message);
+    });
+    _db = pgDrizzle(pool, { schema });
   }
   return _db;
 }
