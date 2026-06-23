@@ -7,7 +7,7 @@ import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth/token";
  * pages re-check the session (and role) server-side as defense in depth.
  */
 const PARENT_PREFIXES = ["/dashboard", "/manage", "/award"];
-const KID_PREFIXES = ["/me"];
+const KID_PREFIXES = ["/me", "/redeem"];
 const AUTH_PAGES = ["/sign-in", "/sign-up"];
 
 function matches(pathname: string, prefixes: string[]) {
@@ -46,6 +46,7 @@ export const config = {
     "/manage/:path*",
     "/award/:path*",
     "/me/:path*",
+    "/redeem/:path*",
     "/sign-in",
     "/sign-up",
   ],
