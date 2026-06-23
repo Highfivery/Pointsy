@@ -29,6 +29,41 @@ describe("catalog service — chores", () => {
     ctx = await createTestDb();
   });
 
+  it("defaults to unlimited and persists a claim limit", async () => {
+    const { db } = ctx;
+    const fam = await newFamily(db);
+
+    const unlimited = await createChore(db, fam.familyId, {
+      name: "Tidy",
+      emoji: "🧹",
+      points: 5,
+    });
+    expect(unlimited.limitPeriod).toBe("none");
+
+    const limited = await createChore(db, fam.familyId, {
+      name: "Make bed",
+      emoji: "🛏️",
+      points: 5,
+      limitPeriod: "day",
+      limitCount: 2,
+    });
+    expect(limited.limitPeriod).toBe("day");
+    expect(limited.limitCount).toBe(2);
+
+    await updateChore(db, fam.familyId, limited.id, {
+      name: "Make bed",
+      emoji: "🛏️",
+      points: 5,
+      limitPeriod: "week",
+      limitCount: 3,
+    });
+    const after = (await listChores(db, fam.familyId)).find(
+      (c) => c.id === limited.id,
+    );
+    expect(after?.limitPeriod).toBe("week");
+    expect(after?.limitCount).toBe(3);
+  });
+
   it("creates, lists, updates, toggles, and deletes chores", async () => {
     const { db } = ctx;
     const fam = await newFamily(db);

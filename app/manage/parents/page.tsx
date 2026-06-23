@@ -50,7 +50,7 @@ export default async function ManageParentsPage() {
             <li key={p.id} className={styles.row}>
               <span className={styles.rowText}>
                 <span className={styles.rowName}>
-                  {p.name}
+                  <span className={styles.name}>{p.name}</span>
                   {p.id === session.personId ? (
                     <span className={styles.badge}>You</span>
                   ) : null}

@@ -57,6 +57,7 @@ test.describe("points engine", () => {
     // Open the kid's award screen.
     await page.getByRole("link", { name: /kiddo/i }).click();
     await expect(page).toHaveURL(/\/award\//);
+    await expect(page).toHaveTitle(/\S/); // let the soft-nav <title> settle
     await expectNoA11yViolations(page, "/award");
 
     // One-tap chore award.

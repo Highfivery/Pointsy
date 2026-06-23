@@ -36,6 +36,12 @@ export const redemptionStatusEnum = pgEnum("redemption_status", [
   "denied",
   "cancelled",
 ]);
+/** How often a kid may claim a chore. "none" = unlimited. */
+export const choreLimitPeriodEnum = pgEnum("chore_limit_period", [
+  "none",
+  "day",
+  "week",
+]);
 
 /* --------------------------------------------------------------- families */
 
@@ -50,6 +56,9 @@ export const families = pgTable("families", {
   ownerId: uuid("owner_id").references((): AnyPgColumn => people.id, {
     onDelete: "set null",
   }),
+  /** IANA timezone (e.g. "America/New_York"); defines the family's day for
+      chore limits. Auto-detected from the browser. */
+  timezone: text("timezone").notNull().default("UTC"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -109,6 +118,9 @@ export const chores = pgTable(
     emoji: text("emoji").notNull().default("✅"),
     /** Default award value (overridable at award time). */
     points: integer("points").notNull(),
+    /** Per-kid claim limit when a kid submits this chore. "none" = unlimited. */
+    limitPeriod: choreLimitPeriodEnum("limit_period").notNull().default("none"),
+    limitCount: integer("limit_count").notNull().default(1),
     isActive: boolean("is_active").notNull().default(true),
     sortOrder: integer("sort_order").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -303,4 +315,5 @@ export const schema = {
   roleEnum,
   ledgerTypeEnum,
   redemptionStatusEnum,
+  choreLimitPeriodEnum,
 };

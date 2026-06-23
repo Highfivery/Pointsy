@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Field } from "@/components/auth/Field";
 import { IconPicker } from "@/components/icons/IconPicker";
 import {
@@ -8,8 +9,12 @@ import {
   DEFAULT_CHORE_ICON,
   DEFAULT_REWARD_ICON,
 } from "@/lib/icons";
+import type { LimitPeriod } from "@/lib/catalog/limit";
+import form from "@/components/auth/auth-form.module.css";
+import styles from "./catalog.module.css";
 
 export type CatalogKind = "chore" | "reward";
+export type { LimitPeriod };
 
 interface CatalogFieldsProps {
   kind: CatalogKind;
@@ -19,6 +24,8 @@ interface CatalogFieldsProps {
     emoji?: string;
     value?: number;
     description?: string | null;
+    limitPeriod?: LimitPeriod;
+    limitCount?: number;
   };
 }
 
@@ -26,6 +33,10 @@ interface CatalogFieldsProps {
 export function CatalogFields({ kind, errors, defaults }: CatalogFieldsProps) {
   const isChore = kind === "chore";
   const valueName = isChore ? "points" : "cost";
+  const [period, setPeriod] = useState<LimitPeriod>(
+    defaults?.limitPeriod ?? "none",
+  );
+
   return (
     <>
       <Field
@@ -55,6 +66,42 @@ export function CatalogFields({ kind, errors, defaults }: CatalogFieldsProps) {
         error={errors?.points ?? errors?.cost}
         required
       />
+
+      {isChore ? (
+        <div className={form.field}>
+          <label htmlFor="limitPeriod" className={form.label}>
+            How often can a kid claim this?
+          </label>
+          <select
+            id="limitPeriod"
+            name="limitPeriod"
+            value={period}
+            onChange={(e) => setPeriod(e.target.value as LimitPeriod)}
+            className={styles.select}
+          >
+            <option value="none">Unlimited</option>
+            <option value="day">A set number per day</option>
+            <option value="week">A set number per week</option>
+          </select>
+          {period === "none" ? (
+            <input type="hidden" name="limitCount" value="1" />
+          ) : (
+            <div className={styles.limitCount}>
+              <Field
+                label={period === "day" ? "Times per day" : "Times per week"}
+                name="limitCount"
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                defaultValue={defaults?.limitCount ?? 1}
+                error={errors?.limitCount}
+                required
+              />
+            </div>
+          )}
+        </div>
+      ) : null}
+
       {!isChore ? (
         <Field
           label="Description (optional)"

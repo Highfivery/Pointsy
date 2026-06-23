@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { signUpAction, type AuthState } from "@/app/actions/auth";
 import { Field } from "./Field";
@@ -10,9 +10,19 @@ const initialState: AuthState = {};
 
 export function SignUpForm() {
   const [state, action, pending] = useActionState(signUpAction, initialState);
+  const tzRef = useRef<HTMLInputElement>(null);
+
+  // Capture the browser's timezone so chore limits reset at the family's local
+  // midnight. Set via a DOM ref (no state) to avoid hydration mismatch.
+  useEffect(() => {
+    if (tzRef.current) {
+      tzRef.current.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    }
+  }, []);
 
   return (
     <form action={action} className={styles.form} noValidate>
+      <input ref={tzRef} type="hidden" name="timezone" defaultValue="" />
       <Field
         label="Family name"
         name="familyName"

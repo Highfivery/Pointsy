@@ -10,6 +10,7 @@ import {
 } from "@/app/actions/catalog";
 import { CatalogFields, type CatalogKind } from "./CatalogFields";
 import { IconByName } from "@/components/icons/registry";
+import { formatChoreLimit, type LimitPeriod } from "@/lib/catalog/limit";
 import type { FormState } from "@/lib/validation/form";
 import form from "@/components/auth/auth-form.module.css";
 import manage from "@/components/manage/manage.module.css";
@@ -22,6 +23,8 @@ export interface CatalogItem {
   value: number;
   description: string | null;
   isActive: boolean;
+  limitPeriod?: LimitPeriod;
+  limitCount?: number;
 }
 
 const initialState: FormState = {};
@@ -47,6 +50,13 @@ export function CatalogItemCard({
         <div className={styles.headText}>
           <span className={manage.kidName}>{item.name}</span>
           <span className={styles.value}>{item.value} pts</span>
+          {kind === "chore" &&
+          item.limitPeriod &&
+          item.limitPeriod !== "none" ? (
+            <span className={styles.limitMeta}>
+              {formatChoreLimit(item.limitPeriod, item.limitCount ?? 1)} per kid
+            </span>
+          ) : null}
           {item.description ? (
             <span className={styles.desc}>{item.description}</span>
           ) : null}
@@ -91,6 +101,8 @@ export function CatalogItemCard({
               emoji: item.emoji,
               value: item.value,
               description: item.description,
+              limitPeriod: item.limitPeriod,
+              limitCount: item.limitCount,
             }}
           />
           <button type="submit" className={form.submit} disabled={editPending}>
