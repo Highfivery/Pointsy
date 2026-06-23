@@ -1,5 +1,15 @@
 # pointsy
 
+## 0.17.0
+
+### Minor Changes
+
+- 669eeff: One shared icon library everywhere. Every picker (kid & parent avatars, chores,
+  rewards) now draws from the same comprehensive ~200-icon set instead of three
+  smaller per-context lists, so the same icons are available on every screen. The
+  library is grouped by theme and shown in a compact scrollable area. Existing
+  saved icons are unchanged.
+
 ## 0.16.0
 
 ### Minor Changes
