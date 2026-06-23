@@ -1,35 +1,96 @@
-.wrap {
+.card {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  align-items: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
 }
 
-.on,
-.off {
+.icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  color: var(--color-primary);
+  background: var(--color-primary-weak);
+  border-radius: var(--radius-full);
+}
+
+.body {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.desc {
+  margin-top: var(--space-1);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}
+
+.error {
+  margin-top: var(--space-1);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-danger);
+}
+
+.action {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.enableBtn {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
+  justify-content: center;
   min-height: var(--tap-target);
-  padding: 0 var(--space-5);
+  padding: 0 var(--space-6);
   font-weight: 600;
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+  border: none;
   border-radius: var(--radius-full);
   cursor: pointer;
 }
 
-.on {
-  color: var(--color-primary-text);
-  background: var(--color-primary);
-  border: 2px solid transparent;
+.enableBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
-.off {
-  color: var(--color-text);
-  background: var(--color-surface);
-  border: 2px solid var(--color-border);
+.statusOn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-weight: 700;
+  color: var(--color-success);
 }
 
-.error {
+.linkBtn {
+  min-height: var(--tap-target);
+  padding: 0 var(--space-2);
   font-weight: 600;
-  color: var(--color-danger);
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.linkBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
 }

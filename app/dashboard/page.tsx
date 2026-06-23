@@ -277,7 +277,7 @@ export default async function DashboardPage() {
         </Link>
       </nav>
 
-      <EnableNotifications />
+      <EnableNotifications audience="parent" />
     </main>
   );
 }

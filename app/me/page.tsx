@@ -81,7 +81,7 @@ export default async function MePage() {
         />
       </section>
 
-      <EnableNotifications />
+      <EnableNotifications audience="kid" />
     </main>
   );
 }
