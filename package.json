@@ -2,6 +2,9 @@
   "name": "pointsy",
   "version": "0.2.0",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "SERWIST_SUPPRESS_TURBOPACK_WARNING=1 next dev",
     "build": "next build --webpack",
