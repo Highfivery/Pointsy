@@ -17,6 +17,14 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(3rem, 1fr));
   gap: var(--space-2);
+  /* The library is large, so contain it in a scrollable area rather than
+     letting it grow into a tall wall inside the form. */
+  max-height: 15rem;
+  overflow-y: auto;
+  /* Room so checked/focus outlines aren't clipped by the scroll container. */
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
 }
 
 .option {
