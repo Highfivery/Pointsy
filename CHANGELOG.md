@@ -1,5 +1,23 @@
 # pointsy
 
+## 0.14.0
+
+### Minor Changes
+
+- 026332c: Greatly expand the icon pickers. Avatars go from 21 to 43 (turtle, squirrel,
+  panda, rainbow, robot, magic wand, plane, mountain, and more), chore icons from
+  16 to 34 (cooking, groceries, recycling, fix-it, washing, study, music, science…),
+  and reward icons from 16 to 35 (cake, donut, headphones, board game, savings,
+  outings, fruit…). All keys stay in sync with the registry via the existing test.
+
+### Patch Changes
+
+- 026332c: Fix a hydration mismatch in the dashboard's family-timezone control: it used
+  `Intl.supportedValuesOf("timeZone")` during render, and the server's and
+  browser's IANA lists can differ, which mismatched the rendered options. It now
+  uses a deterministic curated list of common zones (the exact zone is still
+  auto-detected). Resolves intermittent flakiness on WebKit.
+
 ## 0.13.0
 
 ### Minor Changes
