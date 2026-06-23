@@ -29,6 +29,13 @@
       "when": 1782236086915,
       "tag": "0003_parents_and_invites",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1782240683354,
+      "tag": "0004_parent_avatar_default",
+      "breakpoints": true
     }
   ]
 }

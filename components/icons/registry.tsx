@@ -1,5 +1,6 @@
 import { createElement } from "react";
 import {
+  UserRound,
   Smile,
   Cat,
   Dog,
@@ -62,6 +63,7 @@ interface IconDef {
 /** Every key in `lib/icons` must have an entry here (verified by a unit test). */
 const ICONS: Record<string, IconDef> = {
   // avatars
+  person: { label: "Person", Icon: UserRound },
   smile: { label: "Smiley", Icon: Smile },
   cat: { label: "Cat", Icon: Cat },
   dog: { label: "Dog", Icon: Dog },

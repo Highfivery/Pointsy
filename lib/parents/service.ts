@@ -4,6 +4,7 @@ import { families, people, parentInvites } from "@/lib/db/schema";
 import { hashSecret } from "@/lib/auth/password";
 import { generateInviteCode, hashInviteCode } from "@/lib/auth/invite-code";
 import { EmailTakenError, CONSENT_VERSION } from "@/lib/auth/register";
+import { DEFAULT_PARENT_AVATAR_ICON } from "@/lib/icons";
 
 /** Invite lifetime (72h), single-use. */
 export const INVITE_TTL_MS = 72 * 60 * 60 * 1000;
@@ -185,6 +186,7 @@ export async function redeemParentInvite(
         familyId: invite.familyId,
         role: "parent",
         name: input.name.trim(),
+        avatar: DEFAULT_PARENT_AVATAR_ICON,
         email,
         passwordHash,
         consentAt: now,

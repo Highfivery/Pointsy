@@ -66,8 +66,8 @@ export const people = pgTable(
       .references(() => families.id, { onDelete: "cascade" }),
     role: roleEnum("role").notNull(),
     name: text("name").notNull(),
-    /** Emoji or preset avatar key. */
-    avatar: text("avatar").notNull().default("🙂"),
+    /** Preset avatar icon key (see lib/icons). */
+    avatar: text("avatar").notNull().default("smile"),
     /** Theme accent (hex or preset key). */
     color: text("color").notNull().default("#6366f1"),
     /** Parents only. Stored lower-cased; unique across the whole app. */
