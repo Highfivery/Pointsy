@@ -36,6 +36,12 @@ Zod (validation) · Serwist (PWA) · Vitest + PGlite + Playwright/axe.
 6. **Validate every boundary** with a Zod schema from `lib/validation`.
 7. **Hash secrets.** Passwords and PINs go through `lib/auth/password`. Never log
    or return them. Rate-limit PIN/password attempts.
+8. **Never show auth chrome to a known user.** A signed-in user — or any device
+   already associated with a family (the `pointsy_family` cookie) — must **never**
+   see the marketing page, a sign-in form, or a "re-enter your family code" step
+   as the home screen. The root `/` resolves to the PIN-gated family **profile
+   picker** for known devices and marketing **only** for brand-new ones. Any change
+   to routing/entry/auth must keep an E2E asserting this for both states.
 
 ## Conventions
 
@@ -67,6 +73,13 @@ Follow `docs/accessibility.md`. Semantic HTML, labelled controls, visible focus,
 `npm run typecheck` · `npm run lint` · `npm run format:check` · `npm test` all
 green; tests added; a11y checked; a changeset added for user-facing changes;
 verified in a mobile viewport.
+
+**Look at the UI before you ship it.** For any change that touches a screen,
+actually render it and look — don't ship UI you've only reasoned about. Run the
+app (or Playwright against a throwaway Postgres) and capture a screenshot of each
+affected screen in **both** states it can be in (e.g. signed-out vs known-device,
+empty vs populated, light vs dark), confirm it matches intent, and include the
+screenshots in the PR. "Typecheck passes" is **not** UI verification.
 
 ## Workflow & commits
 

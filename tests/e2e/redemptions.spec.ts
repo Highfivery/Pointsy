@@ -43,7 +43,7 @@ test.describe("redemption loop", () => {
     test.setTimeout(120_000);
 
     const email = await signUpParent(page);
-    const code = await familyCode(page);
+    await familyCode(page);
 
     // Add a kid.
     await page.getByRole("link", { name: "Kids", exact: true }).click();
@@ -80,10 +80,8 @@ test.describe("redemption loop", () => {
     await page.getByRole("button", { name: /sign out/i }).click();
     await expect(page).toHaveURL(/\/$/);
 
-    // Kid signs in and redeems.
+    // Kid signs in and redeems (device remembers the family → picker directly).
     await page.goto("/enter");
-    await page.getByLabel("Family code").fill(code);
-    await page.getByRole("button", { name: /continue/i }).click();
     await page.getByRole("button", { name: /Kiddo/i }).click();
     await page.getByLabel(/enter your pin/i).fill("4321");
     await page.getByRole("button", { name: /let.?s go/i }).click();

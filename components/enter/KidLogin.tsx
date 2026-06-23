@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import {
   lookupFamilyAction,
+  forgetFamilyAction,
   kidSignInAction,
   type KidSignInState,
 } from "@/app/actions/kid-login";
@@ -12,11 +13,20 @@ import { IconByName } from "@/components/icons/registry";
 import form from "@/components/auth/auth-form.module.css";
 import styles from "./enter.module.css";
 
-const STORAGE_KEY = "pointsy.familyCode";
 const pinInitial: KidSignInState = {};
 
-export function KidLogin() {
-  const [family, setFamily] = useState<FamilyLookup | null>(null);
+/**
+ * The family profile picker — used as the home screen for any device that's
+ * already associated with a family (and at /enter for entering a code). Anyone
+ * (parent or kid) taps their face and enters their PIN. The known family is
+ * provided by the server from the device cookie, so there's no code to re-type.
+ */
+export function KidLogin({
+  initialFamily = null,
+}: {
+  initialFamily?: FamilyLookup | null;
+}) {
+  const [family, setFamily] = useState<FamilyLookup | null>(initialFamily);
   const [selected, setSelected] = useState<PickerMember | null>(null);
   const [code, setCode] = useState("");
   const [codeError, setCodeError] = useState<string | null>(null);
@@ -25,21 +35,6 @@ export function KidLogin() {
     kidSignInAction,
     pinInitial,
   );
-
-  // Auto-load a remembered family on this device.
-  useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (!saved) return;
-    let active = true;
-    lookupFamilyAction(saved).then((result) => {
-      if (!active) return;
-      if (result) setFamily(result);
-      else window.localStorage.removeItem(STORAGE_KEY);
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
 
   async function resolveCode(raw: string) {
     setLoading(true);
@@ -50,18 +45,17 @@ export function KidLogin() {
       setCodeError("We couldn't find a family with that code.");
       return;
     }
-    window.localStorage.setItem(STORAGE_KEY, raw.trim().toUpperCase());
     setFamily(result);
   }
 
-  function forgetFamily() {
-    window.localStorage.removeItem(STORAGE_KEY);
+  async function forget() {
+    await forgetFamilyAction();
     setFamily(null);
     setSelected(null);
     setCode("");
   }
 
-  // 1. Family code entry
+  // 1. Family code entry (only when this device doesn't know a family yet)
   if (!family) {
     return (
       <form
@@ -101,6 +95,9 @@ export function KidLogin() {
         <button type="submit" className={form.submit} disabled={loading}>
           {loading ? "Looking…" : "Continue"}
         </button>
+        <a href="/sign-in" className={styles.textBtn}>
+          Parent? Sign in with email &amp; password
+        </a>
       </form>
     );
   }
@@ -156,7 +153,9 @@ export function KidLogin() {
       <p className={styles.familyName}>{family.familyName}</p>
       {family.members.length === 0 ? (
         <p className={styles.empty}>
-          No profiles yet — ask a parent to add you.
+          No profiles yet. A parent can{" "}
+          <a href="/sign-in">sign in with email &amp; password</a> to set up
+          PINs.
         </p>
       ) : (
         <ul className={styles.grid}>
@@ -179,9 +178,18 @@ export function KidLogin() {
           ))}
         </ul>
       )}
-      <button type="button" onClick={forgetFamily} className={styles.textBtn}>
-        Use a different family code
-      </button>
+      <div className={styles.pickerFooter}>
+        <a href="/sign-in" className={styles.textBtn}>
+          Parent? Sign in with email &amp; password
+        </a>
+        <button
+          type="button"
+          onClick={() => void forget()}
+          className={styles.textBtn}
+        >
+          Use a different family
+        </button>
+      </div>
     </div>
   );
 }

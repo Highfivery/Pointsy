@@ -25,7 +25,7 @@ async function signUpParent(page: Page): Promise<string> {
 test("a parent sets a PIN and signs in via the profile picker", async ({
   page,
 }) => {
-  const code = await signUpParent(page);
+  await signUpParent(page);
 
   // Set a quick sign-in PIN from the dashboard.
   await page.getByText(/set a sign-in pin for yourself/i).click();
@@ -33,14 +33,12 @@ test("a parent sets a PIN and signs in via the profile picker", async ({
   await page.getByRole("button", { name: /^set pin$/i }).click();
   await expect(page.getByText("PIN saved.")).toBeVisible();
 
-  // Sign out.
+  // Sign out → the device still remembers the family, so the home page is the
+  // profile picker (no family code to re-type).
   await page.getByRole("button", { name: /sign out/i }).click();
   await expect(page).toHaveURL(/\/$/);
 
-  // Sign back in through the picker.
-  await page.goto("/enter");
-  await page.getByLabel("Family code").fill(code);
-  await page.getByRole("button", { name: /continue/i }).click();
+  // Sign back in through the picker straight from home.
   await page.getByRole("button", { name: /Pat/i }).click();
   await page.getByLabel(/enter your pin/i).fill("1122");
   await page.getByRole("button", { name: /let.?s go/i }).click();

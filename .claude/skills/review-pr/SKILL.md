@@ -21,6 +21,11 @@ against the code — don't assume.
    migrations additive and reviewed.
 4. **Accessibility** — semantic markup, labels, focus, ≥44px targets, 7:1
    contrast, reduced motion. (Run `a11y-audit` for changed screens.)
+   - **UI was actually rendered & looked at** — screenshots of each changed
+     screen in every state (signed-out vs known-device, empty vs populated,
+     light/dark) are attached; the result matches intent. Reasoning ≠ verifying.
+   - **Auth/entry** — no signed-in user or known device is shown marketing or a
+     sign-in form as home; `/` is the PIN-gated picker for them (AGENTS.md inv. 8).
 5. **Performance** — Server Components by default, no N+1 queries, cached reads.
 6. **Tests** — unit for domain, integration incl. isolation, e2e + axe; meaningful
    assertions; coverage targets met.

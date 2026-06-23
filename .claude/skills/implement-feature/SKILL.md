@@ -30,3 +30,16 @@ Build the feature wired together: validation → action → UI → tests.
 
 Run and fix until green: `npm run typecheck`, `npm run lint`,
 `npm run format`, `npm test`. Then run the `review-pr` and `a11y-audit` skills.
+
+**Then look at it.** For any UI change, render the screen and capture a
+screenshot — run `npm run dev`, or Playwright against a throwaway Postgres:
+`docker run --rm -d -p 5432:5432 -e POSTGRES_USER=pointsy -e POSTGRES_PASSWORD=pointsy -e POSTGRES_DB=pointsy postgres:16`,
+then `DATABASE_URL=postgres://pointsy:pointsy@localhost:5432/pointsy npm run db:migrate`.
+Screenshot **every affected screen in each state it can have** (signed-out vs
+known-device, empty vs populated, light/dark), confirm it matches intent, and
+attach the screenshots to the PR. Typecheck/lint passing is NOT UI verification.
+
+**Auth/entry rule:** a signed-in user, or a device that already knows a family,
+must never land on marketing or a sign-in form — `/` is the PIN-gated profile
+picker for them. If you touch routing/entry/auth, verify both the new-device and
+known-device home states (AGENTS.md invariant 8).
