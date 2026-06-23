@@ -91,6 +91,7 @@ test.describe("redemption loop", () => {
 
     await page.getByRole("link", { name: /redeem rewards/i }).click();
     await expect(page).toHaveURL(/\/redeem$/);
+    await expect(page).toHaveTitle(/redeem/i); // let the soft-nav title settle
     await expectNoA11yViolations(page, "/redeem");
 
     await page.getByRole("button", { name: /sticker/i }).click();
@@ -115,6 +116,6 @@ test.describe("redemption loop", () => {
 
     // Moves to the awaiting-delivery queue; balance drops to 5.
     await expect(page.getByText(/awaiting delivery/i)).toBeVisible();
-    await expect(page.getByText("5 pts")).toBeVisible();
+    await expect(page.getByText("5 pts", { exact: true })).toBeVisible();
   });
 });
