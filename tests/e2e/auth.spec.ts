@@ -51,7 +51,7 @@ test.describe("parent auth", () => {
     await page.getByLabel("Email").fill(email);
     await page.getByLabel("Password").fill("WRONGpassword");
     await page.getByRole("button", { name: /^sign in$/i }).click();
-    await expect(page.getByRole("alert")).toContainText(/incorrect/i);
+    await expect(page.getByText(/incorrect email or password/i)).toBeVisible();
   });
 
   test("auth pages have no WCAG A/AA/AAA violations", async ({ page }) => {
