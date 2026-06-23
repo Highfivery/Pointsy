@@ -10,6 +10,11 @@ updates:
         update-types:
           - minor
           - patch
+    ignore:
+      # Keep @types/node aligned with the Node runtime (.nvmrc = 22); don't
+      # propose majors that run ahead of it.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: "/"
