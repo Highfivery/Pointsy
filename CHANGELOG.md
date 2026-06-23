@@ -1,5 +1,22 @@
 # pointsy
 
+## 0.3.0
+
+### Minor Changes
+
+- e06e686: Add kids and PIN-based sign-in. Parents can manage child profiles (name, avatar,
+  color, 4-digit PIN) with edit, reset-PIN, and deactivate/reactivate. Kids sign in
+  through an avatar profile picker plus their PIN on a remembered device (with a
+  family-code fallback), landing on a minimal kid home. PIN attempts are
+  rate-limited with a lockout after repeated failures.
+
+### Patch Changes
+
+- e5efb72: Add a `/api/health` endpoint that verifies database connectivity (for uptime
+  monitoring), plus Vercel deploy config (`vercel.json` build command + Node 22
+  `engines`) and dotenv-powered local migrations so `npm run db:migrate` reads
+  `.env.local` (preferring the direct/unpooled URL).
+
 ## 0.2.0
 
 ### Minor Changes
