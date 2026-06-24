@@ -118,6 +118,11 @@ export const choreSchema = z.object({
     ])
     .default("other"),
   description: z.string().trim().max(280).optional(),
+  /** A "core" chore expected daily (drives challenges). */
+  isCore: z.coerce.boolean().default(false),
+  /** Who the chore is for; assignees/rotation order in `kidIds`. */
+  assignment: z.enum(["everyone", "specific", "rotating"]).default("everyone"),
+  kidIds: z.array(z.string().uuid()).default([]),
   /** How often a kid may claim it. "none" = unlimited; count applies otherwise. */
   limitPeriod: z.enum(["none", "day", "week"]).default("none"),
   limitCount: z.coerce

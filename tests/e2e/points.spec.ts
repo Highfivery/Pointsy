@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { addChore } from "./_helpers";
 
 function uniqueEmail() {
   return `parent.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
@@ -32,24 +33,13 @@ async function addKid(page: Page, name: string) {
   await expect(page.getByText(name)).toBeVisible();
 }
 
-async function addChore(page: Page, name: string, points: number) {
-  await page.goto("/dashboard");
-  await page.getByRole("link", { name: "Chores", exact: true }).click();
-  await expect(page).toHaveURL(/\/manage\/chores$/);
-  const add = page.getByRole("region", { name: /add a chore/i });
-  await add.getByLabel("Name").fill(name);
-  await add.getByLabel("Points").fill(String(points));
-  await add.getByRole("button", { name: /add chore/i }).click();
-  await expect(page.getByText(name, { exact: true })).toBeVisible();
-}
-
 test.describe("points engine", () => {
   test("award a chore and custom points updates the balance", async ({
     page,
   }) => {
     await signUpParent(page);
     await addKid(page, "Kiddo");
-    await addChore(page, "Made bed", 5);
+    await addChore(page, "Made bed", { points: 5 });
 
     await page.goto("/dashboard");
     await expect(page.getByText("0 pts")).toBeVisible();

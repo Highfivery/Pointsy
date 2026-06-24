@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { addChore } from "./_helpers";
 
 function uniqueEmail() {
   return `parent.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
@@ -22,45 +23,31 @@ async function signUpParent(page: Page) {
   await expect(page).toHaveURL(/\/dashboard$/);
 }
 
-/** Names of the catalog item cards, in display order. */
-async function itemOrder(page: Page): Promise<string[]> {
-  return page.getByRole("region").evaluateAll((els) =>
-    els
-      .map((e) => e.getAttribute("aria-label") ?? "")
-      .filter((l) => l.startsWith("Manage "))
-      .map((l) => l.replace("Manage ", "")),
-  );
-}
-
 test.describe("chore & reward catalog", () => {
   test("parent creates, reorders, and hides chores", async ({ page }) => {
     await signUpParent(page);
-    await page.getByRole("link", { name: /^chores$/i }).click();
-    await expect(page).toHaveURL(/\/manage\/chores$/);
+    await addChore(page, "Made bed", { points: 5 });
     await expectNoA11yViolations(page, "/manage/chores");
+    await addChore(page, "Dishes", { points: 10 });
 
-    const add = page.getByRole("region", { name: /add a chore/i });
-    await add.getByLabel("Name").fill("Made bed");
-    await add.getByRole("radio", { name: "Make bed", exact: true }).check();
-    await add.getByLabel("Points").fill("5");
-    await add.getByRole("button", { name: /add chore/i }).click();
-    await expect(page.getByText("Made bed", { exact: true })).toBeVisible();
-    await expect(page.getByText("5 pts")).toBeVisible();
-
-    await add.getByLabel("Name").fill("Dishes");
-    await add.getByLabel("Points").fill("10");
-    await add.getByRole("button", { name: /add chore/i }).click();
-    await expect(page.getByText("Dishes", { exact: true })).toBeVisible();
-    expect(await itemOrder(page)).toEqual(["Made bed", "Dishes"]);
+    // Both chores list as rows that link into the editor.
+    const rows = page.locator('ul a[href^="/manage/chores/"]');
+    await expect(rows.first()).toContainText("Made bed");
 
     // Reorder: move the first chore down.
     await page.getByRole("button", { name: /move made bed down/i }).click();
-    await expect.poll(() => itemOrder(page)).toEqual(["Dishes", "Made bed"]);
+    await expect(rows.first()).toContainText("Dishes");
 
-    // Hide a chore.
-    const madeBed = page.getByRole("region", { name: /manage made bed/i });
-    await madeBed.getByRole("button", { name: /^hide$/i }).click();
-    await expect(madeBed.getByText(/hidden/i)).toBeVisible();
+    // Hide via the editor.
+    await page
+      .getByRole("link", { name: /made bed/i })
+      .first()
+      .click();
+    await page.waitForURL(/\/manage\/chores\/[0-9a-f-]+$/);
+    await page.getByRole("button", { name: /hide from kids/i }).click();
+    await expect(
+      page.getByRole("button", { name: /show to kids/i }),
+    ).toBeVisible();
   });
 
   test("parent creates a reward with a description", async ({ page }) => {

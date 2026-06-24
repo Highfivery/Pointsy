@@ -3,6 +3,12 @@ import type { Database } from "@/lib/db/types";
 import { chores, choreSubmissions, ledger, people } from "@/lib/db/schema";
 import { localDate, weekStart } from "@/lib/timezone";
 import type { LimitPeriod } from "@/lib/catalog/limit";
+import {
+  advanceRotationIfDone,
+  getAssigneeIds,
+  getAssigneesByChore,
+} from "@/lib/chores/assignment";
+import { eligibleFor } from "@/lib/chores/eligibility";
 
 export class LimitReachedError extends Error {
   constructor(message: string) {
@@ -78,22 +84,53 @@ export async function listSubmittableChores(
     .where(and(eq(chores.familyId, familyId), eq(chores.isActive, true)))
     .orderBy(chores.sortOrder, chores.createdAt);
 
+  const assignees = await getAssigneesByChore(
+    db,
+    active.map((c) => c.id),
+  );
+  const kids = await db
+    .select({ id: people.id, name: people.name })
+    .from(people)
+    .where(and(eq(people.familyId, familyId), eq(people.role, "kid")));
+  const nameById = new Map(kids.map((k) => [k.id, k.name]));
+  const nameOf = (pid: string) => nameById.get(pid) ?? "Someone";
+
+  const base = (c: (typeof active)[number]) => ({
+    id: c.id,
+    name: c.name,
+    emoji: c.emoji,
+    description: c.description,
+    category: c.category,
+    points: c.points,
+    limitPeriod: c.limitPeriod,
+    limitCount: c.limitCount,
+  });
+
   const out: SubmittableChore[] = [];
   for (const c of active) {
-    if (c.limitPeriod === "none") {
+    // Assignment first: a chore that isn't this kid's (or not their turn) is
+    // shown locked with a reason, regardless of any per-chore limit.
+    const elig = eligibleFor(
+      {
+        assignment: c.assignment,
+        assigneeIds: assignees.get(c.id) ?? [],
+        currentTurnPersonId: c.currentTurnPersonId,
+      },
+      personId,
+      nameOf,
+    );
+    if (!elig.allowed) {
       out.push({
-        id: c.id,
-        name: c.name,
-        emoji: c.emoji,
-        description: c.description,
-        category: c.category,
-        points: c.points,
-        limitPeriod: "none",
-        limitCount: c.limitCount,
+        ...base(c),
         remaining: null,
-        canSubmit: true,
-        reason: null,
+        canSubmit: false,
+        reason: elig.reason,
       });
+      continue;
+    }
+
+    if (c.limitPeriod === "none") {
+      out.push({ ...base(c), remaining: null, canSubmit: true, reason: null });
       continue;
     }
     const used = await usedInWindow(
@@ -107,14 +144,7 @@ export async function listSubmittableChores(
     const remaining = Math.max(0, c.limitCount - used);
     const unit = c.limitPeriod === "day" ? "today" : "this week";
     out.push({
-      id: c.id,
-      name: c.name,
-      emoji: c.emoji,
-      description: c.description,
-      category: c.category,
-      points: c.points,
-      limitPeriod: c.limitPeriod,
-      limitCount: c.limitCount,
+      ...base(c),
       remaining,
       canSubmit: remaining > 0,
       reason: remaining > 0 ? null : `Done ${unit}`,
@@ -146,6 +176,22 @@ export async function submitChore(
       )
       .limit(1);
     if (!chore) throw new InvalidSubmissionError();
+
+    // Assignment guard — a kid can't log a chore that isn't theirs / their turn.
+    const elig = eligibleFor(
+      {
+        assignment: chore.assignment,
+        assigneeIds: await getAssigneeIds(tx, choreId),
+        currentTurnPersonId: chore.currentTurnPersonId,
+      },
+      personId,
+      () => "",
+    );
+    if (!elig.allowed) {
+      throw new InvalidSubmissionError(
+        "This chore isn't yours to log right now.",
+      );
+    }
 
     if (chore.limitPeriod !== "none") {
       const used = await usedInWindow(
@@ -237,6 +283,9 @@ export async function decideSubmission(
         choreId: s.choreId,
         createdBy: decidedBy,
       });
+      if (s.choreId) {
+        await advanceRotationIfDone(tx, familyId, s.choreId, s.personId);
+      }
     }
     await tx
       .update(choreSubmissions)

@@ -3,6 +3,7 @@ import type { Database } from "@/lib/db/types";
 import { ledger, chores, people, type LedgerEntry } from "@/lib/db/schema";
 import { getPersonById } from "@/lib/db/queries";
 import { addDays, localDate } from "@/lib/timezone";
+import { advanceRotationIfDone } from "@/lib/chores/assignment";
 
 /**
  * The points engine. The `ledger` is append-only and the single source of
@@ -53,6 +54,7 @@ export async function awardChore(
       createdBy: awardedBy,
     })
     .returning();
+  await advanceRotationIfDone(db, familyId, chore.id, kidId);
   return row;
 }
 

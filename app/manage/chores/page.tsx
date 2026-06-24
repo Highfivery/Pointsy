@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { listChores } from "@/lib/catalog/service";
+import { getAssigneesByChore } from "@/lib/chores/assignment";
+import { getKidBalances } from "@/lib/points/service";
 import { groupByCategory } from "@/lib/catalog/category";
-import { AddCatalogForm } from "@/components/catalog/AddCatalogForm";
-import { CatalogItemCard } from "@/components/catalog/CatalogItemCard";
+import { ChoreRow } from "@/components/catalog/ChoreRow";
 import { IconByName } from "@/components/icons/registry";
+import type { Chore } from "@/lib/db/schema";
 import manage from "@/components/manage/manage.module.css";
 
 export const metadata: Metadata = { title: "Chores" };
@@ -18,7 +20,28 @@ export default async function ChoresPage() {
   if (!session) redirect("/sign-in");
   if (session.role !== "parent") redirect("/me");
 
-  const chores = await listChores(getDb(), session.familyId);
+  const db = getDb();
+  const chores = await listChores(db, session.familyId);
+  const [assignees, kids] = await Promise.all([
+    getAssigneesByChore(
+      db,
+      chores.map((c) => c.id),
+    ),
+    getKidBalances(db, session.familyId),
+  ]);
+  const nameById = new Map(kids.map((k) => [k.id, k.name]));
+  const nameOf = (id: string) => nameById.get(id) ?? "A kid";
+
+  function whoLabel(c: Chore): string | null {
+    if (c.assignment === "everyone") return null;
+    if (c.assignment === "rotating") {
+      return c.currentTurnPersonId
+        ? `${nameOf(c.currentTurnPersonId)}'s turn`
+        : "Takes turns";
+    }
+    const names = (assignees.get(c.id) ?? []).map(nameOf);
+    return names.length > 0 ? names.join(", ") : "No one yet";
+  }
 
   return (
     <main id="main" className={manage.main}>
@@ -28,7 +51,10 @@ export default async function ChoresPage() {
       </Link>
       <h1 className={manage.title}>Chores</h1>
 
-      <AddCatalogForm kind="chore" />
+      <Link href="/manage/chores/new" className={manage.addBtn}>
+        <Plus size={18} aria-hidden="true" />
+        Add a chore
+      </Link>
 
       {chores.length > 0 ? (
         groupByCategory(chores).map(({ meta, items }) => (
@@ -44,19 +70,18 @@ export default async function ChoresPage() {
             <ul className={manage.list}>
               {items.map((c) => (
                 <li key={c.id}>
-                  <CatalogItemCard
-                    kind="chore"
+                  <ChoreRow
                     item={{
                       id: c.id,
                       name: c.name,
                       emoji: c.emoji,
-                      value: c.points,
-                      description: c.description,
+                      points: c.points,
                       isActive: c.isActive,
-                      category: c.category,
                       pinned: c.pinned,
+                      isCore: c.isCore,
                       limitPeriod: c.limitPeriod,
                       limitCount: c.limitCount,
+                      whoLabel: whoLabel(c),
                     }}
                   />
                 </li>
@@ -65,7 +90,7 @@ export default async function ChoresPage() {
           </section>
         ))
       ) : (
-        <p className={manage.empty}>No chores yet — add your first above.</p>
+        <p className={manage.empty}>No chores yet — add your first.</p>
       )}
     </main>
   );

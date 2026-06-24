@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { enterPin } from "./_helpers";
+import { enterPin, addChore } from "./_helpers";
 
 function uniqueEmail() {
   return `hype.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
@@ -39,21 +39,6 @@ async function addKid(page: Page, name: string) {
   await expect(page.getByText(name, { exact: true })).toBeVisible();
 }
 
-async function addChore(
-  page: Page,
-  name: string,
-  points: number,
-  category: string,
-) {
-  await page.goto("/manage/chores");
-  const add = page.getByRole("region", { name: /add a chore/i });
-  await add.getByLabel("Name").fill(name);
-  await add.getByLabel("Points").fill(String(points));
-  await add.getByLabel("Category").selectOption(category);
-  await add.getByRole("button", { name: /add chore/i }).click();
-  await expect(page.getByText(name, { exact: true })).toBeVisible();
-}
-
 async function addReward(page: Page, name: string, cost: number) {
   await page.goto("/manage/rewards");
   const add = page.getByRole("region", { name: /add a reward/i });
@@ -69,8 +54,8 @@ test("award screen groups by category, searches, and awards to several kids", as
   await signUpParent(page);
   await addKid(page, "Robin");
   await addKid(page, "Sky");
-  await addChore(page, "Brush teeth", 3, "selfcare");
-  await addChore(page, "Walk dog", 5, "pets");
+  await addChore(page, "Brush teeth", { points: 3, category: "selfcare" });
+  await addChore(page, "Walk dog", { points: 5, category: "pets" });
 
   await page.goto("/dashboard");
   await page.getByRole("link", { name: /robin/i }).click();
@@ -106,7 +91,7 @@ test("kid dashboard shows redeem-now rewards and a savings goal", async ({
 }) => {
   await signUpParent(page);
   await addKid(page, "Robin");
-  await addChore(page, "Big job", 30, "home");
+  await addChore(page, "Big job", { points: 30, category: "home" });
   await addReward(page, "Ice cream", 10);
 
   // Give Robin enough to afford the reward.

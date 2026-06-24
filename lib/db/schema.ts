@@ -60,6 +60,12 @@ export const choreCategoryEnum = pgEnum("chore_category", [
   "selfcare",
   "other",
 ]);
+/** Who a chore is for. "rotating" takes turns among its assignees. */
+export const choreAssignmentEnum = pgEnum("chore_assignment", [
+  "everyone",
+  "specific",
+  "rotating",
+]);
 
 /* --------------------------------------------------------------- families */
 
@@ -147,6 +153,15 @@ export const chores = pgTable(
     category: choreCategoryEnum("category").notNull().default("other"),
     /** Favourited chores surface first on the award screen. */
     pinned: boolean("pinned").notNull().default(false),
+    /** A "core" chore that's expected daily (drives challenges). */
+    isCore: boolean("is_core").notNull().default(false),
+    /** Who the chore is for. Assignees live in `choreAssignees`. */
+    assignment: choreAssignmentEnum("assignment").notNull().default("everyone"),
+    /** For "rotating": whose turn it is now. Advances when they complete it. */
+    currentTurnPersonId: uuid("current_turn_person_id").references(
+      (): AnyPgColumn => people.id,
+      { onDelete: "set null" },
+    ),
     /** Per-kid claim limit when a kid submits this chore. "none" = unlimited. */
     limitPeriod: choreLimitPeriodEnum("limit_period").notNull().default("none"),
     limitCount: integer("limit_count").notNull().default(1),
@@ -157,6 +172,28 @@ export const chores = pgTable(
       .notNull(),
   },
   (t) => [index("chores_family_idx").on(t.familyId)],
+);
+
+/**
+ * The kids a chore is assigned to (for "specific") or the rotation order (for
+ * "rotating", by `position`). Empty for "everyone".
+ */
+export const choreAssignees = pgTable(
+  "chore_assignees",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    choreId: uuid("chore_id")
+      .notNull()
+      .references(() => chores.id, { onDelete: "cascade" }),
+    personId: uuid("person_id")
+      .notNull()
+      .references(() => people.id, { onDelete: "cascade" }),
+    position: integer("position").notNull().default(0),
+  },
+  (t) => [
+    index("chore_assignees_chore_idx").on(t.choreId),
+    uniqueIndex("chore_assignees_unique").on(t.choreId, t.personId),
+  ],
 );
 
 /* ---------------------------------------------------------------- rewards */
@@ -358,6 +395,9 @@ export type NewPerson = typeof people.$inferInsert;
 export type Chore = typeof chores.$inferSelect;
 export type NewChore = typeof chores.$inferInsert;
 export type ChoreCategory = (typeof choreCategoryEnum.enumValues)[number];
+export type ChoreAssignment = (typeof choreAssignmentEnum.enumValues)[number];
+export type ChoreAssignee = typeof choreAssignees.$inferSelect;
+export type NewChoreAssignee = typeof choreAssignees.$inferInsert;
 export type Reward = typeof rewards.$inferSelect;
 export type NewReward = typeof rewards.$inferInsert;
 export type Redemption = typeof redemptions.$inferSelect;
@@ -375,6 +415,7 @@ export const schema = {
   families,
   people,
   chores,
+  choreAssignees,
   rewards,
   redemptions,
   ledger,
@@ -387,4 +428,5 @@ export const schema = {
   choreLimitPeriodEnum,
   submissionStatusEnum,
   choreCategoryEnum,
+  choreAssignmentEnum,
 };
