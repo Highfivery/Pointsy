@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Field } from "@/components/auth/Field";
 import { IconPicker } from "@/components/icons/IconPicker";
 import {
@@ -35,6 +35,10 @@ interface CatalogFieldsProps {
 export function CatalogFields({ kind, errors, defaults }: CatalogFieldsProps) {
   const isChore = kind === "chore";
   const valueName = isChore ? "points" : "cost";
+  // Unique per instance — the add form and every edit card render these fields,
+  // so static ids would collide and mis-wire the labels (issue #56).
+  const categoryId = useId();
+  const periodId = useId();
   const [period, setPeriod] = useState<LimitPeriod>(
     defaults?.limitPeriod ?? "none",
   );
@@ -71,11 +75,11 @@ export function CatalogFields({ kind, errors, defaults }: CatalogFieldsProps) {
 
       {isChore ? (
         <div className={form.field}>
-          <label htmlFor="category" className={form.label}>
+          <label htmlFor={categoryId} className={form.label}>
             Category
           </label>
           <select
-            id="category"
+            id={categoryId}
             name="category"
             defaultValue={defaults?.category ?? "other"}
             className={styles.select}
@@ -91,11 +95,11 @@ export function CatalogFields({ kind, errors, defaults }: CatalogFieldsProps) {
 
       {isChore ? (
         <div className={form.field}>
-          <label htmlFor="limitPeriod" className={form.label}>
+          <label htmlFor={periodId} className={form.label}>
             How often can a kid claim this?
           </label>
           <select
-            id="limitPeriod"
+            id={periodId}
             name="limitPeriod"
             value={period}
             onChange={(e) => setPeriod(e.target.value as LimitPeriod)}
