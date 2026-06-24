@@ -12,7 +12,6 @@ import {
 import { CatalogFields, type CatalogKind } from "./CatalogFields";
 import { IconByName } from "@/components/icons/registry";
 import { formatChoreLimit, type LimitPeriod } from "@/lib/catalog/limit";
-import { categoryLabel } from "@/lib/catalog/category";
 import type { FormState } from "@/lib/validation/form";
 import form from "@/components/auth/auth-form.module.css";
 import manage from "@/components/manage/manage.module.css";
@@ -53,77 +52,73 @@ export function CatalogItemCard({
         </span>
         <div className={styles.headText}>
           <span className={manage.kidName}>{item.name}</span>
-          <span className={styles.value}>{item.value} pts</span>
-          <span className={styles.metaRow}>
-            {kind === "chore" && item.category ? (
-              <span className={styles.catMeta}>
-                {categoryLabel(item.category)}
-              </span>
-            ) : null}
+          <div className={styles.metaRow}>
+            <span className={styles.value}>{item.value} pts</span>
             {kind === "chore" &&
             item.limitPeriod &&
             item.limitPeriod !== "none" ? (
               <span className={styles.limitMeta}>
-                {formatChoreLimit(item.limitPeriod, item.limitCount ?? 1)} per
-                kid
+                {formatChoreLimit(item.limitPeriod, item.limitCount ?? 1)}
               </span>
             ) : null}
-          </span>
+            {!item.isActive ? (
+              <span className={manage.inactive}>Hidden</span>
+            ) : null}
+          </div>
           {item.description ? (
             <span className={styles.desc}>{item.description}</span>
           ) : null}
         </div>
-        {!item.isActive ? (
-          <span className={manage.inactive}>Hidden</span>
-        ) : null}
-        {kind === "chore" ? (
-          <form action={toggleChorePinnedAction} className={styles.pinForm}>
+        <div className={styles.controls}>
+          {kind === "chore" ? (
+            <form action={toggleChorePinnedAction} className={styles.pinForm}>
+              <input type="hidden" name="id" value={item.id} />
+              <input
+                type="hidden"
+                name="pinned"
+                value={(!item.pinned).toString()}
+              />
+              <button
+                type="submit"
+                className={item.pinned ? styles.pinOn : styles.iconBtn}
+                aria-pressed={Boolean(item.pinned)}
+                aria-label={
+                  item.pinned
+                    ? `Unpin ${item.name}`
+                    : `Pin ${item.name} to the top`
+                }
+              >
+                <Star
+                  size={20}
+                  aria-hidden="true"
+                  fill={item.pinned ? "currentColor" : "none"}
+                />
+              </button>
+            </form>
+          ) : null}
+          <form action={moveCatalogItemAction} className={styles.reorder}>
+            <input type="hidden" name="kind" value={kind} />
             <input type="hidden" name="id" value={item.id} />
-            <input
-              type="hidden"
-              name="pinned"
-              value={(!item.pinned).toString()}
-            />
             <button
               type="submit"
-              className={item.pinned ? styles.pinOn : styles.iconBtn}
-              aria-pressed={Boolean(item.pinned)}
-              aria-label={
-                item.pinned
-                  ? `Unpin ${item.name}`
-                  : `Pin ${item.name} to the top`
-              }
+              name="direction"
+              value="up"
+              className={styles.iconBtn}
+              aria-label={`Move ${item.name} up`}
             >
-              <Star
-                size={20}
-                aria-hidden="true"
-                fill={item.pinned ? "currentColor" : "none"}
-              />
+              <ChevronUp size={20} aria-hidden="true" />
+            </button>
+            <button
+              type="submit"
+              name="direction"
+              value="down"
+              className={styles.iconBtn}
+              aria-label={`Move ${item.name} down`}
+            >
+              <ChevronDown size={20} aria-hidden="true" />
             </button>
           </form>
-        ) : null}
-        <form action={moveCatalogItemAction} className={styles.reorder}>
-          <input type="hidden" name="kind" value={kind} />
-          <input type="hidden" name="id" value={item.id} />
-          <button
-            type="submit"
-            name="direction"
-            value="up"
-            className={styles.iconBtn}
-            aria-label={`Move ${item.name} up`}
-          >
-            <ChevronUp size={20} aria-hidden="true" />
-          </button>
-          <button
-            type="submit"
-            name="direction"
-            value="down"
-            className={styles.iconBtn}
-            aria-label={`Move ${item.name} down`}
-          >
-            <ChevronDown size={20} aria-hidden="true" />
-          </button>
-        </form>
+        </div>
       </div>
 
       <details className={manage.disclosure}>
