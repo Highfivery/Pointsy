@@ -1,12 +1,11 @@
 import { test, expect } from "@playwright/test";
+import { addChore } from "./_helpers";
 
 function uniqueEmail() {
   return `freq.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
 }
 
-// Issue #56: a chore set to "N per day" couldn't be changed back to Unlimited,
-// because the add form and every edit card shared id="limitPeriod", so the edit
-// form's label targeted the wrong (add-form) control.
+// Issue #56: a chore set to "N per day" must be changeable back to Unlimited.
 test("a chore's frequency can be switched back to Unlimited (#56)", async ({
   page,
 }) => {
@@ -19,26 +18,21 @@ test("a chore's frequency can be switched back to Unlimited (#56)", async ({
   await page.getByRole("button", { name: /create family/i }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
 
-  await page.goto("/manage/chores");
-  const add = page.getByRole("region", { name: /add a chore/i });
-  await add.getByLabel("Name").fill("Brush teeth");
-  await add.getByLabel("Points").fill("5");
-  await add.getByLabel(/how often/i).selectOption("day");
-  await add.getByLabel(/times per day/i).fill("3");
-  await add.getByRole("button", { name: /add chore/i }).click();
-  await expect(page.getByText("Brush teeth", { exact: true })).toBeVisible();
+  await addChore(page, "Brush teeth", { points: 5, perDay: 3 });
+  await expect(page.getByText("3× per day")).toBeVisible(); // the limit chip
 
-  const card = page.getByRole("region", { name: /manage brush teeth/i });
-  await expect(card.getByText("3× per day")).toBeVisible(); // the limit chip
-  await card.getByText("Edit", { exact: true }).click();
+  // Open the editor and switch the frequency back to Unlimited.
+  await page
+    .getByRole("link", { name: /brush teeth/i })
+    .first()
+    .click();
+  await page.waitForURL(/\/manage\/chores\/[0-9a-f-]+$/);
+  await expect(page.getByLabel(/times per day/i)).toBeVisible();
+  await page.getByLabel(/how often/i).selectOption("none");
+  await expect(page.getByLabel(/times per day/i)).toHaveCount(0);
 
-  // The edit form's OWN "How often" control resolves via its label (unique id).
-  await expect(card.getByLabel(/times per day/i)).toBeVisible();
-  await card.getByLabel(/how often/i).selectOption("none");
-  await expect(card.getByLabel(/times per day/i)).toHaveCount(0);
-
-  await card.getByRole("button", { name: /save changes/i }).click();
-  await expect(card.getByText("Saved.")).toBeVisible();
-  // The chore is now unlimited — the "3× per day" chip is gone.
-  await expect(card.getByText("3× per day")).toHaveCount(0);
+  await page.getByRole("button", { name: /save chore/i }).click();
+  await page.waitForURL(/\/manage\/chores$/);
+  // Now unlimited — no frequency chip on the row.
+  await expect(page.getByText("3× per day")).toHaveCount(0);
 });

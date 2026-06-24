@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { enterPin } from "./_helpers";
+import { enterPin, addChore } from "./_helpers";
 
 function uniqueEmail() {
   return `sub.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
@@ -14,15 +14,6 @@ async function signUp(page: Page, email: string) {
   await page.getByLabel(/parent or guardian/i).check();
   await page.getByRole("button", { name: /create family/i }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
-}
-
-async function addChore(page: Page, name: string) {
-  await page.getByRole("link", { name: "Chores", exact: true }).click();
-  await expect(page).toHaveURL(/\/manage\/chores$/);
-  await page.getByLabel("Name").fill(name);
-  await page.getByLabel("Points").fill("5");
-  await page.getByRole("button", { name: /add chore/i }).click();
-  await expect(page.getByText(name, { exact: true })).toBeVisible();
 }
 
 async function addKid(page: Page, name: string, pin: string) {

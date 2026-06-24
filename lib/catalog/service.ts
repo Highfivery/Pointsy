@@ -1,12 +1,16 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import type { Database } from "@/lib/db/types";
 import {
   chores,
+  people,
   rewards,
   type Chore,
+  type ChoreAssignment,
   type ChoreCategory,
   type Reward,
 } from "@/lib/db/schema";
+import { replaceAssignees } from "@/lib/chores/assignment";
+import { initialTurn } from "@/lib/chores/eligibility";
 
 /**
  * Catalog services for the chore and reward catalogs. All functions take an
@@ -21,8 +25,34 @@ export interface ChoreInput {
   points: number;
   category?: ChoreCategory;
   description?: string;
+  isCore?: boolean;
+  assignment?: ChoreAssignment;
+  /** Assigned kids (specific) / rotation order (rotating); ignored for everyone. */
+  kidIds?: string[];
   limitPeriod?: "none" | "day" | "week";
   limitCount?: number;
+}
+
+/** Keep only ids that are active kids in this family (tenant isolation). */
+async function familyKidIds(
+  db: Database,
+  familyId: string,
+  ids: string[],
+): Promise<string[]> {
+  if (ids.length === 0) return [];
+  const rows = await db
+    .select({ id: people.id })
+    .from(people)
+    .where(
+      and(
+        eq(people.familyId, familyId),
+        eq(people.role, "kid"),
+        inArray(people.id, ids),
+      ),
+    );
+  const valid = new Set(rows.map((r) => r.id));
+  // Preserve the caller's order (rotation order matters).
+  return ids.filter((id) => valid.has(id));
 }
 
 export interface RewardInput {
@@ -47,12 +77,33 @@ export async function listChores(
     .orderBy(chores.sortOrder, chores.createdAt);
 }
 
+export async function getChore(
+  db: Database,
+  familyId: string,
+  id: string,
+): Promise<Chore | null> {
+  const [row] = await db
+    .select()
+    .from(chores)
+    .where(and(eq(chores.familyId, familyId), eq(chores.id, id)))
+    .limit(1);
+  return row ?? null;
+}
+
 export async function createChore(
   db: Database,
   familyId: string,
   input: ChoreInput,
 ): Promise<Chore> {
   const existing = await listChores(db, familyId);
+  const assignment = input.assignment ?? "everyone";
+  const kidIds =
+    assignment === "everyone"
+      ? []
+      : await familyKidIds(db, familyId, input.kidIds ?? []);
+  const currentTurnPersonId =
+    assignment === "rotating" ? initialTurn(kidIds, null) : null;
+
   const [row] = await db
     .insert(chores)
     .values({
@@ -62,11 +113,15 @@ export async function createChore(
       points: input.points,
       category: input.category ?? "other",
       description: input.description?.trim() || null,
+      isCore: input.isCore ?? false,
+      assignment,
+      currentTurnPersonId,
       limitPeriod: input.limitPeriod ?? "none",
       limitCount: input.limitCount ?? 1,
       sortOrder: existing.length,
     })
     .returning();
+  await replaceAssignees(db, row.id, kidIds);
   return row;
 }
 
@@ -76,6 +131,23 @@ export async function updateChore(
   id: string,
   input: ChoreInput,
 ): Promise<void> {
+  const assignment = input.assignment ?? "everyone";
+  const kidIds =
+    assignment === "everyone"
+      ? []
+      : await familyKidIds(db, familyId, input.kidIds ?? []);
+
+  // Keep the rotation turn if that kid is still assigned, else restart it.
+  let currentTurnPersonId: string | null = null;
+  if (assignment === "rotating") {
+    const [prev] = await db
+      .select({ turn: chores.currentTurnPersonId })
+      .from(chores)
+      .where(and(eq(chores.familyId, familyId), eq(chores.id, id)))
+      .limit(1);
+    currentTurnPersonId = initialTurn(kidIds, prev?.turn ?? null);
+  }
+
   await db
     .update(chores)
     .set({
@@ -84,10 +156,14 @@ export async function updateChore(
       points: input.points,
       category: input.category ?? "other",
       description: input.description?.trim() || null,
+      isCore: input.isCore ?? false,
+      assignment,
+      currentTurnPersonId,
       limitPeriod: input.limitPeriod ?? "none",
       limitCount: input.limitCount ?? 1,
     })
     .where(and(eq(chores.familyId, familyId), eq(chores.id, id)));
+  await replaceAssignees(db, id, kidIds);
 }
 
 export async function setChorePinned(

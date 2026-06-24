@@ -124,6 +124,71 @@
   margin-top: var(--space-1);
 }
 
+/* ---- overview rows (chore list links into the editor) ---- */
+
+.row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.rowLink {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.rowLink:hover {
+  border-color: var(--color-primary);
+}
+
+.rowText {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.rowChevron {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.rowActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.coreChip,
+.whoChip {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.1rem var(--space-2);
+  border-radius: var(--radius-full);
+}
+
+.coreChip {
+  color: var(--color-primary);
+  background: var(--color-primary-weak);
+}
+
+.whoChip {
+  color: var(--color-text-muted);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+}
+
 .limitMeta {
   font-size: 0.78rem;
   font-weight: 600;

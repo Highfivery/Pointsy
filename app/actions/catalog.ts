@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getDb } from "@/lib/db/client";
 import { requireParent } from "@/lib/auth/session";
@@ -33,9 +34,58 @@ function parseChore(formData: FormData) {
     points: formData.get("points"),
     category: formData.get("category") ?? "other",
     description: formData.get("description") || undefined,
+    isCore: formData.get("isCore"),
+    assignment: formData.get("assignment") ?? "everyone",
+    kidIds: formData.getAll("kidIds"),
     limitPeriod: formData.get("limitPeriod") ?? "none",
     limitCount: formData.get("limitCount") ?? 1,
   });
+}
+
+/** Create or update a chore from the full-page editor, then return to the list. */
+export async function saveChoreAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const session = await requireParent();
+  const parsed = parseChore(formData);
+  if (!parsed.success) return { fieldErrors: toFieldErrors(parsed.error) };
+
+  const rawId = formData.get("id");
+  if (typeof rawId === "string" && rawId.length > 0) {
+    const id = idSchema.safeParse(rawId);
+    if (!id.success) return { error: "Could not find that chore." };
+    await updateChore(getDb(), session.familyId, id.data, parsed.data);
+  } else {
+    await createChore(getDb(), session.familyId, parsed.data);
+  }
+  revalidatePath("/manage/chores");
+  redirect("/manage/chores");
+}
+
+/** Hide/show a chore from the editor (stays on the page). */
+export async function setChoreHiddenAction(formData: FormData): Promise<void> {
+  const session = await requireParent();
+  const id = idSchema.safeParse(formData.get("id"));
+  if (!id.success) return;
+  await toggleChoreActive(
+    getDb(),
+    session.familyId,
+    id.data,
+    formData.get("isActive") === "true",
+  );
+  revalidatePath("/manage/chores");
+}
+
+/** Delete a chore from the editor, then return to the list. */
+export async function deleteChoreAction(formData: FormData): Promise<void> {
+  const session = await requireParent();
+  const id = idSchema.safeParse(formData.get("id"));
+  if (id.success) {
+    await deleteChore(getDb(), session.familyId, id.data);
+    revalidatePath("/manage/chores");
+  }
+  redirect("/manage/chores");
 }
 
 /** Pin/unpin a chore so it surfaces first on the award screen. */
