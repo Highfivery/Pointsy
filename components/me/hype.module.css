@@ -18,21 +18,61 @@
 .celebrate {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  z-index: 60;
   display: flex;
+  align-items: center;
   justify-content: center;
+  padding: var(--space-4);
+  /* Visual focus only — never blocks the app (taps pass through). */
+  background: rgb(0 0 0 / 0.18);
   pointer-events: none;
+  animation: fadeIn 0.2s ease;
 }
 
-.celebrateToast {
-  margin-top: 16vh;
-  padding: var(--space-3) var(--space-5);
+.celebrateCard {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  max-width: 18rem;
+  padding: var(--space-6) var(--space-5);
+  text-align: center;
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 16px 48px rgb(0 0 0 / 0.35);
+  pointer-events: auto;
+  animation: pop 0.35s ease;
+}
+
+.celebrateEmoji {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.celebrateBig {
+  margin: 0;
+  font-size: 2rem;
   font-weight: 800;
+  color: var(--color-primary);
+}
+
+.celebrateSub {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.celebrateBtn {
+  margin-top: var(--space-3);
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-6);
+  font-weight: 700;
   color: var(--color-primary-text);
   background: var(--color-primary);
+  border: none;
   border-radius: var(--radius-full);
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.25);
-  animation: pop 0.3s ease;
+  cursor: pointer;
 }
 
 .confetti {
@@ -44,13 +84,13 @@
 .confetti span {
   position: absolute;
   top: -12vh;
-  left: calc(var(--i) * 5.4%);
-  width: 10px;
-  height: 14px;
+  left: calc(var(--i) * 4.2%);
+  width: 11px;
+  height: 15px;
   border-radius: 2px;
-  background: hsl(calc(var(--i) * 40) 85% 55%);
-  animation: fall 2.6s linear forwards;
-  animation-delay: calc(var(--i) * 55ms);
+  background: hsl(calc(var(--i) * 33) 85% 55%);
+  animation: fall 2.8s linear forwards;
+  animation-delay: calc(var(--i) * 45ms);
 }
 
 @keyframes fall {
@@ -67,11 +107,18 @@
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .confetti {
     display: none;
   }
-  .celebrateToast {
+  .celebrate,
+  .celebrateCard {
     animation: none;
   }
 }
