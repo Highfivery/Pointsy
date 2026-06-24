@@ -10,6 +10,7 @@ import {
   createChore,
   updateChore,
   toggleChoreActive,
+  setChorePinned,
   deleteChore,
   moveChore,
   createReward,
@@ -30,10 +31,27 @@ function parseChore(formData: FormData) {
     name: formData.get("name"),
     emoji: formData.get("emoji"),
     points: formData.get("points"),
+    category: formData.get("category") ?? "other",
     description: formData.get("description") || undefined,
     limitPeriod: formData.get("limitPeriod") ?? "none",
     limitCount: formData.get("limitCount") ?? 1,
   });
+}
+
+/** Pin/unpin a chore so it surfaces first on the award screen. */
+export async function toggleChorePinnedAction(
+  formData: FormData,
+): Promise<void> {
+  const session = await requireParent();
+  const id = idSchema.safeParse(formData.get("id"));
+  if (!id.success) return;
+  await setChorePinned(
+    getDb(),
+    session.familyId,
+    id.data,
+    formData.get("pinned") === "true",
+  );
+  revalidatePath("/manage/chores");
 }
 
 function parseReward(formData: FormData) {

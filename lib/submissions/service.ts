@@ -53,6 +53,7 @@ export interface SubmittableChore {
   name: string;
   emoji: string;
   description: string | null;
+  category: string;
   points: number;
   limitPeriod: LimitPeriod;
   limitCount: number;
@@ -85,6 +86,7 @@ export async function listSubmittableChores(
         name: c.name,
         emoji: c.emoji,
         description: c.description,
+        category: c.category,
         points: c.points,
         limitPeriod: "none",
         limitCount: c.limitCount,
@@ -109,6 +111,7 @@ export async function listSubmittableChores(
       name: c.name,
       emoji: c.emoji,
       description: c.description,
+      category: c.category,
       points: c.points,
       limitPeriod: c.limitPeriod,
       limitCount: c.limitCount,

@@ -6,8 +6,9 @@ import { getSession } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
 import { getDb } from "@/lib/db/client";
 import { getPersonById } from "@/lib/db/queries";
-import { getBalance, listKidActivity } from "@/lib/points/service";
-import { getAvailable } from "@/lib/redemptions/service";
+import { getBalance, listKidActivity, getStreak } from "@/lib/points/service";
+import { listRedeemableRewards, getKidGoal } from "@/lib/redemptions/service";
+import { getFamilyTimezone } from "@/lib/family/settings";
 import {
   getPendingPoints,
   listKidSubmissions,
@@ -15,8 +16,12 @@ import {
 import { cancelSubmissionAction } from "@/app/actions/submissions";
 import { IconByName } from "@/components/icons/registry";
 import { ActivityList } from "@/components/points/ActivityList";
+import { Celebration } from "@/components/me/Celebration";
+import { RewardShelf } from "@/components/me/RewardShelf";
+import { KidGoal } from "@/components/me/KidGoal";
 import { EnableNotifications } from "@/components/push/EnableNotifications";
 import styles from "./me.module.css";
+import hype from "@/components/me/hype.module.css";
 
 export const metadata: Metadata = { title: "My points" };
 
@@ -29,18 +34,57 @@ export default async function MePage() {
   const me = await getPersonById(db, session.familyId, session.personId);
   if (!me) redirect("/enter");
 
-  const [balance, available, pendingPoints, submissions, activity] =
-    await Promise.all([
-      getBalance(db, session.familyId, session.personId),
-      getAvailable(db, session.familyId, session.personId),
-      getPendingPoints(db, session.familyId, session.personId),
-      listKidSubmissions(db, session.familyId, session.personId, 20),
-      listKidActivity(db, session.familyId, session.personId, 15),
-    ]);
+  const tz = await getFamilyTimezone(db, session.familyId);
+  const [
+    balance,
+    pendingPoints,
+    submissions,
+    activity,
+    streak,
+    redeemable,
+    goal,
+  ] = await Promise.all([
+    getBalance(db, session.familyId, session.personId),
+    getPendingPoints(db, session.familyId, session.personId),
+    listKidSubmissions(db, session.familyId, session.personId, 20),
+    listKidActivity(db, session.familyId, session.personId, 15),
+    getStreak(db, session.familyId, session.personId, tz),
+    listRedeemableRewards(db, session.familyId, session.personId),
+    getKidGoal(db, session.familyId, session.personId),
+  ]);
   const waiting = submissions.filter((s) => s.status === "pending");
+  const available = redeemable.available;
+
+  const affordable = redeemable.rewards
+    .filter((r) => r.affordable)
+    .map((r) => ({
+      id: r.id,
+      name: r.name,
+      emoji: r.emoji,
+      cost: r.cost,
+      moreNeeded: r.moreNeeded,
+    }));
+  const nextReward = redeemable.rewards
+    .filter((r) => !r.affordable)
+    .sort((a, b) => a.moreNeeded - b.moreNeeded)[0];
+  const nextUp = nextReward
+    ? {
+        id: nextReward.id,
+        name: nextReward.name,
+        emoji: nextReward.emoji,
+        cost: nextReward.cost,
+        moreNeeded: nextReward.moreNeeded,
+      }
+    : null;
+  const rewardOptions = redeemable.rewards.map((r) => ({
+    id: r.id,
+    name: r.name,
+    cost: r.cost,
+  }));
 
   return (
     <main id="main" className={styles.main}>
+      <Celebration kidId={session.personId} balance={balance} />
       <header className={styles.header}>
         <span className={styles.avatar} style={{ background: me.color }}>
           <IconByName name={me.avatar} size={28} />
@@ -74,7 +118,18 @@ export default async function MePage() {
             +{pendingPoints} waiting for approval
           </p>
         ) : null}
+        {streak > 0 ? (
+          <p className={hype.streak}>🔥 {streak}-day streak — keep it going!</p>
+        ) : null}
       </section>
+
+      <KidGoal goal={goal} rewardOptions={rewardOptions} />
+
+      <RewardShelf
+        available={available}
+        affordable={affordable}
+        nextUp={nextUp}
+      />
 
       <div className={styles.actions}>
         <Link href="/submit" className={styles.actionLink}>

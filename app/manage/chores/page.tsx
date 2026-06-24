@@ -5,8 +5,10 @@ import { ArrowLeft } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { listChores } from "@/lib/catalog/service";
+import { groupByCategory } from "@/lib/catalog/category";
 import { AddCatalogForm } from "@/components/catalog/AddCatalogForm";
 import { CatalogItemCard } from "@/components/catalog/CatalogItemCard";
+import { IconByName } from "@/components/icons/registry";
 import manage from "@/components/manage/manage.module.css";
 
 export const metadata: Metadata = { title: "Chores" };
@@ -29,25 +31,39 @@ export default async function ChoresPage() {
       <AddCatalogForm kind="chore" />
 
       {chores.length > 0 ? (
-        <ul className={manage.list}>
-          {chores.map((c) => (
-            <li key={c.id}>
-              <CatalogItemCard
-                kind="chore"
-                item={{
-                  id: c.id,
-                  name: c.name,
-                  emoji: c.emoji,
-                  value: c.points,
-                  description: c.description,
-                  isActive: c.isActive,
-                  limitPeriod: c.limitPeriod,
-                  limitCount: c.limitCount,
-                }}
-              />
-            </li>
-          ))}
-        </ul>
+        groupByCategory(chores).map(({ meta, items }) => (
+          <section
+            key={meta.key}
+            className={manage.section}
+            aria-label={meta.label}
+          >
+            <h2 className={manage.sectionTitle}>
+              <IconByName name={meta.icon} size={18} />
+              {meta.label}
+            </h2>
+            <ul className={manage.list}>
+              {items.map((c) => (
+                <li key={c.id}>
+                  <CatalogItemCard
+                    kind="chore"
+                    item={{
+                      id: c.id,
+                      name: c.name,
+                      emoji: c.emoji,
+                      value: c.points,
+                      description: c.description,
+                      isActive: c.isActive,
+                      category: c.category,
+                      pinned: c.pinned,
+                      limitPeriod: c.limitPeriod,
+                      limitCount: c.limitCount,
+                    }}
+                  />
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
       ) : (
         <p className={manage.empty}>No chores yet — add your first above.</p>
       )}

@@ -104,6 +104,19 @@ export const choreSchema = z.object({
     .int("Points must be a whole number.")
     .min(0)
     .max(100000),
+  category: z
+    .enum([
+      "bedroom",
+      "bathroom",
+      "kitchen",
+      "home",
+      "outdoor",
+      "pets",
+      "school",
+      "selfcare",
+      "other",
+    ])
+    .default("other"),
   description: z.string().trim().max(280).optional(),
   /** How often a kid may claim it. "none" = unlimited; count applies otherwise. */
   limitPeriod: z.enum(["none", "day", "week"]).default("none"),

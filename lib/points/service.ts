@@ -1,7 +1,8 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
 import type { Database } from "@/lib/db/types";
 import { ledger, chores, people, type LedgerEntry } from "@/lib/db/schema";
 import { getPersonById } from "@/lib/db/queries";
+import { addDays, localDate } from "@/lib/timezone";
 
 /**
  * The points engine. The `ledger` is append-only and the single source of
@@ -181,6 +182,69 @@ export async function listFamilyActivity(
     .where(eq(ledger.familyId, familyId))
     .orderBy(desc(ledger.createdAt))
     .limit(limit);
+}
+
+/**
+ * Chore IDs this kid has been awarded most often (most → least), for the
+ * "Most used" shortcut row on the award screen.
+ */
+export async function mostUsedChoreIds(
+  db: Database,
+  familyId: string,
+  kidId: string,
+  limit = 6,
+): Promise<string[]> {
+  const rows = await db
+    .select({ choreId: ledger.choreId, n: sql<number>`count(*)::int` })
+    .from(ledger)
+    .where(
+      and(
+        eq(ledger.familyId, familyId),
+        eq(ledger.personId, kidId),
+        eq(ledger.type, "earn"),
+        isNotNull(ledger.choreId),
+      ),
+    )
+    .groupBy(ledger.choreId)
+    .orderBy(desc(sql`count(*)`))
+    .limit(limit);
+  return rows.map((r) => r.choreId).filter((id): id is string => Boolean(id));
+}
+
+/**
+ * Consecutive family-local days the kid has earned points, counting back from
+ * today (or yesterday, so a streak isn't "lost" before the day is over). 0 if
+ * no earning today or yesterday.
+ */
+export async function getStreak(
+  db: Database,
+  familyId: string,
+  kidId: string,
+  timezone: string,
+): Promise<number> {
+  const rows = await db
+    .select({ createdAt: ledger.createdAt })
+    .from(ledger)
+    .where(
+      and(
+        eq(ledger.familyId, familyId),
+        eq(ledger.personId, kidId),
+        eq(ledger.type, "earn"),
+      ),
+    );
+  if (rows.length === 0) return 0;
+
+  const days = new Set(rows.map((r) => localDate(timezone, r.createdAt)));
+  const today = localDate(timezone, new Date());
+  let cursor = days.has(today) ? today : addDays(today, -1);
+  if (!days.has(cursor)) return 0;
+
+  let streak = 0;
+  while (days.has(cursor)) {
+    streak += 1;
+    cursor = addDays(cursor, -1);
+  }
+  return streak;
 }
 
 /** One kid's recent activity (most recent first). */

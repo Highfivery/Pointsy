@@ -57,6 +57,13 @@
       "when": 1782253277605,
       "tag": "0007_chore_description",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1782309722343,
+      "tag": "0008_gray_banshee",
+      "breakpoints": true
     }
   ]
 }

@@ -128,3 +128,17 @@
 .empty {
   color: var(--color-text-muted);
 }
+
+.section {
+  margin-top: var(--space-5);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
