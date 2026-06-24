@@ -88,7 +88,10 @@ export async function requestRedemption(
     if (!reward) throw new NotFoundError("Reward not found");
 
     const available = await getAvailable(tx, familyId, kidId);
-    if (reward.cost > available) throw new InsufficientPointsError();
+    // A kid in the red can't redeem anything until they're back to zero.
+    if (available < 0 || reward.cost > available) {
+      throw new InsufficientPointsError();
+    }
 
     const [row] = await tx
       .insert(redemptions)

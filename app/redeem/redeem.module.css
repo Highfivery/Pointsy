@@ -169,3 +169,13 @@
 .empty {
   color: var(--color-text-muted);
 }
+
+.negative {
+  margin: 0 0 var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  font-weight: 600;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}

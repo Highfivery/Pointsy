@@ -9,11 +9,9 @@ import {
   listRedeemableRewards,
   listKidRedemptions,
 } from "@/lib/redemptions/service";
-import {
-  requestRedemptionAction,
-  cancelRedemptionAction,
-} from "@/app/actions/redemptions";
+import { cancelRedemptionAction } from "@/app/actions/redemptions";
 import { IconByName } from "@/components/icons/registry";
+import { RedeemButton } from "@/components/redeem/RedeemButton";
 import styles from "./redeem.module.css";
 
 export const metadata: Metadata = { title: "Redeem rewards" };
@@ -40,7 +38,14 @@ export default async function RedeemPage() {
         Back
       </Link>
       <h1 className={styles.title}>Rewards</h1>
-      <p className={styles.available}>{available} points to spend</p>
+      {available < 0 ? (
+        <p className={styles.negative}>
+          You&rsquo;re at {available} points. Earn {-available} to get back to
+          zero, then you can spend!
+        </p>
+      ) : (
+        <p className={styles.available}>{available} points to spend</p>
+      )}
 
       {pending.length > 0 ? (
         <section aria-labelledby="pending-title">
@@ -75,18 +80,21 @@ export default async function RedeemPage() {
         {rewards.length > 0 ? (
           <div className={styles.grid}>
             {rewards.map((r) =>
-              r.affordable ? (
-                <form key={r.id} action={requestRedemptionAction}>
-                  <input type="hidden" name="rewardId" value={r.id} />
-                  <button type="submit" className={styles.rewardBtn}>
-                    <span className={styles.rewardIcon}>
-                      <IconByName name={r.emoji} size={26} />
-                    </span>
-                    <span className={styles.rewardName}>{r.name}</span>
-                    <span className={styles.rewardCost}>{r.cost} pts</span>
-                    <span className={styles.redeemPill}>Redeem</span>
-                  </button>
-                </form>
+              r.affordable && available >= 0 ? (
+                <RedeemButton
+                  key={r.id}
+                  rewardId={r.id}
+                  name={r.name}
+                  cost={r.cost}
+                  className={styles.rewardBtn}
+                >
+                  <span className={styles.rewardIcon}>
+                    <IconByName name={r.emoji} size={26} />
+                  </span>
+                  <span className={styles.rewardName}>{r.name}</span>
+                  <span className={styles.rewardCost}>{r.cost} pts</span>
+                  <span className={styles.redeemPill}>Redeem</span>
+                </RedeemButton>
               ) : (
                 <div key={r.id} className={styles.rewardLocked}>
                   <span className={styles.rewardIconLocked}>

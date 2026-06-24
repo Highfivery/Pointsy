@@ -1,5 +1,5 @@
-import { requestRedemptionAction } from "@/app/actions/redemptions";
 import { IconByName } from "@/components/icons/registry";
+import { RedeemButton } from "@/components/redeem/RedeemButton";
 import styles from "./hype.module.css";
 
 export interface ShelfReward {
@@ -35,16 +35,18 @@ export function RewardShelf({
           <ul className={styles.shelfRow}>
             {affordable.map((r) => (
               <li key={r.id}>
-                <form action={requestRedemptionAction}>
-                  <input type="hidden" name="rewardId" value={r.id} />
-                  <button type="submit" className={styles.shelfCard}>
-                    <span className={styles.shelfIcon}>
-                      <IconByName name={r.emoji} size={28} />
-                    </span>
-                    <span className={styles.shelfName}>{r.name}</span>
-                    <span className={styles.shelfCost}>{r.cost} pts</span>
-                  </button>
-                </form>
+                <RedeemButton
+                  rewardId={r.id}
+                  name={r.name}
+                  cost={r.cost}
+                  className={styles.shelfCard}
+                >
+                  <span className={styles.shelfIcon}>
+                    <IconByName name={r.emoji} size={28} />
+                  </span>
+                  <span className={styles.shelfName}>{r.name}</span>
+                  <span className={styles.shelfCost}>{r.cost} pts</span>
+                </RedeemButton>
               </li>
             ))}
           </ul>

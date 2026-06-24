@@ -93,6 +93,8 @@ test.describe("redemption loop", () => {
     await expectNoA11yViolations(page, "/redeem");
 
     await page.getByRole("button", { name: /sticker/i }).click();
+    // Confirm in the bottom sheet (guards against accidental taps).
+    await page.getByRole("button", { name: /yes, request it/i }).click();
     await expect(page.getByText(/pending/i)).toBeVisible();
 
     // Kid signs out.

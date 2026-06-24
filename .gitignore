@@ -47,3 +47,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local throwaway screenshot harness
+.shots/
+shots.local.mjs
