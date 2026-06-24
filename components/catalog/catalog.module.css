@@ -1,6 +1,6 @@
 .head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-3);
 }
 
@@ -24,8 +24,13 @@
 }
 
 .value {
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--color-primary);
+  background: var(--color-primary-weak);
+  padding: 0.1rem var(--space-2);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
 }
 
 .desc {
@@ -111,27 +116,30 @@
   margin-top: var(--space-2);
 }
 
-.limitMeta {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-}
-
 .metaRow {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
+  margin-top: var(--space-1);
 }
 
-.catMeta {
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--color-primary-text);
-  background: var(--color-primary);
+.limitMeta {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
   padding: 0.1rem var(--space-2);
   border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
 }
 
 .pinForm {

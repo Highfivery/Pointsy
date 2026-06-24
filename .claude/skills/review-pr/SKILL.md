@@ -24,6 +24,10 @@ against the code — don't assume.
    - **UI was actually rendered & looked at** — screenshots of each changed
      screen in every state (signed-out vs known-device, empty vs populated,
      light/dark) are attached; the result matches intent. Reasoning ≠ verifying.
+   - **Visual polish** — scrutinise those screenshots like a designer: no
+     crowding/cramping, things align, no info repeated that context already
+     shows, badges/chips are subtle (not loud uppercase pills), good hierarchy
+     and balance. "It renders" is not the bar — flag anything that looks "off".
    - **Auth/entry** — no signed-in user or known device is shown marketing or a
      sign-in form as home; `/` is the PIN-gated picker for them (AGENTS.md inv. 8).
 5. **Performance** — Server Components by default, no N+1 queries, cached reads.

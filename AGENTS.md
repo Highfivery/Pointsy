@@ -88,7 +88,25 @@ actually render it and look — don't ship UI you've only reasoned about. Run th
 app (or Playwright against a throwaway Postgres) and capture a screenshot of each
 affected screen in **both** states it can be in (e.g. signed-out vs known-device,
 empty vs populated, light vs dark), confirm it matches intent, and include the
-screenshots in the PR. "Typecheck passes" is **not** UI verification.
+screenshots in the PR. "Typecheck passes" is **not** UI verification, and
+"it renders" is **not** the bar — **scrutinise the screenshot for visual
+polish** as a designer would, every time:
+
+- **Crowding & spacing** — nothing cramped, jammed together, or touching edges;
+  consistent gaps; controls have room to breathe.
+- **Alignment** — items line up; no ragged/awkward wrapping; baseline/centre
+  alignment is intentional.
+- **Redundancy** — don't repeat information already shown by context (e.g. a
+  per-card category badge when the card is already under a category heading).
+- **Badge/chip weight** — tags are subtle, not shouty; soft backgrounds over
+  loud solid-fill uppercase pills unless truly a primary action.
+- **Hierarchy & balance** — the most important thing reads first; cards aren't
+  sparse-and-tall or top-heavy; related fields sit on one line where natural.
+- **Both themes & widths** — check light _and_ dark, and a narrow mobile width.
+
+If a screen looks "off", **fix it before shipping** — the user should never be
+the one to point out obvious visual problems. When in doubt, run the
+`a11y-audit` skill (it now includes this visual-polish pass).
 
 ## Workflow & commits
 
