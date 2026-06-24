@@ -228,6 +228,75 @@ export async function listRedeemableRewards(
   };
 }
 
+export interface GoalProgress {
+  reward: { id: string; name: string; emoji: string; cost: number };
+  available: number;
+  moreNeeded: number;
+  /** 0–100, clamped. */
+  pct: number;
+}
+
+/** The kid's chosen savings-goal reward and progress toward it (null if none). */
+export async function getKidGoal(
+  db: Database,
+  familyId: string,
+  kidId: string,
+): Promise<GoalProgress | null> {
+  const kid = await getPersonById(db, familyId, kidId);
+  if (!kid?.goalRewardId) return null;
+  const [reward] = await db
+    .select()
+    .from(rewards)
+    .where(
+      and(
+        eq(rewards.familyId, familyId),
+        eq(rewards.id, kid.goalRewardId),
+        eq(rewards.isActive, true),
+      ),
+    )
+    .limit(1);
+  if (!reward) return null;
+
+  const available = await getAvailable(db, familyId, kidId);
+  const pct =
+    reward.cost > 0
+      ? Math.min(100, Math.max(0, Math.round((available / reward.cost) * 100)))
+      : 100;
+  return {
+    reward: {
+      id: reward.id,
+      name: reward.name,
+      emoji: reward.emoji,
+      cost: reward.cost,
+    },
+    available,
+    moreNeeded: Math.max(0, reward.cost - available),
+    pct,
+  };
+}
+
+/** Set (or clear, with null) the kid's savings-goal reward. */
+export async function setKidGoal(
+  db: Database,
+  familyId: string,
+  kidId: string,
+  rewardId: string | null,
+): Promise<void> {
+  await assertKid(db, familyId, kidId);
+  if (rewardId) {
+    const [reward] = await db
+      .select({ id: rewards.id })
+      .from(rewards)
+      .where(and(eq(rewards.familyId, familyId), eq(rewards.id, rewardId)))
+      .limit(1);
+    if (!reward) throw new NotFoundError("Reward not found");
+  }
+  await db
+    .update(people)
+    .set({ goalRewardId: rewardId })
+    .where(and(eq(people.familyId, familyId), eq(people.id, kidId)));
+}
+
 export async function listKidRedemptions(
   db: Database,
   familyId: string,

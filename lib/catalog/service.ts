@@ -1,6 +1,12 @@
 import { and, eq } from "drizzle-orm";
 import type { Database } from "@/lib/db/types";
-import { chores, rewards, type Chore, type Reward } from "@/lib/db/schema";
+import {
+  chores,
+  rewards,
+  type Chore,
+  type ChoreCategory,
+  type Reward,
+} from "@/lib/db/schema";
 
 /**
  * Catalog services for the chore and reward catalogs. All functions take an
@@ -13,6 +19,7 @@ export interface ChoreInput {
   name: string;
   emoji: string;
   points: number;
+  category?: ChoreCategory;
   description?: string;
   limitPeriod?: "none" | "day" | "week";
   limitCount?: number;
@@ -53,6 +60,7 @@ export async function createChore(
       name: input.name.trim(),
       emoji: input.emoji,
       points: input.points,
+      category: input.category ?? "other",
       description: input.description?.trim() || null,
       limitPeriod: input.limitPeriod ?? "none",
       limitCount: input.limitCount ?? 1,
@@ -74,10 +82,23 @@ export async function updateChore(
       name: input.name.trim(),
       emoji: input.emoji,
       points: input.points,
+      category: input.category ?? "other",
       description: input.description?.trim() || null,
       limitPeriod: input.limitPeriod ?? "none",
       limitCount: input.limitCount ?? 1,
     })
+    .where(and(eq(chores.familyId, familyId), eq(chores.id, id)));
+}
+
+export async function setChorePinned(
+  db: Database,
+  familyId: string,
+  id: string,
+  pinned: boolean,
+): Promise<void> {
+  await db
+    .update(chores)
+    .set({ pinned })
     .where(and(eq(chores.familyId, familyId), eq(chores.id, id)));
 }
 

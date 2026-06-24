@@ -33,24 +33,32 @@ function revalidateFor(kidId: string) {
 /** One-tap chore award (direct form action). */
 export async function awardChoreAction(formData: FormData): Promise<void> {
   const session = await requireParent();
-  const kidId = idSchema.safeParse(formData.get("kidId"));
   const choreId = idSchema.safeParse(formData.get("choreId"));
-  if (!kidId.success || !choreId.success) return;
+  if (!choreId.success) return;
 
-  const entry = await awardChore(
-    getDb(),
-    session.familyId,
-    kidId.data,
-    choreId.data,
-    session.personId,
+  // The form submits one `kidId` per selected recipient (single case included).
+  const kidIds = Array.from(
+    new Set(
+      formData
+        .getAll("kidId")
+        .map((v) => idSchema.safeParse(v))
+        .filter((r) => r.success)
+        .map((r) => r.data),
+    ),
   );
-  await notifyKidEarned(
-    session.familyId,
-    kidId.data,
-    entry.amount,
-    entry.reason,
-  );
-  revalidateFor(kidId.data);
+  if (kidIds.length === 0) return;
+
+  for (const kidId of kidIds) {
+    const entry = await awardChore(
+      getDb(),
+      session.familyId,
+      kidId,
+      choreId.data,
+      session.personId,
+    );
+    await notifyKidEarned(session.familyId, kidId, entry.amount, entry.reason);
+    revalidateFor(kidId);
+  }
 }
 
 export async function awardCustomAction(

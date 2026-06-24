@@ -48,6 +48,18 @@ export const submissionStatusEnum = pgEnum("submission_status", [
   "rejected",
   "cancelled",
 ]);
+/** Area a chore belongs to, used to group chores across every view. */
+export const choreCategoryEnum = pgEnum("chore_category", [
+  "bedroom",
+  "bathroom",
+  "kitchen",
+  "home",
+  "outdoor",
+  "pets",
+  "school",
+  "selfcare",
+  "other",
+]);
 
 /* --------------------------------------------------------------- families */
 
@@ -97,6 +109,11 @@ export const people = pgTable(
     pinLockedUntil: timestamp("pin_locked_until", { withTimezone: true }),
     sortOrder: integer("sort_order").notNull().default(0),
     isActive: boolean("is_active").notNull().default(true),
+    /** Kids only — the reward they're saving toward (drives the goal ring). */
+    goalRewardId: uuid("goal_reward_id").references(
+      (): AnyPgColumn => rewards.id,
+      { onDelete: "set null" },
+    ),
     /** Parents only — when guardian consent was recorded. */
     consentAt: timestamp("consent_at", { withTimezone: true }),
     /** Parents only — ToS/Privacy version consented to. */
@@ -126,6 +143,10 @@ export const chores = pgTable(
     description: text("description"),
     /** Default award value (overridable at award time). */
     points: integer("points").notNull(),
+    /** Area used to group chores in every view. */
+    category: choreCategoryEnum("category").notNull().default("other"),
+    /** Favourited chores surface first on the award screen. */
+    pinned: boolean("pinned").notNull().default(false),
     /** Per-kid claim limit when a kid submits this chore. "none" = unlimited. */
     limitPeriod: choreLimitPeriodEnum("limit_period").notNull().default("none"),
     limitCount: integer("limit_count").notNull().default(1),
@@ -336,6 +357,7 @@ export type Person = typeof people.$inferSelect;
 export type NewPerson = typeof people.$inferInsert;
 export type Chore = typeof chores.$inferSelect;
 export type NewChore = typeof chores.$inferInsert;
+export type ChoreCategory = (typeof choreCategoryEnum.enumValues)[number];
 export type Reward = typeof rewards.$inferSelect;
 export type NewReward = typeof rewards.$inferInsert;
 export type Redemption = typeof redemptions.$inferSelect;
@@ -364,4 +386,5 @@ export const schema = {
   redemptionStatusEnum,
   choreLimitPeriodEnum,
   submissionStatusEnum,
+  choreCategoryEnum,
 };

@@ -1,0 +1,288 @@
+/* ---- streak badge -------------------------------------------------- */
+
+.streak {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+}
+
+/* ---- celebration --------------------------------------------------- */
+
+.celebrate {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.celebrateToast {
+  margin-top: 16vh;
+  padding: var(--space-3) var(--space-5);
+  font-weight: 800;
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.25);
+  animation: pop 0.3s ease;
+}
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.confetti span {
+  position: absolute;
+  top: -12vh;
+  left: calc(var(--i) * 5.4%);
+  width: 10px;
+  height: 14px;
+  border-radius: 2px;
+  background: hsl(calc(var(--i) * 40) 85% 55%);
+  animation: fall 2.6s linear forwards;
+  animation-delay: calc(var(--i) * 55ms);
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(125vh) rotate(540deg);
+    opacity: 0.85;
+  }
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti {
+    display: none;
+  }
+  .celebrateToast {
+    animation: none;
+  }
+}
+
+/* ---- reward shelves ------------------------------------------------ */
+
+.shelf,
+.almost,
+.goal {
+  margin-top: var(--space-5);
+}
+
+.shelfTitle {
+  margin: 0 0 var(--space-2);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.shelfRow {
+  display: flex;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0 0 var(--space-2);
+  overflow-x: auto;
+  list-style: none;
+}
+
+.shelfCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  width: 7rem;
+  min-height: var(--tap-target);
+  padding: var(--space-3);
+  text-align: center;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+}
+
+.shelfCard:hover {
+  border-color: var(--color-primary);
+}
+
+.shelfIcon {
+  display: inline-flex;
+  color: var(--color-primary);
+}
+
+.shelfName {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.shelfCost {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.almostCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.almostText {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.almostNeed {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.bar {
+  appearance: none;
+  width: 100%;
+  height: 10px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.bar::-webkit-progress-bar {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+.bar::-webkit-progress-value {
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+}
+
+.bar::-moz-progress-bar {
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+}
+
+/* ---- savings goal -------------------------------------------------- */
+
+.goalRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.goalText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.goalClear,
+.goalSet {
+  align-self: flex-start;
+  min-height: var(--tap-target);
+  padding: var(--space-1) var(--space-3);
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.goalClear {
+  color: var(--color-text-muted);
+  background: none;
+  border: 2px solid var(--color-border);
+}
+
+.goalSet {
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+  border: 2px solid var(--color-primary);
+}
+
+.goalPicker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.goalLabel {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.goalPickRow {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.goalSelect {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.ringWrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+}
+
+.ring {
+  width: 72px;
+  height: 72px;
+}
+
+.ringTrack {
+  fill: none;
+  stroke: var(--color-border);
+  stroke-width: 7;
+}
+
+.ringFill {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 7;
+  transition: stroke-dasharray 0.4s ease;
+}
+
+.ringIcon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ringFill {
+    transition: none;
+  }
+}

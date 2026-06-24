@@ -115,3 +115,38 @@
   font-size: 0.85rem;
   color: var(--color-text-muted);
 }
+
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.catMeta {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+  padding: 0.1rem var(--space-2);
+  border-radius: var(--radius-full);
+}
+
+.pinForm {
+  display: flex;
+}
+
+.pinOn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}

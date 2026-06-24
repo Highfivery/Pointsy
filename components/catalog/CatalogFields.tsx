@@ -10,6 +10,7 @@ import {
   DEFAULT_REWARD_ICON,
 } from "@/lib/icons";
 import type { LimitPeriod } from "@/lib/catalog/limit";
+import { CHORE_CATEGORIES } from "@/lib/catalog/category";
 import form from "@/components/auth/auth-form.module.css";
 import styles from "./catalog.module.css";
 
@@ -24,6 +25,7 @@ interface CatalogFieldsProps {
     emoji?: string;
     value?: number;
     description?: string | null;
+    category?: string;
     limitPeriod?: LimitPeriod;
     limitCount?: number;
   };
@@ -66,6 +68,26 @@ export function CatalogFields({ kind, errors, defaults }: CatalogFieldsProps) {
         error={errors?.points ?? errors?.cost}
         required
       />
+
+      {isChore ? (
+        <div className={form.field}>
+          <label htmlFor="category" className={form.label}>
+            Category
+          </label>
+          <select
+            id="category"
+            name="category"
+            defaultValue={defaults?.category ?? "other"}
+            className={styles.select}
+          >
+            {CHORE_CATEGORIES.map((c) => (
+              <option key={c.key} value={c.key}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
 
       {isChore ? (
         <div className={form.field}>

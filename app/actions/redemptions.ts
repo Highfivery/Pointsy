@@ -9,6 +9,7 @@ import {
   cancelRedemption,
   decideRedemption,
   fulfillRedemption,
+  setKidGoal,
   InsufficientPointsError,
 } from "@/lib/redemptions/service";
 import { getPersonById } from "@/lib/db/queries";
@@ -64,6 +65,22 @@ export async function cancelRedemptionAction(
   if (!id.success) return;
   await cancelRedemption(getDb(), session.familyId, id.data, session.personId);
   revalidatePath("/redeem");
+  revalidatePath("/me");
+}
+
+/** Set or clear the kid's savings-goal reward (empty value clears it). */
+export async function setGoalAction(formData: FormData): Promise<void> {
+  const session = await requireKid();
+  const raw = formData.get("rewardId");
+  const rewardId =
+    typeof raw === "string" && raw.length > 0 ? idSchema.safeParse(raw) : null;
+  if (rewardId && !rewardId.success) return;
+  await setKidGoal(
+    getDb(),
+    session.familyId,
+    session.personId,
+    rewardId ? rewardId.data : null,
+  );
   revalidatePath("/me");
 }
 

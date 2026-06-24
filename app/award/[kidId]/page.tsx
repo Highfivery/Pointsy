@@ -6,8 +6,13 @@ import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { getPersonById } from "@/lib/db/queries";
 import { listChores } from "@/lib/catalog/service";
-import { getBalance, listKidActivity } from "@/lib/points/service";
-import { awardChoreAction } from "@/app/actions/points";
+import {
+  getBalance,
+  listKidActivity,
+  mostUsedChoreIds,
+  getKidBalances,
+} from "@/lib/points/service";
+import { AwardBoard } from "@/components/points/AwardBoard";
 import { AwardExtras } from "@/components/points/AwardExtras";
 import { ActivityList } from "@/components/points/ActivityList";
 import { IconByName } from "@/components/icons/registry";
@@ -30,12 +35,34 @@ export default async function AwardPage({
   const kid = await getPersonById(db, session.familyId, kidId);
   if (!kid || kid.role !== "kid") redirect("/dashboard");
 
-  const [balance, allChores, activity] = await Promise.all([
-    getBalance(db, session.familyId, kidId),
-    listChores(db, session.familyId),
-    listKidActivity(db, session.familyId, kidId, 15),
-  ]);
-  const activeChores = allChores.filter((c) => c.isActive);
+  const [balance, allChores, activity, mostUsedIds, kidBalances] =
+    await Promise.all([
+      getBalance(db, session.familyId, kidId),
+      listChores(db, session.familyId),
+      listKidActivity(db, session.familyId, kidId, 15),
+      mostUsedChoreIds(db, session.familyId, kidId, 6),
+      getKidBalances(db, session.familyId),
+    ]);
+  const activeChores = allChores
+    .filter((c) => c.isActive)
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      emoji: c.emoji,
+      points: c.points,
+      category: c.category,
+      pinned: c.pinned,
+      limitPeriod: c.limitPeriod,
+      limitCount: c.limitCount,
+    }));
+  const otherKids = kidBalances
+    .filter((k) => k.id !== kidId)
+    .map((k) => ({
+      id: k.id,
+      name: k.name,
+      avatar: k.avatar,
+      color: k.color,
+    }));
 
   return (
     <main id="main" className={manage.main}>
@@ -61,21 +88,12 @@ export default async function AwardPage({
           Award a chore
         </h2>
         {activeChores.length > 0 ? (
-          <div className={styles.choreGrid}>
-            {activeChores.map((c) => (
-              <form key={c.id} action={awardChoreAction}>
-                <input type="hidden" name="kidId" value={kidId} />
-                <input type="hidden" name="choreId" value={c.id} />
-                <button type="submit" className={styles.choreBtn}>
-                  <span className={styles.choreIcon}>
-                    <IconByName name={c.emoji} size={24} />
-                  </span>
-                  <span className={styles.choreName}>{c.name}</span>
-                  <span className={styles.chorePoints}>+{c.points}</span>
-                </button>
-              </form>
-            ))}
-          </div>
+          <AwardBoard
+            kidId={kidId}
+            chores={activeChores}
+            mostUsedIds={mostUsedIds}
+            otherKids={otherKids}
+          />
         ) : (
           <p className={styles.empty}>
             No chores yet. <Link href="/manage/chores">Add some first</Link>.

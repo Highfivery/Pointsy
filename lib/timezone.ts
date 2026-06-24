@@ -24,6 +24,14 @@ export function localDate(timezone: string, at: Date): string {
   }).format(at);
 }
 
+/** Shift a "YYYY-MM-DD" date by `n` whole days (UTC math; DST-safe). */
+export function addDays(date: string, n: number): string {
+  const [y, m, d] = date.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  dt.setUTCDate(dt.getUTCDate() + n);
+  return dt.toISOString().slice(0, 10);
+}
+
 /** Monday-start week containing a "YYYY-MM-DD" date, as a "YYYY-MM-DD" string. */
 export function weekStart(date: string): string {
   const [y, m, d] = date.split("-").map(Number);
