@@ -37,6 +37,7 @@ function parseChore(formData: FormData) {
     isCore: formData.get("isCore"),
     assignment: formData.get("assignment") ?? "everyone",
     kidIds: formData.getAll("kidIds"),
+    subtasks: formData.getAll("subtasks"),
     limitPeriod: formData.get("limitPeriod") ?? "none",
     limitCount: formData.get("limitCount") ?? 1,
   });

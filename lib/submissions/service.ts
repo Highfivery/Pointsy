@@ -8,6 +8,7 @@ import {
   getAssigneeIds,
   getAssigneesByChore,
 } from "@/lib/chores/assignment";
+import { getSubtasksByChore } from "@/lib/chores/subtasks";
 import { eligibleFor } from "@/lib/chores/eligibility";
 
 export class LimitReachedError extends Error {
@@ -63,6 +64,8 @@ export interface SubmittableChore {
   points: number;
   limitPeriod: LimitPeriod;
   limitCount: number;
+  /** Checklist the kid must complete before logging it. */
+  subtasks: string[];
   /** Remaining claims in the current window, or null when unlimited. */
   remaining: number | null;
   canSubmit: boolean;
@@ -88,6 +91,10 @@ export async function listSubmittableChores(
     db,
     active.map((c) => c.id),
   );
+  const subtasks = await getSubtasksByChore(
+    db,
+    active.map((c) => c.id),
+  );
   const kids = await db
     .select({ id: people.id, name: people.name })
     .from(people)
@@ -104,6 +111,7 @@ export async function listSubmittableChores(
     points: c.points,
     limitPeriod: c.limitPeriod,
     limitCount: c.limitCount,
+    subtasks: subtasks.get(c.id) ?? [],
   });
 
   const out: SubmittableChore[] = [];

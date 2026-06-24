@@ -131,3 +131,56 @@
 .actions .submit {
   flex: 1;
 }
+
+.subtaskRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.subtaskInput {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-3);
+  font-size: 1rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.subtaskInput:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+  border-color: var(--color-primary);
+}
+
+.subtaskRemove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.addStep {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  align-self: flex-start;
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-3);
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-primary-weak);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}

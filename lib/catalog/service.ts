@@ -10,6 +10,7 @@ import {
   type Reward,
 } from "@/lib/db/schema";
 import { replaceAssignees } from "@/lib/chores/assignment";
+import { replaceSubtasks } from "@/lib/chores/subtasks";
 import { initialTurn } from "@/lib/chores/eligibility";
 
 /**
@@ -29,6 +30,8 @@ export interface ChoreInput {
   assignment?: ChoreAssignment;
   /** Assigned kids (specific) / rotation order (rotating); ignored for everyone. */
   kidIds?: string[];
+  /** Ordered checklist a kid must complete to log the chore. */
+  subtasks?: string[];
   limitPeriod?: "none" | "day" | "week";
   limitCount?: number;
 }
@@ -122,6 +125,7 @@ export async function createChore(
     })
     .returning();
   await replaceAssignees(db, row.id, kidIds);
+  await replaceSubtasks(db, row.id, input.subtasks ?? []);
   return row;
 }
 
@@ -164,6 +168,7 @@ export async function updateChore(
     })
     .where(and(eq(chores.familyId, familyId), eq(chores.id, id)));
   await replaceAssignees(db, id, kidIds);
+  await replaceSubtasks(db, id, input.subtasks ?? []);
 }
 
 export async function setChorePinned(
