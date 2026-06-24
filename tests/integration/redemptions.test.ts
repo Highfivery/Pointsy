@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { registerFamily } from "@/lib/auth/register";
 import { addKid } from "@/lib/people/service";
 import { createReward } from "@/lib/catalog/service";
-import { awardCustom, getBalance } from "@/lib/points/service";
+import { awardCustom, adjustPoints, getBalance } from "@/lib/points/service";
 import {
   getAvailable,
   requestRedemption,
@@ -43,6 +43,17 @@ describe("redemptions", () => {
   let ctx: TestDb;
   beforeEach(async () => {
     ctx = await createTestDb();
+  });
+
+  it("blocks redemption when the kid's balance is negative", async () => {
+    const { db } = ctx;
+    const { fam, kid, reward } = await setup(db);
+    await adjustPoints(db, fam.familyId, kid.id, -25, "penalty", fam.personId);
+    expect(await getBalance(db, fam.familyId, kid.id)).toBe(-15);
+
+    await expect(
+      requestRedemption(db, fam.familyId, kid.id, reward.id),
+    ).rejects.toBeInstanceOf(InsufficientPointsError);
   });
 
   it("reserves points on request without deducting them", async () => {

@@ -1,0 +1,79 @@
+.sheet {
+  margin: auto auto 0; /* bottom-centre the modal dialog */
+  width: 100%;
+  max-width: 32rem;
+  padding: var(--space-6) var(--space-5)
+    calc(var(--space-6) + env(safe-area-inset-bottom));
+  text-align: center;
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: none;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: 0 -8px 32px rgb(0 0 0 / 0.25);
+  animation: rise 0.25s ease;
+}
+
+/* Only lay the sheet out while open — otherwise the author `display` would
+   beat the UA `dialog:not([open])` rule and leave the closed sheet on screen. */
+.sheet[open] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sheet::backdrop {
+  background: rgb(0 0 0 / 0.45);
+  animation: fade 0.2s ease;
+}
+
+.sheetTitle {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.sheetBody {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.confirmBtn {
+  width: 100%;
+  min-height: var(--tap-target);
+  font-weight: 700;
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.cancelBtn {
+  width: 100%;
+  min-height: var(--tap-target);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .sheet::backdrop {
+    animation: none;
+  }
+}

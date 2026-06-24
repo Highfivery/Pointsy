@@ -107,11 +107,13 @@ export default async function MePage() {
           {balance}
         </p>
         <p className={styles.muted}>
-          {available !== balance
-            ? `${available} available to spend`
-            : balance === 0
-              ? "Earn points for chores and good habits!"
-              : "Keep up the great work!"}
+          {balance < 0
+            ? `Earn ${-balance} to get back to zero!`
+            : available !== balance
+              ? `${available} available to spend`
+              : balance === 0
+                ? "Earn points for chores and good habits!"
+                : "Keep up the great work!"}
         </p>
         {pendingPoints > 0 ? (
           <p className={styles.pending}>
