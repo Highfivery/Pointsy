@@ -2,6 +2,7 @@
 
 import { useActionState, useId, useState } from "react";
 import Link from "next/link";
+import { Plus, X } from "lucide-react";
 import { Field } from "@/components/auth/Field";
 import { IconPicker } from "@/components/icons/IconPicker";
 import { IconByName } from "@/components/icons/registry";
@@ -31,6 +32,7 @@ export interface ChoreDefaults {
   isCore?: boolean;
   assignment?: ChoreAssignment;
   kidIds?: string[];
+  subtasks?: string[];
   limitPeriod?: LimitPeriod;
   limitCount?: number;
 }
@@ -69,6 +71,7 @@ export function ChoreEditor({
   const [period, setPeriod] = useState<LimitPeriod>(
     defaults?.limitPeriod ?? "none",
   );
+  const [subtasks, setSubtasks] = useState<string[]>(defaults?.subtasks ?? []);
   const categoryId = useId();
   const periodId = useId();
   const selected = new Set(defaults?.kidIds ?? []);
@@ -188,6 +191,47 @@ export function ChoreEditor({
             Expected every day — counts toward challenges
           </span>
         </label>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Checklist (optional)</h2>
+        <p className={styles.muted}>
+          Steps a kid ticks off — they must complete them all to log the chore.
+        </p>
+        {subtasks.map((step, i) => (
+          <div key={i} className={styles.subtaskRow}>
+            <input
+              className={styles.subtaskInput}
+              name="subtasks"
+              value={step}
+              placeholder={`Step ${i + 1}`}
+              aria-label={`Step ${i + 1}`}
+              onChange={(e) =>
+                setSubtasks((prev) =>
+                  prev.map((v, j) => (j === i ? e.target.value : v)),
+                )
+              }
+            />
+            <button
+              type="button"
+              className={styles.subtaskRemove}
+              aria-label={`Remove step ${i + 1}`}
+              onClick={() =>
+                setSubtasks((prev) => prev.filter((_, j) => j !== i))
+              }
+            >
+              <X size={18} aria-hidden="true" />
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          className={styles.addStep}
+          onClick={() => setSubtasks((prev) => [...prev, ""])}
+        >
+          <Plus size={16} aria-hidden="true" />
+          Add a step
+        </button>
       </section>
 
       <section className={styles.section}>

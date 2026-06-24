@@ -123,6 +123,8 @@ export const choreSchema = z.object({
   /** Who the chore is for; assignees/rotation order in `kidIds`. */
   assignment: z.enum(["everyone", "specific", "rotating"]).default("everyone"),
   kidIds: z.array(z.string().uuid()).default([]),
+  /** Ordered checklist; blanks are dropped server-side. */
+  subtasks: z.array(z.string().trim().max(80)).max(20).default([]),
   /** How often a kid may claim it. "none" = unlimited; count applies otherwise. */
   limitPeriod: z.enum(["none", "day", "week"]).default("none"),
   limitCount: z.coerce

@@ -196,6 +196,20 @@ export const choreAssignees = pgTable(
   ],
 );
 
+/** An ordered checklist on a chore; a kid must tick all of them to log it. */
+export const choreSubtasks = pgTable(
+  "chore_subtasks",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    choreId: uuid("chore_id")
+      .notNull()
+      .references(() => chores.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    position: integer("position").notNull().default(0),
+  },
+  (t) => [index("chore_subtasks_chore_idx").on(t.choreId)],
+);
+
 /* ---------------------------------------------------------------- rewards */
 
 export const rewards = pgTable(
@@ -396,6 +410,8 @@ export type Chore = typeof chores.$inferSelect;
 export type NewChore = typeof chores.$inferInsert;
 export type ChoreCategory = (typeof choreCategoryEnum.enumValues)[number];
 export type ChoreAssignment = (typeof choreAssignmentEnum.enumValues)[number];
+export type ChoreSubtask = typeof choreSubtasks.$inferSelect;
+export type NewChoreSubtask = typeof choreSubtasks.$inferInsert;
 export type ChoreAssignee = typeof choreAssignees.$inferSelect;
 export type NewChoreAssignee = typeof choreAssignees.$inferInsert;
 export type Reward = typeof rewards.$inferSelect;
@@ -416,6 +432,7 @@ export const schema = {
   people,
   chores,
   choreAssignees,
+  choreSubtasks,
   rewards,
   redemptions,
   ledger,

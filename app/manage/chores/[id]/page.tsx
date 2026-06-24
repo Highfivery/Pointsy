@@ -6,6 +6,7 @@ import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { getChore } from "@/lib/catalog/service";
 import { getAssigneeIds } from "@/lib/chores/assignment";
+import { getSubtasks } from "@/lib/chores/subtasks";
 import { getKidBalances } from "@/lib/points/service";
 import { ChoreEditor } from "@/components/catalog/ChoreEditor";
 import { ChoreDangerZone } from "@/components/catalog/ChoreDangerZone";
@@ -27,8 +28,9 @@ export default async function EditChorePage({
   const chore = await getChore(db, session.familyId, id);
   if (!chore) redirect("/manage/chores");
 
-  const [assigneeIds, kids] = await Promise.all([
+  const [assigneeIds, subtasks, kids] = await Promise.all([
     getAssigneeIds(db, chore.id),
+    getSubtasks(db, chore.id),
     getKidBalances(db, session.familyId),
   ]);
 
@@ -56,6 +58,7 @@ export default async function EditChorePage({
           isCore: chore.isCore,
           assignment: chore.assignment,
           kidIds: assigneeIds,
+          subtasks,
           limitPeriod: chore.limitPeriod,
           limitCount: chore.limitCount,
         }}
