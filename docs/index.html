@@ -301,7 +301,12 @@
       .phone img {
         border-radius: 28px;
         width: 100%;
+        /* Crop the long full-page capture to a real phone-screen shape so the
+           frame stays phone-sized and shows the top of the screen. */
+        aspect-ratio: 9 / 19;
         height: auto;
+        object-fit: cover;
+        object-position: top;
       }
       .phone.back {
         position: absolute;
