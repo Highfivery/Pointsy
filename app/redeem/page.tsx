@@ -99,29 +99,43 @@ export default async function RedeemPage() {
             Team rewards
           </h2>
           <div className={styles.grid}>
-            {teamRewards.map((r) => (
-              <TeamUpButton
-                key={r.id}
-                reward={{
-                  id: r.id,
-                  name: r.name,
-                  cost: r.cost,
-                  minKids: r.minKids,
-                }}
-                otherKids={otherKids}
-                className={styles.rewardBtn}
-              >
-                <span className={styles.rewardIcon}>
-                  <IconByName name={r.emoji} size={26} />
-                </span>
-                <span className={styles.rewardName}>{r.name}</span>
-                <span className={styles.rewardCost}>{r.cost} pts</span>
-                <span className={styles.teamPill}>
-                  <Users size={14} aria-hidden="true" />
-                  Team up
-                </span>
-              </TeamUpButton>
-            ))}
+            {teamRewards.map((r) => {
+              const canSolo = r.allowSolo && r.affordable && available >= 0;
+              return (
+                <div key={r.id} className={styles.teamCard}>
+                  <span className={styles.rewardIcon}>
+                    <IconByName name={r.emoji} size={26} />
+                  </span>
+                  <span className={styles.rewardName}>{r.name}</span>
+                  <span className={styles.rewardCost}>{r.cost} pts</span>
+                  <div className={styles.teamActions}>
+                    <TeamUpButton
+                      reward={{
+                        id: r.id,
+                        name: r.name,
+                        cost: r.cost,
+                        minKids: r.minKids,
+                      }}
+                      otherKids={otherKids}
+                      className={styles.teamActionBtn}
+                    >
+                      <Users size={14} aria-hidden="true" />
+                      Team up
+                    </TeamUpButton>
+                    {canSolo ? (
+                      <RedeemButton
+                        rewardId={r.id}
+                        name={r.name}
+                        cost={r.cost}
+                        className={styles.soloActionBtn}
+                      >
+                        Solo
+                      </RedeemButton>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
       ) : null}

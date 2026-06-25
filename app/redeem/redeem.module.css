@@ -191,3 +191,55 @@
   background: var(--color-primary-weak);
   border-radius: var(--radius-full);
 }
+
+/* Team reward card with one or two actions */
+.teamCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-2);
+  text-align: center;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.teamActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+  margin-top: var(--space-1);
+}
+
+.teamActionBtn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 38px;
+  padding: 0 var(--space-2);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.soloActionBtn {
+  flex: 1;
+  min-height: 38px;
+  padding: 0 var(--space-2);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--color-primary);
+  background: var(--color-primary-weak);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}

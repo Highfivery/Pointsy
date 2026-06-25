@@ -107,6 +107,8 @@ export async function requestRedemption(
       )
       .limit(1);
     if (!reward) throw new NotFoundError("Reward not found");
+    // A team-only reward can't be grabbed solo (the kid UI hides this anyway).
+    if (reward.isTeam && !reward.allowSolo) throw new InsufficientPointsError();
 
     const available = await getAvailable(tx, familyId, kidId);
     // A kid in the red can't redeem anything until they're back to zero.
@@ -225,6 +227,7 @@ export interface RedeemableReward {
   moreNeeded: number;
   isTeam: boolean;
   minKids: number;
+  allowSolo: boolean;
 }
 
 /** Active rewards with affordability, plus the kid's available points. */
@@ -252,6 +255,7 @@ export async function listRedeemableRewards(
       moreNeeded: Math.max(0, r.cost - available),
       isTeam: r.isTeam,
       minKids: r.minKids,
+      allowSolo: r.allowSolo,
     })),
   };
 }

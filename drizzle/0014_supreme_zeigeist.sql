@@ -1,0 +1,1 @@
+ALTER TABLE "rewards" ADD COLUMN "allow_solo" boolean DEFAULT false NOT NULL;

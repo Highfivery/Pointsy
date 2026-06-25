@@ -261,6 +261,8 @@ export const rewards = pgTable(
     isTeam: boolean("is_team").notNull().default(false),
     /** Minimum participants for a team reward. */
     minKids: integer("min_kids").notNull().default(2),
+    /** For team rewards: may a kid also redeem it solo at full cost? */
+    allowSolo: boolean("allow_solo").notNull().default(false),
     isActive: boolean("is_active").notNull().default(true),
     sortOrder: integer("sort_order").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true })

@@ -406,3 +406,21 @@ export async function listTeamRedemptionsAwaitingApproval(
   // Only those where every member has accepted are actionable.
   return views.filter((v) => v.members.every((m) => m.status === "accepted"));
 }
+
+/** Approved team redemptions a parent hasn't marked delivered yet. */
+export async function listTeamRedemptionsAwaitingFulfillment(
+  db: Database,
+  familyId: string,
+): Promise<TeamRedemptionView[]> {
+  const rows = await db
+    .select()
+    .from(teamRedemptions)
+    .where(
+      and(
+        eq(teamRedemptions.familyId, familyId),
+        eq(teamRedemptions.status, "approved"),
+      ),
+    )
+    .orderBy(teamRedemptions.createdAt);
+  return buildViews(db, rows);
+}

@@ -113,6 +113,7 @@ function parseReward(formData: FormData) {
     description: formData.get("description") || undefined,
     isTeam: formData.get("isTeam") ?? false,
     minKids: formData.get("minKids") ?? 2,
+    allowSolo: formData.get("allowSolo") ?? false,
   });
 }
 
