@@ -30,6 +30,8 @@ import {
 } from "@/app/actions/redemptions";
 import { listPendingSubmissions } from "@/lib/submissions/service";
 import { decideSubmissionAction } from "@/app/actions/submissions";
+import { listTeamRedemptionsAwaitingApproval } from "@/lib/redemptions/team";
+import { decideTeamAction } from "@/app/actions/team";
 import { IconByName } from "@/components/icons/registry";
 import { SetPinForm } from "@/components/account/SetPinForm";
 import { EnableNotifications } from "@/components/push/EnableNotifications";
@@ -53,11 +55,12 @@ export default async function DashboardPage() {
   const me = await getPersonById(db, session.familyId, session.personId);
   if (!family || !me) redirect("/sign-in");
 
-  const [kids, pending, awaiting, choreSubs] = await Promise.all([
+  const [kids, pending, awaiting, choreSubs, teamReady] = await Promise.all([
     getKidBalances(db, session.familyId),
     listPendingRedemptions(db, session.familyId),
     listAwaitingFulfillment(db, session.familyId),
     listPendingSubmissions(db, session.familyId),
+    listTeamRedemptionsAwaitingApproval(db, session.familyId),
   ]);
 
   return (
@@ -116,6 +119,56 @@ export default async function DashboardPage() {
                     value="denied"
                     className={styles.denyBtn}
                     aria-label={`Deny ${p.rewardName} for ${p.kidName}`}
+                  >
+                    <X size={16} aria-hidden="true" />
+                    Deny
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {teamReady.length > 0 ? (
+        <section aria-labelledby="team-approvals-heading">
+          <h2 id="team-approvals-heading" className={styles.sectionTitle}>
+            Team-up approvals
+          </h2>
+          <ul className={styles.queueList}>
+            {teamReady.map((t) => (
+              <li key={t.id} className={styles.queueCard}>
+                <span
+                  className={styles.kidAvatar}
+                  style={{ background: "var(--color-primary)" }}
+                >
+                  <Users size={20} aria-hidden="true" />
+                </span>
+                <span className={styles.queueText}>
+                  <span className={styles.queueTitle}>{t.rewardName}</span>
+                  <span className={styles.queueMeta}>
+                    {t.cost} pts ·{" "}
+                    {t.members.map((m) => `${m.name} ${m.share}`).join(", ")}
+                  </span>
+                </span>
+                <form action={decideTeamAction} className={styles.queueActions}>
+                  <input type="hidden" name="teamRedemptionId" value={t.id} />
+                  <button
+                    type="submit"
+                    name="decision"
+                    value="approved"
+                    className={styles.approveBtn}
+                    aria-label={`Approve ${t.rewardName} team-up`}
+                  >
+                    <Check size={16} aria-hidden="true" />
+                    Approve
+                  </button>
+                  <button
+                    type="submit"
+                    name="decision"
+                    value="denied"
+                    className={styles.denyBtn}
+                    aria-label={`Deny ${t.rewardName} team-up`}
                   >
                     <X size={16} aria-hidden="true" />
                     Deny

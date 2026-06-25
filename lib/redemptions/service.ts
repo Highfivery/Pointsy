@@ -223,6 +223,8 @@ export interface RedeemableReward {
   description: string | null;
   affordable: boolean;
   moreNeeded: number;
+  isTeam: boolean;
+  minKids: number;
 }
 
 /** Active rewards with affordability, plus the kid's available points. */
@@ -248,6 +250,8 @@ export async function listRedeemableRewards(
       description: r.description,
       affordable: available >= r.cost,
       moreNeeded: Math.max(0, r.cost - available),
+      isTeam: r.isTeam,
+      minKids: r.minKids,
     })),
   };
 }

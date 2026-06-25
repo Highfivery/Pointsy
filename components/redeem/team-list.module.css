@@ -1,0 +1,120 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.invite {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+}
+
+.inviteText {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.share {
+  margin: 0;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.respond {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.yes {
+  flex: 1;
+  min-height: var(--tap-target);
+  font-weight: 700;
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.no {
+  flex: 1;
+  min-height: var(--tap-target);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.rowName {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.rowStatus {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.avatars {
+  display: flex;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-left: -6px;
+  color: #fff;
+  border: 2px solid var(--color-surface);
+  border-radius: var(--radius-full);
+}
+
+.avatar[data-out="true"] {
+  opacity: 0.4;
+}
+
+.cancel {
+  flex-shrink: 0;
+  min-height: var(--tap-target);
+  padding: 0 var(--space-3);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
