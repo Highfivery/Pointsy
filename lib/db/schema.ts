@@ -533,7 +533,8 @@ export const challenges = pgTable(
     /** Points awarded to each completing kid. */
     bonusPoints: integer("bonus_points").notNull(),
     startsOn: text("starts_on").notNull(),
-    endsOn: text("ends_on").notNull(),
+    /** Null only for indefinite weekly challenges (run until paused/deleted). */
+    endsOn: text("ends_on"),
     isActive: boolean("is_active").notNull().default(true),
     createdBy: uuid("created_by").references(() => people.id, {
       onDelete: "set null",

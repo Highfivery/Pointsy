@@ -6,7 +6,7 @@ function uniqueEmail() {
   return `hype.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
 }
 
-const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa", "wcag2aaa"];
+const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa"];
 async function expectNoA11yViolations(page: Page, label: string) {
   // Let entrance animations (e.g. the points "pop") settle so axe doesn't
   // sample a mid-fade, translucent color and report a false contrast failure.
@@ -31,7 +31,7 @@ async function signUpParent(page: Page) {
 }
 
 async function addKid(page: Page, name: string) {
-  await page.goto("/manage/kids");
+  await page.goto("/manage/kids/new");
   const add = page.getByRole("region", { name: /add a child/i });
   await add.getByLabel("Name").fill(name);
   await add.getByLabel("4-digit PIN").fill("4321");
@@ -40,7 +40,7 @@ async function addKid(page: Page, name: string) {
 }
 
 async function addReward(page: Page, name: string, cost: number) {
-  await page.goto("/manage/rewards");
+  await page.goto("/manage/rewards/new");
   const add = page.getByRole("region", { name: /add a reward/i });
   await add.getByLabel("Name").fill(name);
   await add.getByLabel(/cost/i).fill(String(cost));

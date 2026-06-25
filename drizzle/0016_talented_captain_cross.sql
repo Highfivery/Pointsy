@@ -1,0 +1,1 @@
+ALTER TABLE "challenges" ALTER COLUMN "ends_on" DROP NOT NULL;

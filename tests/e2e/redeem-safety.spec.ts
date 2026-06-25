@@ -20,14 +20,14 @@ test("a reward request asks for confirmation (no accidental redeem)", async ({
   page,
 }) => {
   await signUp(page);
-  await page.goto("/manage/kids");
+  await page.goto("/manage/kids/new");
   let add = page.getByRole("region", { name: /add a child/i });
   await add.getByLabel("Name").fill("Robin");
   await add.getByLabel("4-digit PIN").fill("4321");
   await add.getByRole("button", { name: /add child/i }).click();
   await expect(page.getByText("Robin", { exact: true })).toBeVisible();
 
-  await page.goto("/manage/rewards");
+  await page.goto("/manage/rewards/new");
   add = page.getByRole("region", { name: /add a reward/i });
   await add.getByLabel("Name").fill("Ice cream");
   await add.getByLabel(/cost/i).fill("5");
@@ -72,14 +72,14 @@ test("a kid in the red can't redeem and sees a clear message", async ({
   page,
 }) => {
   await signUp(page);
-  await page.goto("/manage/kids");
+  await page.goto("/manage/kids/new");
   let add = page.getByRole("region", { name: /add a child/i });
   await add.getByLabel("Name").fill("Robin");
   await add.getByLabel("4-digit PIN").fill("4321");
   await add.getByRole("button", { name: /add child/i }).click();
   await expect(page.getByText("Robin", { exact: true })).toBeVisible();
 
-  await page.goto("/manage/rewards");
+  await page.goto("/manage/rewards/new");
   add = page.getByRole("region", { name: /add a reward/i });
   await add.getByLabel("Name").fill("Treat");
   await add.getByLabel(/cost/i).fill("5");

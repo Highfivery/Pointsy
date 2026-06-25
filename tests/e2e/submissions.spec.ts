@@ -17,9 +17,7 @@ async function signUp(page: Page, email: string) {
 }
 
 async function addKid(page: Page, name: string, pin: string) {
-  await page.goto("/dashboard");
-  await page.getByRole("link", { name: "Kids", exact: true }).click();
-  await expect(page).toHaveURL(/\/manage\/kids$/);
+  await page.goto("/manage/kids/new");
   await page.getByLabel("Name").fill(name);
   await page.getByRole("radio", { name: "Cat", exact: true }).check();
   await page.getByLabel("4-digit PIN").fill(pin);

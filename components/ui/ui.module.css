@@ -1,0 +1,237 @@
+/* Shared UI primitives — Card, IconButton, Chip, ScreenHeader, BottomNav. */
+
+/* ---------------------------------------------------------------- Card --- */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.glass {
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.interactive {
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+.interactive:hover {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-strong);
+}
+.interactive:active {
+  transform: scale(0.99);
+}
+
+/* ----------------------------------------------------------- IconButton --- */
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+.iconBtn:hover {
+  background: var(--color-surface-strong);
+  border-color: var(--color-border-strong);
+}
+.iconBtn:active {
+  transform: scale(0.92);
+}
+.iconBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.accent {
+  color: var(--color-on-accent);
+  background-image: var(--accent-gradient);
+  border-color: transparent;
+}
+.accent:hover {
+  background-image: var(--accent-gradient);
+  filter: brightness(1.06);
+}
+
+.danger {
+  color: var(--color-danger);
+  background: var(--color-danger-weak);
+  border-color: transparent;
+}
+.danger:hover {
+  background: rgba(251, 113, 133, 0.22);
+  border-color: transparent;
+}
+
+.ghost {
+  background: transparent;
+  border-color: transparent;
+}
+.ghost:hover {
+  background: var(--color-surface);
+  border-color: transparent;
+}
+
+/* ---- shared inline icon action row (edit / hide / delete / …) ---------- */
+.actionRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-3);
+}
+.actionDisclosure {
+  flex: 0 0 auto;
+}
+.actionDisclosure[open] {
+  flex: 1 1 100%;
+}
+.iconSummary {
+  list-style: none;
+}
+.iconSummary::-webkit-details-marker {
+  display: none;
+}
+.inlineForm {
+  display: flex;
+}
+.pushRight {
+  margin-left: auto;
+}
+.pushRight[open] {
+  margin-left: 0;
+}
+.actionPanel {
+  width: 100%;
+  margin-top: var(--space-3);
+}
+
+/* ----------------------------------------------------------------- Chip --- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.12rem var(--space-2);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+.chipAccent {
+  color: var(--color-primary);
+  background: var(--color-primary-weak);
+}
+.chipNeutral {
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+.chipMuted {
+  color: var(--color-text-faint);
+}
+.chipWarning {
+  color: var(--color-warning);
+  background: var(--color-warning-weak);
+}
+.chipDanger {
+  color: var(--color-danger);
+  background: var(--color-danger-weak);
+}
+.chipSuccess {
+  color: var(--color-success);
+  background: var(--color-success-weak);
+}
+
+/* --------------------------------------------------------- ScreenHeader --- */
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.title {
+  font-size: clamp(1.6rem, 6vw, 2.1rem);
+  color: var(--color-text);
+}
+.intro {
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+/* ------------------------------------------------------------ BottomNav --- */
+.bar {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 40;
+  padding: var(--space-2) var(--space-2)
+    calc(var(--space-2) + env(safe-area-inset-bottom));
+  background: rgba(7, 22, 16, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--glass-border);
+}
+.barInner {
+  display: flex;
+  justify-content: space-around;
+  gap: var(--space-1);
+  width: 100%;
+  max-width: 30rem;
+  margin: 0 auto;
+}
+.tab {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: var(--tap-target);
+  padding: var(--space-1);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+.tab[data-active="true"] {
+  color: var(--color-primary);
+  background: var(--color-primary-weak);
+}
+.tab[data-accent="true"] {
+  color: var(--color-primary);
+}
+.tab:active {
+  transform: scale(0.96);
+}
+@media (prefers-reduced-motion: reduce) {
+  .tab:active,
+  .iconBtn:active,
+  .interactive:active {
+    transform: none;
+  }
+}
+.label {
+  line-height: 1;
+}

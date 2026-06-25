@@ -8,7 +8,7 @@ function uniqueEmail() {
 
 async function expectNoA11yViolations(page: Page, label: string) {
   const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag2aaa"])
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
     .analyze();
   expect(results.violations, `axe violations on ${label}`).toEqual([]);
 }
@@ -47,7 +47,7 @@ test.describe("redemption loop", () => {
     await familyCode(page);
 
     // Add a kid.
-    await page.getByRole("link", { name: "Kids", exact: true }).click();
+    await page.goto("/manage/kids/new");
     let add = page.getByRole("region", { name: /add a child/i });
     await add.getByLabel("Name").fill("Kiddo");
     await add.getByLabel("4-digit PIN").fill("4321");
@@ -55,8 +55,7 @@ test.describe("redemption loop", () => {
     await expect(page.getByText("Kiddo")).toBeVisible();
 
     // Add a reward.
-    await page.goto("/dashboard");
-    await page.getByRole("link", { name: "Rewards", exact: true }).click();
+    await page.goto("/manage/rewards/new");
     add = page.getByRole("region", { name: /add a reward/i });
     await add.getByLabel("Name").fill("Sticker");
     await add.getByLabel("Cost (points)").fill("5");

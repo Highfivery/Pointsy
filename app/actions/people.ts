@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getDb } from "@/lib/db/client";
 import { requireParent } from "@/lib/auth/session";
@@ -45,7 +46,8 @@ export async function addKidAction(
 
   await addKid(getDb(), session.familyId, parsed.data);
   revalidatePath(MANAGE_PATH);
-  return { ok: true };
+  // The add form lives on /manage/kids/new — return to the list on success.
+  redirect(MANAGE_PATH);
 }
 
 export async function updateKidAction(

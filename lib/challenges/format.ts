@@ -21,7 +21,8 @@ export function formatDay(isoDate: string): string {
   return `${MONTHS[(m ?? 1) - 1]} ${d}`;
 }
 
-export function dateRange(startsOn: string, endsOn: string): string {
+export function dateRange(startsOn: string, endsOn: string | null): string {
+  if (!endsOn) return `From ${formatDay(startsOn)}`;
   return `${formatDay(startsOn)} – ${formatDay(endsOn)}`;
 }
 
@@ -46,6 +47,7 @@ export function challengeStatus(
 ): ChallengeStatus {
   if (!challenge.isActive) return "paused";
   if (today < challenge.startsOn) return "upcoming";
-  if (today > challenge.endsOn) return "ended";
+  // A weekly challenge with no end date never "ends".
+  if (challenge.endsOn && today > challenge.endsOn) return "ended";
   return "active";
 }

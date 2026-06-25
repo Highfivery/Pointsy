@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { listRewards } from "@/lib/catalog/service";
-import { AddCatalogForm } from "@/components/catalog/AddCatalogForm";
 import { CatalogItemCard } from "@/components/catalog/CatalogItemCard";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { ManageNav } from "@/components/manage/ManageNav";
 import manage from "@/components/manage/manage.module.css";
 
 export const metadata: Metadata = { title: "Rewards" };
@@ -20,13 +19,10 @@ export default async function RewardsPage() {
 
   return (
     <main id="main" className={manage.main}>
-      <Link href="/dashboard" className={manage.back}>
-        <ArrowLeft size={18} aria-hidden="true" />
-        Back to dashboard
-      </Link>
-      <h1 className={manage.title}>Rewards</h1>
-
-      <AddCatalogForm kind="reward" />
+      <ScreenHeader
+        title="Rewards"
+        intro="Things kids can spend their points on."
+      />
 
       {rewards.length > 0 ? (
         <ul className={manage.list}>
@@ -50,8 +46,12 @@ export default async function RewardsPage() {
           ))}
         </ul>
       ) : (
-        <p className={manage.empty}>No rewards yet — add your first above.</p>
+        <p className={manage.empty}>
+          No rewards yet — tap “Add a reward” to create your first.
+        </p>
       )}
+
+      <ManageNav section="rewards" />
     </main>
   );
 }

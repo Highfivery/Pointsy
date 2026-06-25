@@ -26,6 +26,7 @@ import { RewardShelf } from "@/components/me/RewardShelf";
 import { KidGoal } from "@/components/me/KidGoal";
 import { EnableNotifications } from "@/components/push/EnableNotifications";
 import { KidTabBar } from "@/components/kid/KidTabBar";
+import { CountUp } from "@/components/me/CountUp";
 import styles from "./me.module.css";
 import hype from "@/components/me/hype.module.css";
 
@@ -130,7 +131,7 @@ export default async function MePage() {
           Your points
         </h2>
         <p className={balance < 0 ? styles.pointsNeg : styles.points}>
-          {balance}
+          <CountUp value={balance} />
         </p>
         <p className={styles.muted}>
           {balance < 0

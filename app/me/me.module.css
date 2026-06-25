@@ -49,29 +49,36 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-6);
+  padding: var(--space-8) var(--space-6);
   text-align: center;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  background: var(--accent-gradient-soft), var(--color-surface-raised);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--glow-accent);
 }
 
 .pointsLabel {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   color: var(--color-text-muted);
 }
 
 .points,
 .pointsNeg {
-  font-size: 4rem;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: 4.25rem;
+  font-weight: 700;
   line-height: 1;
-  animation: pointsPop 0.4s ease-out;
+  animation: pointsPop 0.4s var(--ease-spring);
 }
 
 .points {
-  color: var(--color-primary);
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .pointsNeg {
@@ -80,11 +87,9 @@
 
 @keyframes pointsPop {
   from {
-    opacity: 0;
-    transform: scale(0.8);
+    transform: scale(0.85);
   }
   to {
-    opacity: 1;
     transform: scale(1);
   }
 }
@@ -105,8 +110,8 @@
   padding: 0 var(--space-6);
   font-weight: 700;
   font-size: 1.05rem;
-  color: var(--color-primary-text);
-  background: var(--color-primary);
+  color: var(--color-on-accent);
+  background-image: var(--accent-gradient);
   border-radius: var(--radius-full);
   text-decoration: none;
   align-self: flex-start;

@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { listKids } from "@/lib/people/service";
-import { AddKidForm } from "@/components/manage/AddKidForm";
 import { KidCard } from "@/components/manage/KidCard";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { ManageNav } from "@/components/manage/ManageNav";
 import styles from "@/components/manage/manage.module.css";
 
 export const metadata: Metadata = { title: "Manage kids" };
@@ -20,13 +19,7 @@ export default async function ManageKidsPage() {
 
   return (
     <main id="main" className={styles.main}>
-      <Link href="/dashboard" className={styles.back}>
-        <ArrowLeft size={18} aria-hidden="true" />
-        Back to dashboard
-      </Link>
-      <h1 className={styles.title}>Kids</h1>
-
-      <AddKidForm />
+      <ScreenHeader title="Kids" intro="Profiles, avatars, and sign-in PINs." />
 
       {kids.length > 0 ? (
         <ul className={styles.list}>
@@ -45,8 +38,12 @@ export default async function ManageKidsPage() {
           ))}
         </ul>
       ) : (
-        <p className={styles.empty}>No children yet — add your first above.</p>
+        <p className={styles.empty}>
+          No children yet — tap “Add a kid” to add your first.
+        </p>
       )}
+
+      <ManageNav section="kids" />
     </main>
   );
 }

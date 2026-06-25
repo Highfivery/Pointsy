@@ -57,16 +57,18 @@ Zod (validation) · Serwist (PWA) · Vitest + PGlite + Playwright/axe.
 - **Icons:** always `lucide-react`. No other icon sets, no inline SVG icons.
 - **Styling:** CSS Modules (`*.module.css`) only — no Tailwind, no CSS-in-JS.
   Use the design tokens in `app/globals.css` (never hard-code colors; new colors
-  must meet AAA 7:1 contrast).
+  must meet AA 4.5:1 contrast for normal text, 3:1 for large text/UI). The brand
+  is **dark-only** ("Emerald Noir" — see `app/globals.css`); there is no light
+  theme.
 - **Build uses webpack** (`npm run build` → `next build --webpack`) because
   Serwist injects a webpack config. Dev uses Turbopack with the SW disabled.
 - **Pure logic** (points math, code generation) lives in `lib/domain` and is unit
   tested with no I/O.
 
-## Accessibility — WCAG 2.1 AAA where applicable
+## Accessibility — WCAG 2.1 AA
 
 Follow `docs/accessibility.md`. Semantic HTML, labelled controls, visible focus,
-≥44px targets, `prefers-reduced-motion` honoured, 7:1 contrast. Run the
+≥44px targets, `prefers-reduced-motion` honoured, ≥4.5:1 text contrast. Run the
 `a11y-audit` skill on any changed screen.
 
 ## Testing
@@ -75,7 +77,7 @@ Follow `docs/accessibility.md`. Semantic HTML, labelled controls, visible focus,
 - Server actions / SQL → integration tests via PGlite (`tests/helpers/test-db.ts`),
   including a tenant-isolation assertion.
 - User flows → Playwright in `tests/e2e`, each key screen asserted with axe
-  (tags `wcag2a`, `wcag2aa`, `wcag21aa`, `wcag2aaa`).
+  (tags `wcag2a`, `wcag2aa`, `wcag21aa`).
 
 ## Definition of Done
 

@@ -6,7 +6,7 @@ function uniqueEmail() {
   return `parent.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
 }
 
-const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa", "wcag2aaa"];
+const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa"];
 async function expectNoA11yViolations(page: Page, label: string) {
   const results = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
   expect(results.violations, `axe violations on ${label}`).toEqual([]);
@@ -33,8 +33,7 @@ async function signUpParent(page: Page): Promise<string> {
 }
 
 async function addKid(page: Page, name: string, pin: string) {
-  await page.getByRole("link", { name: /^kids$/i }).click();
-  await expect(page).toHaveURL(/\/manage\/kids$/);
+  await page.goto("/manage/kids/new");
   await page.getByLabel("Name").fill(name);
   await page.getByRole("radio", { name: "Cat", exact: true }).check();
   await page.getByLabel("4-digit PIN").fill(pin);

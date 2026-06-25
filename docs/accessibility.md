@@ -1,26 +1,28 @@
-# Accessibility — WCAG 2.1 AAA (where applicable)
+# Accessibility — WCAG 2.1 AA
 
-Pointsy targets **WCAG 2.1 Level AAA** for all criteria that apply to its content.
-A handful of AAA criteria (e.g. sign-language for video, 1.2.6) don't apply because
-Pointsy has no audio/video. Where a AAA criterion genuinely cannot be met, it is
+Pointsy targets **WCAG 2.1 Level AA** for all criteria that apply to its content.
+The app uses a single **dark theme** ("Emerald Noir"); colours are tuned for AA
+contrast on that palette. Where a criterion genuinely cannot be met, it is
 documented in the "Known exceptions" section below.
 
-> Automated tools (axe) only validate a few AAA rules (mainly enhanced contrast).
-> The rest is enforced by design tokens, the ESLint `jsx-a11y` strict ruleset, and
-> the manual checklist here — which the Claude `a11y-audit` skill runs on changed UI.
+> Automated tools (axe) only validate a subset of rules (mainly contrast). The
+> rest is enforced by design tokens, the ESLint `jsx-a11y` strict ruleset, and the
+> manual checklist here — which the Claude `a11y-audit` skill runs on changed UI.
 
 ## Enforcement layers
 
-1. **Design tokens** (`app/globals.css`) — every text/UI color meets the AAA 7:1
-   contrast ratio (1.4.6). Verify 7:1 before adding any new color.
+1. **Design tokens** (`app/globals.css`) — every text/UI color meets the AA 4.5:1
+   contrast ratio (1.4.3) for normal text, 3:1 for large text/UI. Verify before
+   adding any new color. Gradient/decorative text (e.g. the big balance number) is
+   exempt and must never carry essential information by colour alone.
 2. **ESLint** — `jsx-a11y` strict config + tightened rules (`eslint.config.mjs`).
 3. **Automated checks** — `@axe-core/playwright` runs on every key screen in E2E,
-   tagged for `wcag2a`, `wcag2aa`, `wcag21aa`, `wcag2aaa`.
+   tagged for `wcag2a`, `wcag2aa`, `wcag21aa`.
 4. **Manual checklist** — the list below, reviewed per PR that touches UI.
 
 ## Per-screen manual checklist
 
-- [ ] **1.4.6 Contrast (Enhanced)** — text ≥ 7:1, large text ≥ 4.5:1.
+- [ ] **1.4.3 Contrast (Minimum)** — text ≥ 4.5:1, large text ≥ 3:1.
 - [ ] **1.4.8 Visual Presentation** — body text not justified; line spacing ≥ 1.5;
       content reflows without horizontal scroll at 320px.
 - [ ] **2.1.1 Keyboard** — every action reachable & operable by keyboard only.

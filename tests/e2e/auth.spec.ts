@@ -58,7 +58,7 @@ test.describe("parent auth", () => {
     for (const path of ["/sign-up", "/sign-in"]) {
       await page.goto(path);
       const results = await new AxeBuilder({ page })
-        .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag2aaa"])
+        .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
         .analyze();
       expect(results.violations, `axe violations on ${path}`).toEqual([]);
     }

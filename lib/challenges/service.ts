@@ -35,7 +35,8 @@ export interface ChallengeInput {
   /** Pay the bonus automatically (default) or hold it for a parent to confirm. */
   autoAward?: boolean;
   startsOn: string;
-  endsOn: string;
+  /** Null/undefined ⇒ no end (only valid for weekly challenges). */
+  endsOn?: string | null;
   /** Participating kids; empty ⇒ the whole family. */
   kidIds?: string[];
 }
@@ -100,7 +101,7 @@ export async function createChallenge(
       recurrence: input.recurrence ?? "none",
       autoAward: input.autoAward ?? true,
       startsOn: input.startsOn,
-      endsOn: input.endsOn,
+      endsOn: input.endsOn ?? null,
       createdBy: createdBy ?? null,
     })
     .returning();
@@ -126,7 +127,7 @@ export async function updateChallenge(
       recurrence: input.recurrence ?? "none",
       autoAward: input.autoAward ?? true,
       startsOn: input.startsOn,
-      endsOn: input.endsOn,
+      endsOn: input.endsOn ?? null,
     })
     .where(and(eq(challenges.familyId, familyId), eq(challenges.id, id)));
   await replaceParticipants(db, familyId, id, input.kidIds);
@@ -295,17 +296,19 @@ export function currentWindow(
   challenge: Pick<Challenge, "startsOn" | "endsOn" | "recurrence">,
   today: string,
 ): ChallengeWindow | null {
-  if (today < challenge.startsOn || today > challenge.endsOn) return null;
+  if (today < challenge.startsOn) return null;
+  if (challenge.endsOn && today > challenge.endsOn) return null;
   if (challenge.recurrence === "weekly") {
     const ws = weekStart(today);
     const we = addDays(ws, 6);
     return {
       start: ws < challenge.startsOn ? challenge.startsOn : ws,
-      end: we > challenge.endsOn ? challenge.endsOn : we,
+      end: challenge.endsOn && we > challenge.endsOn ? challenge.endsOn : we,
       key: ws,
     };
   }
-  return { start: challenge.startsOn, end: challenge.endsOn, key: "" };
+  // One-off challenges always have an end date (enforced at validation).
+  return { start: challenge.startsOn, end: challenge.endsOn ?? today, key: "" };
 }
 
 /** The progress value for a challenge over a window, across participating kids. */
