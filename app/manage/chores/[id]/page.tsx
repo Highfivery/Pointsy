@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { getChore } from "@/lib/catalog/service";
@@ -10,6 +8,8 @@ import { getSubtasks } from "@/lib/chores/subtasks";
 import { getKidBalances } from "@/lib/points/service";
 import { ChoreEditor } from "@/components/catalog/ChoreEditor";
 import { ChoreDangerZone } from "@/components/catalog/ChoreDangerZone";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { ManageNav } from "@/components/manage/ManageNav";
 import manage from "@/components/manage/manage.module.css";
 
 export const metadata: Metadata = { title: "Edit chore" };
@@ -36,11 +36,7 @@ export default async function EditChorePage({
 
   return (
     <main id="main" className={manage.main}>
-      <Link href="/manage/chores" className={manage.back}>
-        <ArrowLeft size={18} aria-hidden="true" />
-        Back to chores
-      </Link>
-      <h1 className={manage.title}>Edit chore</h1>
+      <ScreenHeader title="Edit chore" />
       <ChoreEditor
         kids={kids.map((k) => ({
           id: k.id,
@@ -68,6 +64,7 @@ export default async function EditChorePage({
         name={chore.name}
         isActive={chore.isActive}
       />
+      <ManageNav section="chores" />
     </main>
   );
 }
