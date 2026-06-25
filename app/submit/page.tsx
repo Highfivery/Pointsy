@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { Star } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { getFamilyTimezone } from "@/lib/family/settings";
@@ -9,9 +8,10 @@ import { listSubmittableChores } from "@/lib/submissions/service";
 import { groupByCategory } from "@/lib/catalog/category";
 import { IconByName } from "@/components/icons/registry";
 import { SubmitChoreCard } from "@/components/submit/SubmitChoreCard";
+import { KidTabBar } from "@/components/kid/KidTabBar";
 import styles from "./submit.module.css";
 
-export const metadata: Metadata = { title: "Log a chore" };
+export const metadata: Metadata = { title: "My chores" };
 
 export default async function SubmitPage() {
   const session = await getSession();
@@ -26,14 +26,12 @@ export default async function SubmitPage() {
     session.personId,
     tz,
   );
+  const core = chores.filter((c) => c.isCore);
+  const others = chores.filter((c) => !c.isCore);
 
   return (
     <main id="main" className={styles.main}>
-      <Link href="/me" className={styles.back}>
-        <ArrowLeft size={18} aria-hidden="true" />
-        Back
-      </Link>
-      <h1 className={styles.title}>Log a chore you did</h1>
+      <h1 className={styles.title}>My chores</h1>
       <p className={styles.intro}>
         Tap a chore you finished — a grown-up approves it to add the points.
       </p>
@@ -43,24 +41,41 @@ export default async function SubmitPage() {
           No chores yet — ask a parent to add some.
         </p>
       ) : (
-        groupByCategory(chores).map(({ meta, items }) => (
-          <section
-            key={meta.key}
-            className={styles.section}
-            aria-label={meta.label}
-          >
-            <h2 className={styles.sectionTitle}>
-              <IconByName name={meta.icon} size={18} />
-              {meta.label}
-            </h2>
-            <ul className={styles.list}>
-              {items.map((c) => (
-                <SubmitChoreCard key={c.id} chore={c} />
-              ))}
-            </ul>
-          </section>
-        ))
+        <>
+          {core.length > 0 ? (
+            <section className={styles.section} aria-label="Today's must-dos">
+              <h2 className={styles.sectionTitle}>
+                <Star size={18} aria-hidden="true" />
+                Today&rsquo;s must-dos
+              </h2>
+              <ul className={styles.list}>
+                {core.map((c) => (
+                  <SubmitChoreCard key={c.id} chore={c} />
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
+          {groupByCategory(others).map(({ meta, items }) => (
+            <section
+              key={meta.key}
+              className={styles.section}
+              aria-label={meta.label}
+            >
+              <h2 className={styles.sectionTitle}>
+                <IconByName name={meta.icon} size={18} />
+                {meta.label}
+              </h2>
+              <ul className={styles.list}>
+                {items.map((c) => (
+                  <SubmitChoreCard key={c.id} chore={c} />
+                ))}
+              </ul>
+            </section>
+          ))}
+        </>
       )}
+      <KidTabBar />
     </main>
   );
 }

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { getPersonById } from "@/lib/db/queries";
@@ -12,6 +11,7 @@ import {
 import { cancelRedemptionAction } from "@/app/actions/redemptions";
 import { IconByName } from "@/components/icons/registry";
 import { RedeemButton } from "@/components/redeem/RedeemButton";
+import { KidTabBar } from "@/components/kid/KidTabBar";
 import styles from "./redeem.module.css";
 
 export const metadata: Metadata = { title: "Redeem rewards" };
@@ -33,10 +33,6 @@ export default async function RedeemPage() {
 
   return (
     <main id="main" className={styles.main}>
-      <Link href="/me" className={styles.back}>
-        <ArrowLeft size={18} aria-hidden="true" />
-        Back
-      </Link>
       <h1 className={styles.title}>Rewards</h1>
       {available < 0 ? (
         <p className={styles.negative}>
@@ -114,6 +110,7 @@ export default async function RedeemPage() {
           <p className={styles.empty}>No rewards yet — ask a parent!</p>
         )}
       </section>
+      <KidTabBar />
     </main>
   );
 }

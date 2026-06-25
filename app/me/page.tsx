@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LogOut, Gift, ClipboardCheck, X } from "lucide-react";
+import { LogOut, ArrowRight, X } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
 import { getDb } from "@/lib/db/client";
@@ -12,14 +12,18 @@ import { getFamilyTimezone } from "@/lib/family/settings";
 import {
   getPendingPoints,
   listKidSubmissions,
+  listSubmittableChores,
+  getCoreStreak,
 } from "@/lib/submissions/service";
 import { cancelSubmissionAction } from "@/app/actions/submissions";
 import { IconByName } from "@/components/icons/registry";
 import { ActivityList } from "@/components/points/ActivityList";
 import { Celebration } from "@/components/me/Celebration";
+import { CoreProgress } from "@/components/me/CoreProgress";
 import { RewardShelf } from "@/components/me/RewardShelf";
 import { KidGoal } from "@/components/me/KidGoal";
 import { EnableNotifications } from "@/components/push/EnableNotifications";
+import { KidTabBar } from "@/components/kid/KidTabBar";
 import styles from "./me.module.css";
 import hype from "@/components/me/hype.module.css";
 
@@ -40,9 +44,10 @@ export default async function MePage() {
     pendingPoints,
     submissions,
     activity,
-    streak,
+    earnStreak,
     redeemable,
     goal,
+    submittable,
   ] = await Promise.all([
     getBalance(db, session.familyId, session.personId),
     getPendingPoints(db, session.familyId, session.personId),
@@ -51,9 +56,26 @@ export default async function MePage() {
     getStreak(db, session.familyId, session.personId, tz),
     listRedeemableRewards(db, session.familyId, session.personId),
     getKidGoal(db, session.familyId, session.personId),
+    listSubmittableChores(db, session.familyId, session.personId, tz),
   ]);
   const waiting = submissions.filter((s) => s.status === "pending");
   const available = redeemable.available;
+
+  // Today's must-dos: core chores this kid is responsible for.
+  const coreChores = submittable.filter((c) => c.isCore && c.eligible);
+  const coreTotal = coreChores.length;
+  const coreDone = coreChores.filter((c) => c.loggedToday).length;
+  const coreTodo = coreChores.filter((c) => !c.loggedToday);
+  const coreStreakDays =
+    coreTotal > 0
+      ? await getCoreStreak(
+          db,
+          session.familyId,
+          session.personId,
+          tz,
+          coreChores.map((c) => c.id),
+        )
+      : 0;
 
   const affordable = redeemable.rewards
     .filter((r) => r.affordable)
@@ -120,10 +142,41 @@ export default async function MePage() {
             +{pendingPoints} waiting for approval
           </p>
         ) : null}
-        {streak > 0 ? (
-          <p className={hype.streak}>🔥 {streak}-day streak — keep it going!</p>
+        {coreTotal === 0 && earnStreak > 0 ? (
+          <p className={hype.streak}>
+            🔥 {earnStreak}-day streak — keep it going!
+          </p>
         ) : null}
       </section>
+
+      {coreTotal > 0 ? (
+        <section className={styles.today} aria-labelledby="core-heading">
+          <CoreProgress
+            done={coreDone}
+            total={coreTotal}
+            streak={coreStreakDays}
+          />
+          {coreTodo.length > 0 ? (
+            <>
+              <ul className={styles.todoList}>
+                {coreTodo.map((c) => (
+                  <li key={c.id} className={styles.todoRow}>
+                    <span className={styles.todoIcon} aria-hidden="true">
+                      <IconByName name={c.emoji} size={20} />
+                    </span>
+                    <span className={styles.todoName}>{c.name}</span>
+                    <span className={styles.todoPts}>+{c.points}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/submit" className={styles.todoCta}>
+                Go do chores
+                <ArrowRight size={18} aria-hidden="true" />
+              </Link>
+            </>
+          ) : null}
+        </section>
+      ) : null}
 
       <KidGoal goal={goal} rewardOptions={rewardOptions} />
 
@@ -132,17 +185,6 @@ export default async function MePage() {
         affordable={affordable}
         nextUp={nextUp}
       />
-
-      <div className={styles.actions}>
-        <Link href="/submit" className={styles.actionLink}>
-          <ClipboardCheck size={18} aria-hidden="true" />
-          Log a chore
-        </Link>
-        <Link href="/redeem" className={styles.actionLink}>
-          <Gift size={18} aria-hidden="true" />
-          Redeem rewards
-        </Link>
-      </div>
 
       {waiting.length > 0 ? (
         <section aria-labelledby="waiting-heading">
@@ -185,6 +227,7 @@ export default async function MePage() {
       </section>
 
       <EnableNotifications audience="kid" />
+      <KidTabBar />
     </main>
   );
 }

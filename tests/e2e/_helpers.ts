@@ -11,13 +11,21 @@ export async function enterPin(page: Page, pin: string) {
 export async function addChore(
   page: Page,
   name: string,
-  opts: { points?: number; category?: string; perDay?: number } = {},
+  opts: {
+    points?: number;
+    category?: string;
+    perDay?: number;
+    core?: boolean;
+  } = {},
 ) {
   await page.goto("/manage/chores");
   await page.getByRole("link", { name: /add a chore/i }).click();
   await page.waitForURL(/\/manage\/chores\/new$/);
   await page.getByLabel("Name").fill(name);
   await page.getByLabel("Points").fill(String(opts.points ?? 5));
+  if (opts.core) {
+    await page.getByLabel("Core chore").check();
+  }
   if (opts.category) {
     await page.getByLabel("Category").selectOption(opts.category);
   }

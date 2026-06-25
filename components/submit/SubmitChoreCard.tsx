@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, ChevronDown, ListChecks } from "lucide-react";
+import { Plus, ChevronDown, ListChecks, Lock, Check } from "lucide-react";
 import { IconByName } from "@/components/icons/registry";
 import { submitChoreAction } from "@/app/actions/submissions";
 import { formatChoreLimit } from "@/lib/catalog/limit";
@@ -9,10 +9,11 @@ import type { SubmittableChore } from "@/lib/submissions/service";
 import styles from "@/app/submit/submit.module.css";
 
 /**
- * One chore on the kid's "Log a chore" screen. Plain chores log on tap; chores
- * with a checklist expand and only let the kid log once every step is ticked.
- * Locked chores (not theirs / not their turn / limit reached) are shown disabled
- * with a reason.
+ * One chore on the kid's Chores screen. Renders one of four ways:
+ *  - locked (not theirs / not their turn) — muted with a friendly reason,
+ *  - done (no claims left this window) — a green "done" card, not greyed out,
+ *  - checklist — taps to expand; only logs once every step is ticked,
+ *  - plain — logs on a single tap.
  */
 export function SubmitChoreCard({ chore }: { chore: SubmittableChore }) {
   const freq = formatChoreLimit(chore.limitPeriod, chore.limitCount);
@@ -23,22 +24,50 @@ export function SubmitChoreCard({ chore }: { chore: SubmittableChore }) {
   );
   const allDone = done.every(Boolean);
 
-  // Locked, or no checklist → the existing single-tap button.
-  if (!chore.canSubmit || !hasChecklist) {
+  // Not this kid's chore right now (assignment / whose-turn).
+  if (!chore.eligible) {
+    return (
+      <li>
+        <div className={styles.choreLocked}>
+          <span className={styles.lockIcon} aria-hidden="true">
+            <Lock size={20} />
+          </span>
+          <span className={styles.choreText}>
+            <span className={styles.choreName}>{chore.name}</span>
+            <span className={styles.lockReason}>{chore.reason}</span>
+          </span>
+          <span className={styles.chorePtsMuted}>{chore.points}</span>
+        </div>
+      </li>
+    );
+  }
+
+  // Eligible but already done for now — celebrate it, don't grey it out.
+  if (!chore.canSubmit) {
+    return (
+      <li>
+        <div className={styles.choreDone}>
+          <span className={styles.doneIcon} aria-hidden="true">
+            <Check size={22} />
+          </span>
+          <span className={styles.choreText}>
+            <span className={styles.choreName}>{chore.name}</span>
+            <span className={styles.doneTag}>{chore.reason ?? "Done!"}</span>
+          </span>
+          <span className={styles.chorePtsMuted}>+{chore.points}</span>
+        </div>
+      </li>
+    );
+  }
+
+  // Submittable, no checklist → single-tap log button.
+  if (!hasChecklist) {
     return (
       <li>
         <form action={submitChoreAction}>
           <input type="hidden" name="choreId" value={chore.id} />
-          <button
-            type="submit"
-            className={styles.chore}
-            disabled={!chore.canSubmit}
-          >
-            <span
-              className={styles.choreIcon}
-              aria-hidden="true"
-              data-done={!chore.canSubmit}
-            >
+          <button type="submit" className={styles.chore}>
+            <span className={styles.choreIcon} aria-hidden="true">
               <IconByName name={chore.emoji} size={24} />
             </span>
             <span className={styles.choreText}>
@@ -47,12 +76,9 @@ export function SubmitChoreCard({ chore }: { chore: SubmittableChore }) {
                 <span className={styles.choreDesc}>{chore.description}</span>
               ) : null}
               <span className={styles.choreFreq}>{freq ?? "Anytime"}</span>
-              {!chore.canSubmit ? (
-                <span className={styles.doneTag}>{chore.reason}</span>
-              ) : null}
             </span>
             <span className={styles.chorePts}>
-              {chore.canSubmit ? <Plus size={14} aria-hidden="true" /> : null}
+              <Plus size={14} aria-hidden="true" />
               {chore.points}
             </span>
           </button>

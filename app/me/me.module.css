@@ -2,7 +2,7 @@
   width: 100%;
   max-width: 28rem;
   margin: 0 auto;
-  padding: var(--space-6) var(--space-4) var(--space-8);
+  padding: var(--space-6) var(--space-4) calc(var(--space-8) + 4.5rem);
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
@@ -183,4 +183,62 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
   cursor: pointer;
+}
+
+/* Today's must-dos */
+.today {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.todoList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.todoRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.todoIcon {
+  display: inline-flex;
+  color: var(--color-primary);
+}
+
+.todoName {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.todoPts {
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.todoCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  align-self: center;
+  min-height: var(--tap-target);
+  padding: 0 var(--space-5);
+  font-weight: 700;
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  text-decoration: none;
 }
