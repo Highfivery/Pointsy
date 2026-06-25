@@ -29,6 +29,7 @@ export interface ChallengeDefaults {
   goalType?: ChallengeGoal;
   goalTarget?: number;
   bonusPoints?: number;
+  autoAward?: boolean;
   startsOn?: string;
   endsOn?: string;
   kidIds?: string[];
@@ -186,6 +187,17 @@ export function ChallengeEditor({
           }
           required
         />
+        <label className={styles.coreRow}>
+          <input
+            type="checkbox"
+            name="needsApproval"
+            defaultChecked={defaults?.autoAward === false}
+            aria-label="Hold the bonus until I approve it"
+          />
+          <span className={styles.radioLabel}>
+            Hold the bonus until I approve it
+          </span>
+        </label>
       </section>
 
       <section className={styles.section}>

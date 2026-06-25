@@ -12,6 +12,7 @@ import {
   updateChallenge,
   setChallengeActive,
   deleteChallenge,
+  decideChallengeAward,
 } from "@/lib/challenges/service";
 
 const idSchema = z.string().uuid();
@@ -22,6 +23,7 @@ function parseChallenge(formData: FormData) {
     description: formData.get("description") || undefined,
     scope: formData.get("scope") ?? "kid",
     recurrence: formData.get("recurrence") ?? "none",
+    needsApproval: formData.get("needsApproval") ?? false,
     goalType: formData.get("goalType"),
     goalTarget: formData.get("goalTarget"),
     bonusPoints: formData.get("bonusPoints"),
@@ -40,21 +42,41 @@ export async function saveChallengeAction(
   const parsed = parseChallenge(formData);
   if (!parsed.success) return { fieldErrors: toFieldErrors(parsed.error) };
 
+  const input = {
+    ...parsed.data,
+    autoAward: !parsed.data.needsApproval,
+  };
   const rawId = formData.get("id");
   if (typeof rawId === "string" && rawId.length > 0) {
     const id = idSchema.safeParse(rawId);
     if (!id.success) return { error: "Could not find that challenge." };
-    await updateChallenge(getDb(), session.familyId, id.data, parsed.data);
+    await updateChallenge(getDb(), session.familyId, id.data, input);
   } else {
-    await createChallenge(
-      getDb(),
-      session.familyId,
-      parsed.data,
-      session.personId,
-    );
+    await createChallenge(getDb(), session.familyId, input, session.personId);
   }
   revalidatePath("/manage/challenges");
   redirect("/manage/challenges");
+}
+
+/** Parent approves (pays) or denies a completed parent-confirm challenge. */
+export async function decideChallengeAwardAction(
+  formData: FormData,
+): Promise<void> {
+  const session = await requireParent();
+  const awardId = idSchema.safeParse(formData.get("awardId"));
+  const decision = z
+    .enum(["approved", "denied"])
+    .safeParse(formData.get("decision"));
+  if (!awardId.success || !decision.success) return;
+  await decideChallengeAward(
+    getDb(),
+    session.familyId,
+    awardId.data,
+    decision.data,
+    session.personId,
+  );
+  revalidatePath("/dashboard");
+  revalidatePath("/me");
 }
 
 /** Pause/resume a challenge (stays on the page). */

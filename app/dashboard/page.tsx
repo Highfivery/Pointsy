@@ -35,6 +35,8 @@ import {
   listTeamRedemptionsAwaitingFulfillment,
 } from "@/lib/redemptions/team";
 import { decideTeamAction, fulfillTeamAction } from "@/app/actions/team";
+import { listChallengeApprovals } from "@/lib/challenges/service";
+import { decideChallengeAwardAction } from "@/app/actions/challenges";
 import { IconByName } from "@/components/icons/registry";
 import { SetPinForm } from "@/components/account/SetPinForm";
 import { EnableNotifications } from "@/components/push/EnableNotifications";
@@ -58,15 +60,23 @@ export default async function DashboardPage() {
   const me = await getPersonById(db, session.familyId, session.personId);
   if (!family || !me) redirect("/sign-in");
 
-  const [kids, pending, awaiting, choreSubs, teamReady, teamAwaiting] =
-    await Promise.all([
-      getKidBalances(db, session.familyId),
-      listPendingRedemptions(db, session.familyId),
-      listAwaitingFulfillment(db, session.familyId),
-      listPendingSubmissions(db, session.familyId),
-      listTeamRedemptionsAwaitingApproval(db, session.familyId),
-      listTeamRedemptionsAwaitingFulfillment(db, session.familyId),
-    ]);
+  const [
+    kids,
+    pending,
+    awaiting,
+    choreSubs,
+    teamReady,
+    teamAwaiting,
+    challengeApprovals,
+  ] = await Promise.all([
+    getKidBalances(db, session.familyId),
+    listPendingRedemptions(db, session.familyId),
+    listAwaitingFulfillment(db, session.familyId),
+    listPendingSubmissions(db, session.familyId),
+    listTeamRedemptionsAwaitingApproval(db, session.familyId),
+    listTeamRedemptionsAwaitingFulfillment(db, session.familyId),
+    listChallengeApprovals(db, session.familyId),
+  ]);
 
   return (
     <main id="main" className={styles.main}>
@@ -229,6 +239,58 @@ export default async function DashboardPage() {
                   >
                     <X size={16} aria-hidden="true" />
                     Reject
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {challengeApprovals.length > 0 ? (
+        <section aria-labelledby="challenge-approvals-heading">
+          <h2 id="challenge-approvals-heading" className={styles.sectionTitle}>
+            Challenge approvals
+          </h2>
+          <ul className={styles.queueList}>
+            {challengeApprovals.map((c) => (
+              <li key={c.awardId} className={styles.queueCard}>
+                <span
+                  className={styles.kidAvatar}
+                  style={{ background: c.color }}
+                >
+                  <IconByName name={c.avatar} size={22} />
+                </span>
+                <span className={styles.queueText}>
+                  <span className={styles.queueTitle}>
+                    {c.kidName} finished {c.challengeTitle}
+                  </span>
+                  <span className={styles.queueMeta}>+{c.bonusPoints} pts</span>
+                </span>
+                <form
+                  action={decideChallengeAwardAction}
+                  className={styles.queueActions}
+                >
+                  <input type="hidden" name="awardId" value={c.awardId} />
+                  <button
+                    type="submit"
+                    name="decision"
+                    value="approved"
+                    className={styles.approveBtn}
+                    aria-label={`Approve ${c.challengeTitle} for ${c.kidName}`}
+                  >
+                    <Check size={16} aria-hidden="true" />
+                    Approve
+                  </button>
+                  <button
+                    type="submit"
+                    name="decision"
+                    value="denied"
+                    className={styles.denyBtn}
+                    aria-label={`Deny ${c.challengeTitle} for ${c.kidName}`}
+                  >
+                    <X size={16} aria-hidden="true" />
+                    Deny
                   </button>
                 </form>
               </li>

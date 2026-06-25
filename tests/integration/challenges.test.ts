@@ -12,6 +12,8 @@ import {
   createChallenge,
   evaluateChallenges,
   listKidChallenges,
+  listChallengeApprovals,
+  decideChallengeAward,
 } from "@/lib/challenges/service";
 import { localDate, addDays } from "@/lib/timezone";
 import { createTestDb, type TestDb } from "../helpers/test-db";
@@ -234,6 +236,70 @@ describe("challenges", () => {
     expect(await logTwoAndEvaluate(w2)).toHaveLength(1);
 
     expect(await getBalance(db, fam.familyId, kid.id)).toBe(30); // 4×5 chores + 2×5 bonus
+  });
+
+  it("holds a parent-confirm challenge until approved, then pays", async () => {
+    const { db } = ctx;
+    const { fam, kid } = await setup(db);
+    const win = windowAroundToday();
+    await createChallenge(db, fam.familyId, {
+      title: "Confirm me",
+      scope: "kid",
+      goalType: "points",
+      goalTarget: 20,
+      bonusPoints: 10,
+      autoAward: false,
+      ...win,
+    });
+
+    await awardCustom(db, fam.familyId, kid.id, 20, "earn", fam.personId);
+    await evaluateChallenges(db, fam.familyId, kid.id, TZ);
+    expect(await getBalance(db, fam.familyId, kid.id)).toBe(20); // not paid yet
+
+    const progress = await listKidChallenges(db, fam.familyId, kid.id, TZ);
+    expect(progress[0].pendingApproval).toBe(true);
+    expect(progress[0].awarded).toBe(false);
+
+    const approvals = await listChallengeApprovals(db, fam.familyId);
+    expect(approvals).toHaveLength(1);
+    await decideChallengeAward(
+      db,
+      fam.familyId,
+      approvals[0].awardId,
+      "approved",
+      fam.personId,
+    );
+    expect(await getBalance(db, fam.familyId, kid.id)).toBe(30); // +10 bonus
+    expect(await listChallengeApprovals(db, fam.familyId)).toHaveLength(0);
+  });
+
+  it("a denied challenge pays nothing and isn't re-recorded", async () => {
+    const { db } = ctx;
+    const { fam, kid } = await setup(db);
+    const win = windowAroundToday();
+    await createChallenge(db, fam.familyId, {
+      title: "Nope",
+      scope: "kid",
+      goalType: "points",
+      goalTarget: 10,
+      bonusPoints: 99,
+      autoAward: false,
+      ...win,
+    });
+    await awardCustom(db, fam.familyId, kid.id, 10, "earn", fam.personId);
+    await evaluateChallenges(db, fam.familyId, kid.id, TZ);
+    const [approval] = await listChallengeApprovals(db, fam.familyId);
+    await decideChallengeAward(
+      db,
+      fam.familyId,
+      approval.awardId,
+      "denied",
+      fam.personId,
+    );
+    expect(await getBalance(db, fam.familyId, kid.id)).toBe(10); // no bonus
+    // Re-evaluating doesn't resurrect it (the denied row holds the slot).
+    await evaluateChallenges(db, fam.familyId, kid.id, TZ);
+    expect(await listChallengeApprovals(db, fam.familyId)).toHaveLength(0);
   });
 
   it("isolates challenges by family", async () => {
