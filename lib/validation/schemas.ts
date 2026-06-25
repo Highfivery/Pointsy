@@ -144,6 +144,14 @@ export const rewardSchema = z.object({
     .min(0)
     .max(100000),
   description: z.string().trim().max(280).optional(),
+  /** A team reward is redeemed by several kids splitting the cost. */
+  isTeam: z.coerce.boolean().default(false),
+  minKids: z.coerce
+    .number()
+    .int("Enter a whole number.")
+    .min(2, "A team needs at least 2 kids.")
+    .max(10, "Keep it to 10 or fewer.")
+    .default(2),
 });
 
 /* --------------------------------------------------------------- challenges */

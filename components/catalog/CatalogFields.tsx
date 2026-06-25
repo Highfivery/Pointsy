@@ -28,6 +28,8 @@ interface CatalogFieldsProps {
     category?: string;
     limitPeriod?: LimitPeriod;
     limitCount?: number;
+    isTeam?: boolean;
+    minKids?: number;
   };
 }
 
@@ -42,6 +44,7 @@ export function CatalogFields({ kind, errors, defaults }: CatalogFieldsProps) {
   const [period, setPeriod] = useState<LimitPeriod>(
     defaults?.limitPeriod ?? "none",
   );
+  const [isTeam, setIsTeam] = useState<boolean>(defaults?.isTeam ?? false);
 
   return (
     <>
@@ -124,6 +127,43 @@ export function CatalogFields({ kind, errors, defaults }: CatalogFieldsProps) {
                 required
               />
             </div>
+          )}
+        </div>
+      ) : null}
+
+      {!isChore ? (
+        <div className={form.field}>
+          <label className={styles.teamRow}>
+            <input
+              type="checkbox"
+              name="isTeam"
+              checked={isTeam}
+              onChange={(e) => setIsTeam(e.target.checked)}
+              aria-label="Team reward"
+            />
+            <span>
+              <span className={styles.teamLabel}>Team reward</span>
+              <span className={styles.teamHint}>
+                Kids team up and chip in together
+              </span>
+            </span>
+          </label>
+          {isTeam ? (
+            <Field
+              label="Minimum kids"
+              name="minKids"
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              defaultValue={defaults?.minKids ?? 2}
+              error={errors?.minKids}
+            />
+          ) : (
+            <input
+              type="hidden"
+              name="minKids"
+              value={defaults?.minKids ?? 2}
+            />
           )}
         </div>
       ) : null}

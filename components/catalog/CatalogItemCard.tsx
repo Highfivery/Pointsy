@@ -28,6 +28,8 @@ export interface CatalogItem {
   pinned?: boolean;
   limitPeriod?: LimitPeriod;
   limitCount?: number;
+  isTeam?: boolean;
+  minKids?: number;
 }
 
 const initialState: FormState = {};
@@ -137,6 +139,8 @@ export function CatalogItemCard({
               category: item.category,
               limitPeriod: item.limitPeriod,
               limitCount: item.limitCount,
+              isTeam: item.isTeam,
+              minKids: item.minKids,
             }}
           />
           <button type="submit" className={form.submit} disabled={editPending}>

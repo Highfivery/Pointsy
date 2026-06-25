@@ -223,3 +223,30 @@
   border-radius: var(--radius-sm);
   cursor: pointer;
 }
+
+/* Team-reward toggle in the reward form */
+.teamRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  cursor: pointer;
+}
+
+.teamRow input {
+  width: 1.3rem;
+  height: 1.3rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.teamLabel {
+  display: block;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.teamHint {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
