@@ -50,6 +50,9 @@ export function KidChallenges({ items }: { items: ChallengeProgress[] }) {
                 {p.challenge.scope === "family" ? (
                   <span className={styles.team}> · Team</span>
                 ) : null}
+                {p.challenge.recurrence === "weekly" ? (
+                  <span className={styles.team}> · Weekly</span>
+                ) : null}
               </p>
             </li>
           );

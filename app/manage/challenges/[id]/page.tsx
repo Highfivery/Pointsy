@@ -56,6 +56,7 @@ export default async function EditChallengePage({
           title: challenge.title,
           description: challenge.description,
           scope: challenge.scope,
+          recurrence: challenge.recurrence,
           goalType: challenge.goalType,
           goalTarget: challenge.goalTarget,
           bonusPoints: challenge.bonusPoints,

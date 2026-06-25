@@ -191,6 +191,51 @@ describe("challenges", () => {
     expect(await getBalance(db, fam.familyId, kid2.id)).toBe(40);
   });
 
+  it("pays a weekly challenge again each week (per-period idempotency)", async () => {
+    const { db } = ctx;
+    const { fam, kid } = await setup(db);
+    const chore = await createChore(db, fam.familyId, {
+      name: "Dishes",
+      emoji: "utensils",
+      points: 5,
+    });
+    await createChallenge(db, fam.familyId, {
+      title: "Weekly helper",
+      scope: "kid",
+      goalType: "chore_count",
+      goalTarget: 2,
+      bonusPoints: 5,
+      recurrence: "weekly",
+      startsOn: "2026-03-01",
+      endsOn: "2026-03-31",
+    });
+
+    async function logTwoAndEvaluate(day: Date) {
+      for (let i = 0; i < 2; i++) {
+        await submitChore(db, fam.familyId, kid.id, chore.id, TZ, day);
+      }
+      const subs = await listKidSubmissions(db, fam.familyId, kid.id, 50);
+      for (const s of subs.filter((x) => x.status === "pending")) {
+        await decideSubmission(db, fam.familyId, s.id, "approved", fam.personId, day); // prettier-ignore
+      }
+      return evaluateChallenges(db, fam.familyId, kid.id, TZ, day);
+    }
+
+    // Week 1 (Wed 2026-03-04) → paid once.
+    const w1 = new Date("2026-03-04T12:00:00Z");
+    expect(await logTwoAndEvaluate(w1)).toHaveLength(1);
+    // Same week again → no second payout.
+    expect(
+      (await evaluateChallenges(db, fam.familyId, kid.id, TZ, w1)).length,
+    ).toBe(0);
+
+    // Week 2 (Wed 2026-03-11) → paid again (a new period).
+    const w2 = new Date("2026-03-11T12:00:00Z");
+    expect(await logTwoAndEvaluate(w2)).toHaveLength(1);
+
+    expect(await getBalance(db, fam.familyId, kid.id)).toBe(30); // 4×5 chores + 2×5 bonus
+  });
+
   it("isolates challenges by family", async () => {
     const { db } = ctx;
     const a = await setup(db, "A");

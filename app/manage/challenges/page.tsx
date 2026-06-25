@@ -79,6 +79,7 @@ export default async function ChallengesPage() {
                     <span className={styles.meta}>
                       {goalSummary(c.goalType, c.goalTarget)} ·{" "}
                       {scopeLabel(c.scope)} · {dateRange(c.startsOn, c.endsOn)}
+                      {c.recurrence === "weekly" ? " · Weekly" : ""}
                     </span>
                   </span>
                   <span className={styles.end}>

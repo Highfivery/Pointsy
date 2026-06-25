@@ -21,6 +21,7 @@ function parseChallenge(formData: FormData) {
     title: formData.get("title"),
     description: formData.get("description") || undefined,
     scope: formData.get("scope") ?? "kid",
+    recurrence: formData.get("recurrence") ?? "none",
     goalType: formData.get("goalType"),
     goalTarget: formData.get("goalTarget"),
     bonusPoints: formData.get("bonusPoints"),

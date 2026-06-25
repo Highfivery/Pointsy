@@ -5,7 +5,11 @@ import { Field } from "@/components/auth/Field";
 import { IconByName } from "@/components/icons/registry";
 import { saveChallengeAction } from "@/app/actions/challenges";
 import type { FormState } from "@/lib/validation/form";
-import type { ChallengeScope, ChallengeGoal } from "@/lib/db/schema";
+import type {
+  ChallengeScope,
+  ChallengeGoal,
+  ChallengeRecurrence,
+} from "@/lib/db/schema";
 import form from "@/components/auth/auth-form.module.css";
 import styles from "@/components/catalog/chore-editor.module.css";
 
@@ -21,6 +25,7 @@ export interface ChallengeDefaults {
   title?: string;
   description?: string | null;
   scope?: ChallengeScope;
+  recurrence?: ChallengeRecurrence;
   goalType?: ChallengeGoal;
   goalTarget?: number;
   bonusPoints?: number;
@@ -53,6 +58,19 @@ const GOALS: {
   },
 ];
 
+const RECUR_OPTIONS: {
+  value: ChallengeRecurrence;
+  label: string;
+  hint: string;
+}[] = [
+  { value: "none", label: "One-off", hint: "Runs once over these dates" },
+  {
+    value: "weekly",
+    label: "Every week",
+    hint: "Resets each week — earn the bonus again",
+  },
+];
+
 const initialState: FormState = {};
 
 export function ChallengeEditor({
@@ -68,6 +86,9 @@ export function ChallengeEditor({
   );
   const errors = state.fieldErrors;
   const [scope, setScope] = useState<ChallengeScope>(defaults?.scope ?? "kid");
+  const [recurrence, setRecurrence] = useState<ChallengeRecurrence>(
+    defaults?.recurrence ?? "none",
+  );
   const [goalType, setGoalType] = useState<ChallengeGoal>(
     defaults?.goalType ?? "points",
   );
@@ -169,6 +190,23 @@ export function ChallengeEditor({
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>When</h2>
+        <fieldset className={styles.choice}>
+          <legend className={form.label}>Repeat</legend>
+          {RECUR_OPTIONS.map((o) => (
+            <label key={o.value} className={styles.radioRow}>
+              <input
+                type="radio"
+                name="recurrence"
+                value={o.value}
+                checked={recurrence === o.value}
+                onChange={() => setRecurrence(o.value)}
+                aria-label={o.label}
+              />
+              <span className={styles.radioLabel}>{o.label}</span>
+              <span className={styles.radioHint}>{o.hint}</span>
+            </label>
+          ))}
+        </fieldset>
         <Field
           label="Starts"
           name="startsOn"
