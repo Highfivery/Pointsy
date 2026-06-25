@@ -65,6 +65,7 @@ export interface RewardInput {
   description?: string;
   isTeam?: boolean;
   minKids?: number;
+  allowSolo?: boolean;
 }
 
 export type MoveDirection = "up" | "down";
@@ -261,6 +262,7 @@ export async function createReward(
       description: input.description?.trim() || null,
       isTeam: input.isTeam ?? false,
       minKids: input.minKids ?? 2,
+      allowSolo: input.allowSolo ?? false,
       sortOrder: existing.length,
     })
     .returning();
@@ -282,6 +284,7 @@ export async function updateReward(
       description: input.description?.trim() || null,
       isTeam: input.isTeam ?? false,
       minKids: input.minKids ?? 2,
+      allowSolo: input.allowSolo ?? false,
     })
     .where(and(eq(rewards.familyId, familyId), eq(rewards.id, id)));
 }

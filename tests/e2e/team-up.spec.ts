@@ -76,7 +76,7 @@ test("kids team up for a reward and a parent approves the split", async ({
   await expect(page).toHaveURL(/\/$/);
   await kidSignIn(page, "Ava", "1111");
   await page.goto("/redeem");
-  await page.getByRole("button", { name: /movie night/i }).click();
+  await page.getByRole("button", { name: /team up/i }).click();
   await expect(page.getByText(/team up for movie night/i)).toBeVisible();
   await page.getByRole("checkbox", { name: "Bo" }).check();
   await expect(page.getByText(/your share is 15 points/i)).toBeVisible();

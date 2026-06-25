@@ -43,6 +43,7 @@ export default async function RewardsPage() {
                   isActive: r.isActive,
                   isTeam: r.isTeam,
                   minKids: r.minKids,
+                  allowSolo: r.allowSolo,
                 }}
               />
             </li>

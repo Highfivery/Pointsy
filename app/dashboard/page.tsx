@@ -30,8 +30,11 @@ import {
 } from "@/app/actions/redemptions";
 import { listPendingSubmissions } from "@/lib/submissions/service";
 import { decideSubmissionAction } from "@/app/actions/submissions";
-import { listTeamRedemptionsAwaitingApproval } from "@/lib/redemptions/team";
-import { decideTeamAction } from "@/app/actions/team";
+import {
+  listTeamRedemptionsAwaitingApproval,
+  listTeamRedemptionsAwaitingFulfillment,
+} from "@/lib/redemptions/team";
+import { decideTeamAction, fulfillTeamAction } from "@/app/actions/team";
 import { IconByName } from "@/components/icons/registry";
 import { SetPinForm } from "@/components/account/SetPinForm";
 import { EnableNotifications } from "@/components/push/EnableNotifications";
@@ -55,13 +58,15 @@ export default async function DashboardPage() {
   const me = await getPersonById(db, session.familyId, session.personId);
   if (!family || !me) redirect("/sign-in");
 
-  const [kids, pending, awaiting, choreSubs, teamReady] = await Promise.all([
-    getKidBalances(db, session.familyId),
-    listPendingRedemptions(db, session.familyId),
-    listAwaitingFulfillment(db, session.familyId),
-    listPendingSubmissions(db, session.familyId),
-    listTeamRedemptionsAwaitingApproval(db, session.familyId),
-  ]);
+  const [kids, pending, awaiting, choreSubs, teamReady, teamAwaiting] =
+    await Promise.all([
+      getKidBalances(db, session.familyId),
+      listPendingRedemptions(db, session.familyId),
+      listAwaitingFulfillment(db, session.familyId),
+      listPendingSubmissions(db, session.familyId),
+      listTeamRedemptionsAwaitingApproval(db, session.familyId),
+      listTeamRedemptionsAwaitingFulfillment(db, session.familyId),
+    ]);
 
   return (
     <main id="main" className={styles.main}>
@@ -297,6 +302,39 @@ export default async function DashboardPage() {
                 </span>
                 <form action={fulfillRedemptionAction}>
                   <input type="hidden" name="redemptionId" value={a.id} />
+                  <button type="submit" className={styles.deliverBtn}>
+                    <PackageCheck size={16} aria-hidden="true" />
+                    Delivered
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {teamAwaiting.length > 0 ? (
+        <section aria-labelledby="team-awaiting-heading">
+          <h2 id="team-awaiting-heading" className={styles.sectionTitle}>
+            Team rewards to hand out
+          </h2>
+          <ul className={styles.queueList}>
+            {teamAwaiting.map((t) => (
+              <li key={t.id} className={styles.queueCard}>
+                <span
+                  className={styles.kidAvatar}
+                  style={{ background: "var(--color-primary)" }}
+                >
+                  <Users size={20} aria-hidden="true" />
+                </span>
+                <span className={styles.queueText}>
+                  <span className={styles.queueTitle}>{t.rewardName}</span>
+                  <span className={styles.queueMeta}>
+                    {t.members.map((m) => m.name).join(" & ")} · approved
+                  </span>
+                </span>
+                <form action={fulfillTeamAction}>
+                  <input type="hidden" name="teamRedemptionId" value={t.id} />
                   <button type="submit" className={styles.deliverBtn}>
                     <PackageCheck size={16} aria-hidden="true" />
                     Delivered

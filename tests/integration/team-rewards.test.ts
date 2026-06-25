@@ -3,12 +3,18 @@ import { registerFamily } from "@/lib/auth/register";
 import { addKid } from "@/lib/people/service";
 import { createReward } from "@/lib/catalog/service";
 import { awardCustom, getBalance } from "@/lib/points/service";
-import { getAvailable } from "@/lib/redemptions/service";
+import {
+  getAvailable,
+  requestRedemption,
+  InsufficientPointsError,
+} from "@/lib/redemptions/service";
 import {
   proposeTeamRedemption,
   respondTeamInvite,
   decideTeamRedemption,
+  fulfillTeamRedemption,
   listTeamRedemptionsAwaitingApproval,
+  listTeamRedemptionsAwaitingFulfillment,
   listTeamInvitesFor,
   listKidTeamRedemptions,
   NotEnoughKidsError,
@@ -125,6 +131,56 @@ describe("team rewards", () => {
     await expect(
       respondTeamInvite(db, fam.familyId, tr.id, b.id, true),
     ).rejects.toBeInstanceOf(ShareUnaffordableError);
+  });
+
+  it("blocks solo redeem of a team-only reward but allows a both-reward", async () => {
+    const { db } = ctx;
+    const { fam, a } = await setup(db);
+    await awardCustom(db, fam.familyId, a.id, 50, "x", fam.personId);
+
+    const teamOnly = await createReward(db, fam.familyId, {
+      name: "Big trip",
+      emoji: "car",
+      cost: 20,
+      isTeam: true,
+      minKids: 2,
+    });
+    await expect(
+      requestRedemption(db, fam.familyId, a.id, teamOnly.id),
+    ).rejects.toBeInstanceOf(InsufficientPointsError);
+
+    const both = await createReward(db, fam.familyId, {
+      name: "Game time",
+      emoji: "gamepad",
+      cost: 20,
+      isTeam: true,
+      minKids: 2,
+      allowSolo: true,
+    });
+    const red = await requestRedemption(db, fam.familyId, a.id, both.id);
+    expect(red.status).toBe("requested");
+  });
+
+  it("approved team redemptions await fulfilment, then can be delivered", async () => {
+    const { db } = ctx;
+    const { fam, a, b } = await setup(db);
+    await awardCustom(db, fam.familyId, a.id, 20, "x", fam.personId);
+    await awardCustom(db, fam.familyId, b.id, 20, "x", fam.personId);
+    const reward = await teamReward(db, fam.familyId, 30);
+
+    const tr = await proposeTeamRedemption(db, fam.familyId, a.id, reward.id, [
+      b.id,
+    ]);
+    await respondTeamInvite(db, fam.familyId, tr.id, b.id, true);
+    await decideTeamRedemption(db, fam.familyId, tr.id, "approved", fam.personId); // prettier-ignore
+
+    expect(
+      await listTeamRedemptionsAwaitingFulfillment(db, fam.familyId),
+    ).toHaveLength(1);
+    await fulfillTeamRedemption(db, fam.familyId, tr.id, fam.personId);
+    expect(
+      await listTeamRedemptionsAwaitingFulfillment(db, fam.familyId),
+    ).toHaveLength(0);
   });
 
   it("isolates team redemptions by family", async () => {

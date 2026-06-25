@@ -30,6 +30,7 @@ interface CatalogFieldsProps {
     limitCount?: number;
     isTeam?: boolean;
     minKids?: number;
+    allowSolo?: boolean;
   };
 }
 
@@ -45,6 +46,9 @@ export function CatalogFields({ kind, errors, defaults }: CatalogFieldsProps) {
     defaults?.limitPeriod ?? "none",
   );
   const [isTeam, setIsTeam] = useState<boolean>(defaults?.isTeam ?? false);
+  const [allowSolo, setAllowSolo] = useState<boolean>(
+    defaults?.allowSolo ?? false,
+  );
 
   return (
     <>
@@ -149,15 +153,32 @@ export function CatalogFields({ kind, errors, defaults }: CatalogFieldsProps) {
             </span>
           </label>
           {isTeam ? (
-            <Field
-              label="Minimum kids"
-              name="minKids"
-              type="text"
-              inputMode="numeric"
-              autoComplete="off"
-              defaultValue={defaults?.minKids ?? 2}
-              error={errors?.minKids}
-            />
+            <>
+              <Field
+                label="Minimum kids"
+                name="minKids"
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                defaultValue={defaults?.minKids ?? 2}
+                error={errors?.minKids}
+              />
+              <label className={styles.teamRow}>
+                <input
+                  type="checkbox"
+                  name="allowSolo"
+                  checked={allowSolo}
+                  onChange={(e) => setAllowSolo(e.target.checked)}
+                  aria-label="Also redeemable solo"
+                />
+                <span>
+                  <span className={styles.teamLabel}>Also redeemable solo</span>
+                  <span className={styles.teamHint}>
+                    A kid can also grab it alone at the full price
+                  </span>
+                </span>
+              </label>
+            </>
           ) : (
             <input
               type="hidden"

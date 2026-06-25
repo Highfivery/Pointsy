@@ -30,6 +30,7 @@ export interface CatalogItem {
   limitCount?: number;
   isTeam?: boolean;
   minKids?: number;
+  allowSolo?: boolean;
 }
 
 const initialState: FormState = {};
@@ -141,6 +142,7 @@ export function CatalogItemCard({
               limitCount: item.limitCount,
               isTeam: item.isTeam,
               minKids: item.minKids,
+              allowSolo: item.allowSolo,
             }}
           />
           <button type="submit" className={form.submit} disabled={editPending}>

@@ -152,6 +152,8 @@ export const rewardSchema = z.object({
     .min(2, "A team needs at least 2 kids.")
     .max(10, "Keep it to 10 or fewer.")
     .default(2),
+  /** For team rewards: also redeemable solo at full cost. */
+  allowSolo: z.coerce.boolean().default(false),
 });
 
 /* --------------------------------------------------------------- challenges */
