@@ -166,6 +166,8 @@ export const challengeSchema = z
     description: z.string().trim().max(280).optional(),
     scope: z.enum(["kid", "family"]).default("kid"),
     recurrence: z.enum(["none", "weekly"]).default("none"),
+    /** Checked ⇒ the bonus waits for a parent to confirm (auto-award otherwise). */
+    needsApproval: z.coerce.boolean().default(false),
     goalType: z.enum(["points", "chore_count", "core_days"]),
     goalTarget: z.coerce
       .number()

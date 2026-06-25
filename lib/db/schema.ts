@@ -100,6 +100,13 @@ export const challengeRecurrenceEnum = pgEnum("challenge_recurrence", [
   "weekly",
 ]);
 
+/** A bonus is paid automatically, or held for a parent to confirm first. */
+export const challengeAwardStatusEnum = pgEnum("challenge_award_status", [
+  "pending",
+  "paid",
+  "denied",
+]);
+
 /* --------------------------------------------------------------- families */
 
 export const families = pgTable("families", {
@@ -518,6 +525,8 @@ export const challenges = pgTable(
     description: text("description"),
     scope: challengeScopeEnum("scope").notNull().default("kid"),
     recurrence: challengeRecurrenceEnum("recurrence").notNull().default("none"),
+    /** Pay the bonus automatically, or hold it for a parent to confirm. */
+    autoAward: boolean("auto_award").notNull().default(true),
     goalType: challengeGoalEnum("goal_type").notNull(),
     /** Target count for the goal (points, chores, or days). */
     goalTarget: integer("goal_target").notNull(),
@@ -567,6 +576,8 @@ export const challengeAwards = pgTable(
       .references(() => people.id, { onDelete: "cascade" }),
     /** Period this award is for: "" for one-off, the week-start date for weekly. */
     periodKey: text("period_key").notNull().default(""),
+    /** paid = bonus given; pending = waiting on a parent; denied = refused. */
+    status: challengeAwardStatusEnum("status").notNull().default("paid"),
     awardedAt: timestamp("awarded_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -647,4 +658,5 @@ export const schema = {
   challengeScopeEnum,
   challengeGoalEnum,
   challengeRecurrenceEnum,
+  challengeAwardStatusEnum,
 };

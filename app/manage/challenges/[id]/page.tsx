@@ -60,6 +60,7 @@ export default async function EditChallengePage({
           goalType: challenge.goalType,
           goalTarget: challenge.goalTarget,
           bonusPoints: challenge.bonusPoints,
+          autoAward: challenge.autoAward,
           startsOn: challenge.startsOn,
           endsOn: challenge.endsOn,
           kidIds: explicit.map((p) => p.personId),

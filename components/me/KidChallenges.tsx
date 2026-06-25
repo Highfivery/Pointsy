@@ -21,7 +21,7 @@ export function KidChallenges({ items }: { items: ChallengeProgress[] }) {
       </h2>
       <ul className={styles.list}>
         {items.map((p) => {
-          const done = p.awarded || p.complete;
+          const done = p.awarded; // green only once the bonus is actually paid
           const shown = Math.min(p.value, p.target);
           return (
             <li
@@ -44,9 +44,11 @@ export function KidChallenges({ items }: { items: ChallengeProgress[] }) {
               <p className={styles.status}>
                 {p.awarded
                   ? "Done! Bonus earned 🎉"
-                  : p.complete
-                    ? "Complete! 🎉"
-                    : `${shown} / ${p.target} ${UNIT[p.challenge.goalType]}`}
+                  : p.pendingApproval
+                    ? "Done — waiting for a grown-up"
+                    : p.complete
+                      ? "Complete! 🎉"
+                      : `${shown} / ${p.target} ${UNIT[p.challenge.goalType]}`}
                 {p.challenge.scope === "family" ? (
                   <span className={styles.team}> · Team</span>
                 ) : null}

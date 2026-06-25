@@ -32,6 +32,8 @@ export interface ChallengeInput {
   goalTarget: number;
   bonusPoints: number;
   recurrence?: ChallengeRecurrence;
+  /** Pay the bonus automatically (default) or hold it for a parent to confirm. */
+  autoAward?: boolean;
   startsOn: string;
   endsOn: string;
   /** Participating kids; empty ⇒ the whole family. */
@@ -96,6 +98,7 @@ export async function createChallenge(
       goalTarget: input.goalTarget,
       bonusPoints: input.bonusPoints,
       recurrence: input.recurrence ?? "none",
+      autoAward: input.autoAward ?? true,
       startsOn: input.startsOn,
       endsOn: input.endsOn,
       createdBy: createdBy ?? null,
@@ -121,6 +124,7 @@ export async function updateChallenge(
       goalTarget: input.goalTarget,
       bonusPoints: input.bonusPoints,
       recurrence: input.recurrence ?? "none",
+      autoAward: input.autoAward ?? true,
       startsOn: input.startsOn,
       endsOn: input.endsOn,
     })
@@ -347,6 +351,8 @@ export interface ChallengeProgress {
   complete: boolean;
   /** This kid has already been paid the bonus (kid views only). */
   awarded: boolean;
+  /** Met, but the bonus is waiting on a parent to confirm. */
+  pendingApproval: boolean;
 }
 
 function pct(value: number, target: number): number {
@@ -375,11 +381,19 @@ export async function listKidChallenges(
     .select({
       challengeId: challengeAwards.challengeId,
       periodKey: challengeAwards.periodKey,
+      status: challengeAwards.status,
     })
     .from(challengeAwards)
     .where(eq(challengeAwards.personId, kidId));
-  const awarded = new Set(
-    awardedRows.map((r) => `${r.challengeId}:${r.periodKey}`),
+  const paid = new Set(
+    awardedRows
+      .filter((r) => r.status === "paid")
+      .map((r) => `${r.challengeId}:${r.periodKey}`),
+  );
+  const pending = new Set(
+    awardedRows
+      .filter((r) => r.status === "pending")
+      .map((r) => `${r.challengeId}:${r.periodKey}`),
   );
 
   const out: ChallengeProgress[] = [];
@@ -404,7 +418,8 @@ export async function listKidChallenges(
       target: c.goalTarget,
       pct: pct(value, c.goalTarget),
       complete: value >= c.goalTarget,
-      awarded: awarded.has(`${c.id}:${window.key}`),
+      awarded: paid.has(`${c.id}:${window.key}`),
+      pendingApproval: pending.has(`${c.id}:${window.key}`),
     });
   }
   return out;
@@ -412,7 +427,11 @@ export async function listKidChallenges(
 
 /* ------------------------------------------------------------- auto-award */
 
-/** Pay a kid a challenge bonus once (idempotent). Returns true if newly paid. */
+/**
+ * Record a kid completing a challenge once per period (idempotent). Auto-award
+ * challenges pay the bonus immediately ("paid"); otherwise it's held "pending" a
+ * parent's confirmation. Returns true if newly recorded.
+ */
 async function awardBonus(
   db: Database,
   familyId: string,
@@ -423,19 +442,26 @@ async function awardBonus(
   return db.transaction(async (tx) => {
     const claimed = await tx
       .insert(challengeAwards)
-      .values({ challengeId: challenge.id, personId: kidId, periodKey })
+      .values({
+        challengeId: challenge.id,
+        personId: kidId,
+        periodKey,
+        status: challenge.autoAward ? "paid" : "pending",
+      })
       .onConflictDoNothing()
       .returning({ id: challengeAwards.id });
-    if (claimed.length === 0) return false; // already paid
+    if (claimed.length === 0) return false; // already recorded
 
-    await tx.insert(ledger).values({
-      familyId,
-      personId: kidId,
-      amount: challenge.bonusPoints,
-      type: "bonus",
-      reason: `Challenge: ${challenge.title}`,
-      createdBy: challenge.createdBy ?? null,
-    });
+    if (challenge.autoAward) {
+      await tx.insert(ledger).values({
+        familyId,
+        personId: kidId,
+        amount: challenge.bonusPoints,
+        type: "bonus",
+        reason: `Challenge: ${challenge.title}`,
+        createdBy: challenge.createdBy ?? null,
+      });
+    }
     return true;
   });
 }
@@ -501,4 +527,90 @@ export async function evaluateChallenges(
     }
   }
   return wins;
+}
+
+/* ------------------------------------------------------ parent approval */
+
+export interface ChallengeApproval {
+  awardId: string;
+  challengeTitle: string;
+  bonusPoints: number;
+  kidName: string;
+  avatar: string;
+  color: string;
+}
+
+/** Completed challenges (on parent-confirm challenges) awaiting a decision. */
+export async function listChallengeApprovals(
+  db: Database,
+  familyId: string,
+): Promise<ChallengeApproval[]> {
+  return db
+    .select({
+      awardId: challengeAwards.id,
+      challengeTitle: challenges.title,
+      bonusPoints: challenges.bonusPoints,
+      kidName: people.name,
+      avatar: people.avatar,
+      color: people.color,
+    })
+    .from(challengeAwards)
+    .innerJoin(challenges, eq(challenges.id, challengeAwards.challengeId))
+    .innerJoin(people, eq(people.id, challengeAwards.personId))
+    .where(
+      and(
+        eq(challenges.familyId, familyId),
+        eq(challengeAwards.status, "pending"),
+      ),
+    )
+    .orderBy(challengeAwards.awardedAt);
+}
+
+/** Approve (pay the held bonus) or deny a pending challenge completion. */
+export async function decideChallengeAward(
+  db: Database,
+  familyId: string,
+  awardId: string,
+  decision: "approved" | "denied",
+  decidedBy: string,
+): Promise<void> {
+  await db.transaction(async (tx) => {
+    const [row] = await tx
+      .select({
+        personId: challengeAwards.personId,
+        bonusPoints: challenges.bonusPoints,
+        title: challenges.title,
+      })
+      .from(challengeAwards)
+      .innerJoin(challenges, eq(challenges.id, challengeAwards.challengeId))
+      .where(
+        and(
+          eq(challengeAwards.id, awardId),
+          eq(challenges.familyId, familyId),
+          eq(challengeAwards.status, "pending"),
+        ),
+      )
+      .limit(1);
+    if (!row) return;
+
+    if (decision === "approved") {
+      await tx
+        .update(challengeAwards)
+        .set({ status: "paid" })
+        .where(eq(challengeAwards.id, awardId));
+      await tx.insert(ledger).values({
+        familyId,
+        personId: row.personId,
+        amount: row.bonusPoints,
+        type: "bonus",
+        reason: `Challenge: ${row.title}`,
+        createdBy: decidedBy,
+      });
+    } else {
+      await tx
+        .update(challengeAwards)
+        .set({ status: "denied" })
+        .where(eq(challengeAwards.id, awardId));
+    }
+  });
 }
