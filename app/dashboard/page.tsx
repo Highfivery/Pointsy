@@ -2,19 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { eq } from "drizzle-orm";
-import {
-  LogOut,
-  Users,
-  ListChecks,
-  Gift,
-  ChevronRight,
-  Plus,
-  Check,
-  X,
-  PackageCheck,
-  UserPlus,
-  Trophy,
-} from "lucide-react";
+import { LogOut, Users, Plus, Check, X, PackageCheck } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
 import { getDb } from "@/lib/db/client";
@@ -41,6 +29,7 @@ import { IconByName } from "@/components/icons/registry";
 import { SetPinForm } from "@/components/account/SetPinForm";
 import { EnableNotifications } from "@/components/push/EnableNotifications";
 import { FamilyTimezone } from "@/components/family/FamilyTimezone";
+import { DashboardNav } from "@/components/manage/DashboardNav";
 import { families } from "@/lib/db/schema";
 import styles from "./dashboard.module.css";
 
@@ -435,100 +424,9 @@ export default async function DashboardPage() {
         </details>
       </section>
 
-      <nav className={styles.manageNav} aria-label="Manage">
-        <Link
-          href="/manage/kids"
-          className={styles.manageLink}
-          aria-label="Kids"
-        >
-          <span className={styles.manageIcon}>
-            <Users size={22} aria-hidden="true" />
-          </span>
-          <span className={styles.manageText}>
-            <span className={styles.manageLabel}>Kids</span>
-            <span className={styles.manageHint}>Profiles &amp; PINs</span>
-          </span>
-          <ChevronRight
-            size={20}
-            aria-hidden="true"
-            className={styles.manageChevron}
-          />
-        </Link>
-        <Link
-          href="/manage/chores"
-          className={styles.manageLink}
-          aria-label="Chores"
-        >
-          <span className={styles.manageIcon}>
-            <ListChecks size={22} aria-hidden="true" />
-          </span>
-          <span className={styles.manageText}>
-            <span className={styles.manageLabel}>Chores</span>
-            <span className={styles.manageHint}>Ways to earn points</span>
-          </span>
-          <ChevronRight
-            size={20}
-            aria-hidden="true"
-            className={styles.manageChevron}
-          />
-        </Link>
-        <Link
-          href="/manage/rewards"
-          className={styles.manageLink}
-          aria-label="Rewards"
-        >
-          <span className={styles.manageIcon}>
-            <Gift size={22} aria-hidden="true" />
-          </span>
-          <span className={styles.manageText}>
-            <span className={styles.manageLabel}>Rewards</span>
-            <span className={styles.manageHint}>Things to redeem</span>
-          </span>
-          <ChevronRight
-            size={20}
-            aria-hidden="true"
-            className={styles.manageChevron}
-          />
-        </Link>
-        <Link
-          href="/manage/challenges"
-          className={styles.manageLink}
-          aria-label="Challenges"
-        >
-          <span className={styles.manageIcon}>
-            <Trophy size={22} aria-hidden="true" />
-          </span>
-          <span className={styles.manageText}>
-            <span className={styles.manageLabel}>Challenges</span>
-            <span className={styles.manageHint}>Goals &amp; bonuses</span>
-          </span>
-          <ChevronRight
-            size={20}
-            aria-hidden="true"
-            className={styles.manageChevron}
-          />
-        </Link>
-        <Link
-          href="/manage/parents"
-          className={styles.manageLink}
-          aria-label="Parents"
-        >
-          <span className={styles.manageIcon}>
-            <UserPlus size={22} aria-hidden="true" />
-          </span>
-          <span className={styles.manageText}>
-            <span className={styles.manageLabel}>Parents</span>
-            <span className={styles.manageHint}>Invite a co-parent</span>
-          </span>
-          <ChevronRight
-            size={20}
-            aria-hidden="true"
-            className={styles.manageChevron}
-          />
-        </Link>
-      </nav>
-
       <EnableNotifications audience="parent" />
+
+      <DashboardNav />
     </main>
   );
 }
