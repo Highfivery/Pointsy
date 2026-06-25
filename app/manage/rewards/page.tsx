@@ -41,6 +41,8 @@ export default async function RewardsPage() {
                   value: r.cost,
                   description: r.description,
                   isActive: r.isActive,
+                  isTeam: r.isTeam,
+                  minKids: r.minKids,
                 }}
               />
             </li>

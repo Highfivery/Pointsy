@@ -63,6 +63,8 @@ export interface RewardInput {
   emoji: string;
   cost: number;
   description?: string;
+  isTeam?: boolean;
+  minKids?: number;
 }
 
 export type MoveDirection = "up" | "down";
@@ -257,6 +259,8 @@ export async function createReward(
       emoji: input.emoji,
       cost: input.cost,
       description: input.description?.trim() || null,
+      isTeam: input.isTeam ?? false,
+      minKids: input.minKids ?? 2,
       sortOrder: existing.length,
     })
     .returning();
@@ -276,6 +280,8 @@ export async function updateReward(
       emoji: input.emoji,
       cost: input.cost,
       description: input.description?.trim() || null,
+      isTeam: input.isTeam ?? false,
+      minKids: input.minKids ?? 2,
     })
     .where(and(eq(rewards.familyId, familyId), eq(rewards.id, id)));
 }

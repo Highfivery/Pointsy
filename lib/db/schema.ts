@@ -37,6 +37,22 @@ export const redemptionStatusEnum = pgEnum("redemption_status", [
   "denied",
   "cancelled",
 ]);
+
+/** A team redemption: kids opt in, then a parent approves the whole thing. */
+export const teamRedemptionStatusEnum = pgEnum("team_redemption_status", [
+  "proposed",
+  "approved",
+  "fulfilled",
+  "denied",
+  "cancelled",
+]);
+
+/** Each invited kid's stance on a team redemption. */
+export const teamMemberStatusEnum = pgEnum("team_member_status", [
+  "invited",
+  "accepted",
+  "declined",
+]);
 /** How often a kid may claim a chore. "none" = unlimited. */
 export const choreLimitPeriodEnum = pgEnum("chore_limit_period", [
   "none",
@@ -241,6 +257,10 @@ export const rewards = pgTable(
     /** Points required to redeem. */
     cost: integer("cost").notNull(),
     description: text("description"),
+    /** A "team reward" is redeemed by several kids splitting the cost evenly. */
+    isTeam: boolean("is_team").notNull().default(false),
+    /** Minimum participants for a team reward. */
+    minKids: integer("min_kids").notNull().default(2),
     isActive: boolean("is_active").notNull().default(true),
     sortOrder: integer("sort_order").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -286,6 +306,66 @@ export const redemptions = pgTable(
     index("redemptions_family_idx").on(t.familyId),
     index("redemptions_person_idx").on(t.personId),
     index("redemptions_status_idx").on(t.status),
+  ],
+);
+
+/* ------------------------------------------------------- team redemptions */
+
+/** A group request for a team reward; each member chips in their even share. */
+export const teamRedemptions = pgTable(
+  "team_redemptions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    familyId: uuid("family_id")
+      .notNull()
+      .references(() => families.id, { onDelete: "cascade" }),
+    rewardId: uuid("reward_id").references(() => rewards.id, {
+      onDelete: "set null",
+    }),
+    /** Snapshot at propose time. */
+    rewardName: text("reward_name").notNull(),
+    cost: integer("cost").notNull(),
+    proposedBy: uuid("proposed_by")
+      .notNull()
+      .references(() => people.id, { onDelete: "cascade" }),
+    status: teamRedemptionStatusEnum("status").notNull().default("proposed"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    decidedBy: uuid("decided_by").references(() => people.id, {
+      onDelete: "set null",
+    }),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    fulfilledBy: uuid("fulfilled_by").references(() => people.id, {
+      onDelete: "set null",
+    }),
+    fulfilledAt: timestamp("fulfilled_at", { withTimezone: true }),
+  },
+  (t) => [
+    index("team_redemptions_family_idx").on(t.familyId),
+    index("team_redemptions_status_idx").on(t.status),
+  ],
+);
+
+/** Each participating kid's share of a team redemption + their opt-in stance. */
+export const teamRedemptionMembers = pgTable(
+  "team_redemption_members",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    teamRedemptionId: uuid("team_redemption_id")
+      .notNull()
+      .references(() => teamRedemptions.id, { onDelete: "cascade" }),
+    personId: uuid("person_id")
+      .notNull()
+      .references(() => people.id, { onDelete: "cascade" }),
+    /** This kid's slice of the cost (shares sum exactly to the cost). */
+    share: integer("share").notNull(),
+    status: teamMemberStatusEnum("status").notNull().default("invited"),
+  },
+  (t) => [
+    index("team_members_redemption_idx").on(t.teamRedemptionId),
+    index("team_members_person_idx").on(t.personId),
+    uniqueIndex("team_members_unique").on(t.teamRedemptionId, t.personId),
   ],
 );
 
@@ -517,6 +597,8 @@ export type Reward = typeof rewards.$inferSelect;
 export type NewReward = typeof rewards.$inferInsert;
 export type Redemption = typeof redemptions.$inferSelect;
 export type NewRedemption = typeof redemptions.$inferInsert;
+export type TeamRedemption = typeof teamRedemptions.$inferSelect;
+export type TeamRedemptionMember = typeof teamRedemptionMembers.$inferSelect;
 export type LedgerEntry = typeof ledger.$inferSelect;
 export type NewLedgerEntry = typeof ledger.$inferInsert;
 export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect;
@@ -542,6 +624,8 @@ export const schema = {
   choreSubtasks,
   rewards,
   redemptions,
+  teamRedemptions,
+  teamRedemptionMembers,
   ledger,
   pushSubscriptions,
   parentInvites,
@@ -552,6 +636,8 @@ export const schema = {
   roleEnum,
   ledgerTypeEnum,
   redemptionStatusEnum,
+  teamRedemptionStatusEnum,
+  teamMemberStatusEnum,
   choreLimitPeriodEnum,
   submissionStatusEnum,
   choreCategoryEnum,

@@ -1,10 +1,12 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, ne, sql } from "drizzle-orm";
 import type { Database } from "@/lib/db/types";
 import {
   redemptions,
   rewards,
   ledger,
   people,
+  teamRedemptions,
+  teamRedemptionMembers,
   type Redemption,
 } from "@/lib/db/schema";
 import { getPersonById } from "@/lib/db/queries";
@@ -51,7 +53,26 @@ export async function getReserved(
         eq(redemptions.status, "requested"),
       ),
     );
-  return row?.reserved ?? 0;
+  // A kid's share of any still-proposed team redemption is reserved too (unless
+  // they've declined it).
+  const [teamRow] = await db
+    .select({
+      reserved: sql<number>`coalesce(sum(${teamRedemptionMembers.share}), 0)::int`,
+    })
+    .from(teamRedemptionMembers)
+    .innerJoin(
+      teamRedemptions,
+      eq(teamRedemptions.id, teamRedemptionMembers.teamRedemptionId),
+    )
+    .where(
+      and(
+        eq(teamRedemptions.familyId, familyId),
+        eq(teamRedemptionMembers.personId, kidId),
+        eq(teamRedemptions.status, "proposed"),
+        ne(teamRedemptionMembers.status, "declined"),
+      ),
+    );
+  return (row?.reserved ?? 0) + (teamRow?.reserved ?? 0);
 }
 
 /** Spendable points right now = balance − reserved. */

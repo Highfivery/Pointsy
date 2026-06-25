@@ -111,6 +111,8 @@ function parseReward(formData: FormData) {
     emoji: formData.get("emoji"),
     cost: formData.get("cost"),
     description: formData.get("description") || undefined,
+    isTeam: formData.get("isTeam") ?? false,
+    minKids: formData.get("minKids") ?? 2,
   });
 }
 
