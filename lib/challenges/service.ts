@@ -1,0 +1,456 @@
+import { and, eq, gt, gte, lte, inArray, sql } from "drizzle-orm";
+import type { Database } from "@/lib/db/types";
+import {
+  challenges,
+  challengeParticipants,
+  challengeAwards,
+  choreSubmissions,
+  ledger,
+  people,
+  type Challenge,
+  type ChallengeScope,
+  type ChallengeGoal,
+} from "@/lib/db/schema";
+import { localDate } from "@/lib/timezone";
+import { listSubmittableChores } from "@/lib/submissions/service";
+
+/**
+ * Challenges: time-boxed goals a parent sets. Progress is derived (never stored)
+ * from the ledger and chore submissions; the bonus is paid out exactly once per
+ * kid via an idempotent `challenge_awards` row + a `bonus` ledger entry. Family
+ * challenges award every participating kid the full bonus. See SPEC.
+ */
+
+const ACTIVE_SUBMISSION = ["pending", "approved"] as const;
+
+export interface ChallengeInput {
+  title: string;
+  description?: string | null;
+  scope: ChallengeScope;
+  goalType: ChallengeGoal;
+  goalTarget: number;
+  bonusPoints: number;
+  startsOn: string;
+  endsOn: string;
+  /** Participating kids; empty ⇒ the whole family. */
+  kidIds?: string[];
+}
+
+/** All kid ids in the family (used to resolve "everyone" participation). */
+async function familyKidIds(db: Database, familyId: string): Promise<string[]> {
+  const rows = await db
+    .select({ id: people.id })
+    .from(people)
+    .where(and(eq(people.familyId, familyId), eq(people.role, "kid")));
+  return rows.map((r) => r.id);
+}
+
+/** Explicit participants, or all kids when none were chosen. */
+export async function participantKidIds(
+  db: Database,
+  familyId: string,
+  challengeId: string,
+): Promise<string[]> {
+  const rows = await db
+    .select({ personId: challengeParticipants.personId })
+    .from(challengeParticipants)
+    .where(eq(challengeParticipants.challengeId, challengeId));
+  if (rows.length > 0) return rows.map((r) => r.personId);
+  return familyKidIds(db, familyId);
+}
+
+async function replaceParticipants(
+  db: Database,
+  familyId: string,
+  challengeId: string,
+  kidIds: string[] | undefined,
+) {
+  await db
+    .delete(challengeParticipants)
+    .where(eq(challengeParticipants.challengeId, challengeId));
+  if (!kidIds || kidIds.length === 0) return;
+  const allowed = new Set(await familyKidIds(db, familyId));
+  const clean = [...new Set(kidIds)].filter((id) => allowed.has(id));
+  if (clean.length === 0) return;
+  await db
+    .insert(challengeParticipants)
+    .values(clean.map((personId) => ({ challengeId, personId })));
+}
+
+export async function createChallenge(
+  db: Database,
+  familyId: string,
+  input: ChallengeInput,
+  createdBy?: string,
+): Promise<Challenge> {
+  const [row] = await db
+    .insert(challenges)
+    .values({
+      familyId,
+      title: input.title,
+      description: input.description ?? null,
+      scope: input.scope,
+      goalType: input.goalType,
+      goalTarget: input.goalTarget,
+      bonusPoints: input.bonusPoints,
+      startsOn: input.startsOn,
+      endsOn: input.endsOn,
+      createdBy: createdBy ?? null,
+    })
+    .returning();
+  await replaceParticipants(db, familyId, row.id, input.kidIds);
+  return row;
+}
+
+export async function updateChallenge(
+  db: Database,
+  familyId: string,
+  id: string,
+  input: ChallengeInput,
+): Promise<void> {
+  await db
+    .update(challenges)
+    .set({
+      title: input.title,
+      description: input.description ?? null,
+      scope: input.scope,
+      goalType: input.goalType,
+      goalTarget: input.goalTarget,
+      bonusPoints: input.bonusPoints,
+      startsOn: input.startsOn,
+      endsOn: input.endsOn,
+    })
+    .where(and(eq(challenges.familyId, familyId), eq(challenges.id, id)));
+  await replaceParticipants(db, familyId, id, input.kidIds);
+}
+
+export async function setChallengeActive(
+  db: Database,
+  familyId: string,
+  id: string,
+  isActive: boolean,
+): Promise<void> {
+  await db
+    .update(challenges)
+    .set({ isActive })
+    .where(and(eq(challenges.familyId, familyId), eq(challenges.id, id)));
+}
+
+export async function deleteChallenge(
+  db: Database,
+  familyId: string,
+  id: string,
+): Promise<void> {
+  await db
+    .delete(challenges)
+    .where(and(eq(challenges.familyId, familyId), eq(challenges.id, id)));
+}
+
+export async function getChallenge(
+  db: Database,
+  familyId: string,
+  id: string,
+): Promise<Challenge | null> {
+  const [row] = await db
+    .select()
+    .from(challenges)
+    .where(and(eq(challenges.familyId, familyId), eq(challenges.id, id)))
+    .limit(1);
+  return row ?? null;
+}
+
+export function listChallenges(
+  db: Database,
+  familyId: string,
+): Promise<Challenge[]> {
+  return db
+    .select()
+    .from(challenges)
+    .where(eq(challenges.familyId, familyId))
+    .orderBy(challenges.startsOn, challenges.createdAt);
+}
+
+/* --------------------------------------------------------------- progress */
+
+/** Sum of points *earned* (chores/custom, not bonuses) by kids within window. */
+async function earnedPoints(
+  db: Database,
+  familyId: string,
+  kidIds: string[],
+  timezone: string,
+  startsOn: string,
+  endsOn: string,
+): Promise<number> {
+  if (kidIds.length === 0) return 0;
+  const rows = await db
+    .select({ amount: ledger.amount, createdAt: ledger.createdAt })
+    .from(ledger)
+    .where(
+      and(
+        eq(ledger.familyId, familyId),
+        inArray(ledger.personId, kidIds),
+        eq(ledger.type, "earn"),
+        gt(ledger.amount, 0),
+      ),
+    );
+  let sum = 0;
+  for (const r of rows) {
+    const d = localDate(timezone, r.createdAt);
+    if (d >= startsOn && d <= endsOn) sum += r.amount;
+  }
+  return sum;
+}
+
+/** Count of approved chore submissions by kids within window. */
+async function choreCount(
+  db: Database,
+  familyId: string,
+  kidIds: string[],
+  startsOn: string,
+  endsOn: string,
+): Promise<number> {
+  if (kidIds.length === 0) return 0;
+  const [row] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(choreSubmissions)
+    .where(
+      and(
+        eq(choreSubmissions.familyId, familyId),
+        inArray(choreSubmissions.personId, kidIds),
+        eq(choreSubmissions.status, "approved"),
+        gte(choreSubmissions.localDate, startsOn),
+        lte(choreSubmissions.localDate, endsOn),
+      ),
+    );
+  return row?.n ?? 0;
+}
+
+/** Family-local dates within window on which a kid did all their core chores. */
+async function coreCompleteDays(
+  db: Database,
+  familyId: string,
+  kidId: string,
+  timezone: string,
+  startsOn: string,
+  endsOn: string,
+  now: Date,
+): Promise<Set<string>> {
+  const submittable = await listSubmittableChores(
+    db,
+    familyId,
+    kidId,
+    timezone,
+    now,
+  );
+  const coreIds = submittable
+    .filter((c) => c.isCore && c.eligible)
+    .map((c) => c.id);
+  if (coreIds.length === 0) return new Set();
+
+  const rows = await db
+    .selectDistinct({
+      localDate: choreSubmissions.localDate,
+      choreId: choreSubmissions.choreId,
+    })
+    .from(choreSubmissions)
+    .where(
+      and(
+        eq(choreSubmissions.familyId, familyId),
+        eq(choreSubmissions.personId, kidId),
+        inArray(choreSubmissions.status, ACTIVE_SUBMISSION),
+        inArray(choreSubmissions.choreId, coreIds),
+        gte(choreSubmissions.localDate, startsOn),
+        lte(choreSubmissions.localDate, endsOn),
+      ),
+    );
+  const byDay = new Map<string, number>();
+  for (const r of rows) {
+    byDay.set(r.localDate, (byDay.get(r.localDate) ?? 0) + 1);
+  }
+  const done = new Set<string>();
+  for (const [day, n] of byDay) {
+    if (n >= coreIds.length) done.add(day);
+  }
+  return done;
+}
+
+/** The progress value for a challenge across the given participating kids. */
+export async function challengeValue(
+  db: Database,
+  familyId: string,
+  challenge: Challenge,
+  kidIds: string[],
+  timezone: string,
+  now: Date,
+): Promise<number> {
+  const { goalType, startsOn, endsOn } = challenge;
+  if (goalType === "points") {
+    return earnedPoints(db, familyId, kidIds, timezone, startsOn, endsOn);
+  }
+  if (goalType === "chore_count") {
+    return choreCount(db, familyId, kidIds, startsOn, endsOn);
+  }
+  // core_days: per-kid = the kid's complete days; family = days *everyone* did.
+  const sets = await Promise.all(
+    kidIds.map((id) =>
+      coreCompleteDays(db, familyId, id, timezone, startsOn, endsOn, now),
+    ),
+  );
+  if (sets.length === 0) return 0;
+  if (challenge.scope === "kid") {
+    return sets[0]?.size ?? 0;
+  }
+  // Family: intersection — days every participant completed their core chores.
+  const [first, ...rest] = sets;
+  let inter = first ?? new Set<string>();
+  for (const s of rest) inter = new Set([...inter].filter((d) => s.has(d)));
+  return inter.size;
+}
+
+export interface ChallengeProgress {
+  challenge: Challenge;
+  value: number;
+  target: number;
+  pct: number;
+  complete: boolean;
+  /** This kid has already been paid the bonus (kid views only). */
+  awarded: boolean;
+}
+
+function pct(value: number, target: number): number {
+  if (target <= 0) return 100;
+  return Math.min(100, Math.max(0, Math.round((value / target) * 100)));
+}
+
+/** Active challenges a kid takes part in, with their (or the family's) progress. */
+export async function listKidChallenges(
+  db: Database,
+  familyId: string,
+  kidId: string,
+  timezone: string,
+  now: Date = new Date(),
+): Promise<ChallengeProgress[]> {
+  const today = localDate(timezone, now);
+  const all = await db
+    .select()
+    .from(challenges)
+    .where(
+      and(eq(challenges.familyId, familyId), eq(challenges.isActive, true)),
+    )
+    .orderBy(challenges.endsOn);
+
+  const awardedRows = await db
+    .select({ challengeId: challengeAwards.challengeId })
+    .from(challengeAwards)
+    .where(eq(challengeAwards.personId, kidId));
+  const awarded = new Set(awardedRows.map((r) => r.challengeId));
+
+  const out: ChallengeProgress[] = [];
+  for (const c of all) {
+    if (today < c.startsOn || today > c.endsOn) continue;
+    const parts = await participantKidIds(db, familyId, c.id);
+    if (!parts.includes(kidId)) continue;
+    const kids = c.scope === "family" ? parts : [kidId];
+    const value = await challengeValue(db, familyId, c, kids, timezone, now);
+    out.push({
+      challenge: c,
+      value,
+      target: c.goalTarget,
+      pct: pct(value, c.goalTarget),
+      complete: value >= c.goalTarget,
+      awarded: awarded.has(c.id),
+    });
+  }
+  return out;
+}
+
+/* ------------------------------------------------------------- auto-award */
+
+/** Pay a kid a challenge bonus once (idempotent). Returns true if newly paid. */
+async function awardBonus(
+  db: Database,
+  familyId: string,
+  challenge: Challenge,
+  kidId: string,
+): Promise<boolean> {
+  return db.transaction(async (tx) => {
+    const claimed = await tx
+      .insert(challengeAwards)
+      .values({ challengeId: challenge.id, personId: kidId })
+      .onConflictDoNothing()
+      .returning({ id: challengeAwards.id });
+    if (claimed.length === 0) return false; // already paid
+
+    await tx.insert(ledger).values({
+      familyId,
+      personId: kidId,
+      amount: challenge.bonusPoints,
+      type: "bonus",
+      reason: `Challenge: ${challenge.title}`,
+      createdBy: challenge.createdBy ?? null,
+    });
+    return true;
+  });
+}
+
+export interface ChallengeWin {
+  challengeId: string;
+  title: string;
+  personId: string;
+  bonusPoints: number;
+}
+
+/**
+ * Re-check a kid's active challenges after they earn points / log a chore and
+ * pay out any newly-completed bonus. Family challenges pay every participant.
+ * Idempotent — safe to call from multiple earning paths.
+ */
+export async function evaluateChallenges(
+  db: Database,
+  familyId: string,
+  personId: string,
+  timezone: string,
+  now: Date = new Date(),
+): Promise<ChallengeWin[]> {
+  const today = localDate(timezone, now);
+  const active = await db
+    .select()
+    .from(challenges)
+    .where(
+      and(eq(challenges.familyId, familyId), eq(challenges.isActive, true)),
+    );
+
+  const wins: ChallengeWin[] = [];
+  for (const c of active) {
+    if (today < c.startsOn || today > c.endsOn) continue;
+    const parts = await participantKidIds(db, familyId, c.id);
+    if (!parts.includes(personId)) continue;
+
+    if (c.scope === "kid") {
+      const value = await challengeValue(db, familyId, c, [personId], timezone, now); // prettier-ignore
+      if (value < c.goalTarget) continue;
+      if (await awardBonus(db, familyId, c, personId)) {
+        wins.push({
+          challengeId: c.id,
+          title: c.title,
+          personId,
+          bonusPoints: c.bonusPoints,
+        });
+      }
+    } else {
+      const value = await challengeValue(db, familyId, c, parts, timezone, now);
+      if (value < c.goalTarget) continue;
+      for (const kid of parts) {
+        if (await awardBonus(db, familyId, c, kid)) {
+          wins.push({
+            challengeId: c.id,
+            title: c.title,
+            personId: kid,
+            bonusPoints: c.bonusPoints,
+          });
+        }
+      }
+    }
+  }
+  return wins;
+}

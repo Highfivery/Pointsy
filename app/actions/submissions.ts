@@ -15,6 +15,7 @@ import {
   InvalidSubmissionError,
 } from "@/lib/submissions/service";
 import { notifyParents, notifyPerson } from "@/lib/push/send";
+import { evaluateChallenges } from "@/lib/challenges/service";
 
 const idSchema = z.string().uuid();
 const decisionSchema = z.enum(["approved", "rejected"]);
@@ -101,6 +102,10 @@ export async function decideSubmissionAction(
       body: `+${decided.points} for ${decided.choreName}`,
       url: "/me",
     });
+    // Approving points may complete a challenge → pay out any earned bonus.
+    const tz = await getFamilyTimezone(db, session.familyId);
+    await evaluateChallenges(db, session.familyId, decided.personId, tz);
+    revalidatePath("/me");
   } else {
     await notifyPerson(db, session.familyId, decided.personId, {
       title: "Chore not approved",

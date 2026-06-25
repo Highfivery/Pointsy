@@ -146,6 +146,36 @@ export const rewardSchema = z.object({
   description: z.string().trim().max(280).optional(),
 });
 
+/* --------------------------------------------------------------- challenges */
+
+const isoDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Pick a date.");
+
+export const challengeSchema = z
+  .object({
+    title: z.string().trim().min(1, "Name is required.").max(80),
+    description: z.string().trim().max(280).optional(),
+    scope: z.enum(["kid", "family"]).default("kid"),
+    goalType: z.enum(["points", "chore_count", "core_days"]),
+    goalTarget: z.coerce
+      .number()
+      .int("Target must be a whole number.")
+      .min(1, "Set a target of at least 1.")
+      .max(100000),
+    bonusPoints: z.coerce
+      .number()
+      .int("Bonus must be a whole number.")
+      .min(1, "Bonus must be at least 1.")
+      .max(100000),
+    startsOn: isoDateSchema,
+    endsOn: isoDateSchema,
+    /** Participating kids; empty ⇒ the whole family. */
+    kidIds: z.array(z.string().uuid()).default([]),
+  })
+  .refine((d) => d.endsOn >= d.startsOn, {
+    message: "The end date must be on or after the start date.",
+    path: ["endsOn"],
+  });
+
 /* ---------------------------------------------------- points & redemptions */
 
 export const customAwardSchema = z.object({

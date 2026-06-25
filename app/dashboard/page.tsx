@@ -13,6 +13,7 @@ import {
   X,
   PackageCheck,
   UserPlus,
+  Trophy,
 } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
@@ -329,6 +330,24 @@ export default async function DashboardPage() {
           <span className={styles.manageText}>
             <span className={styles.manageLabel}>Rewards</span>
             <span className={styles.manageHint}>Things to redeem</span>
+          </span>
+          <ChevronRight
+            size={20}
+            aria-hidden="true"
+            className={styles.manageChevron}
+          />
+        </Link>
+        <Link
+          href="/manage/challenges"
+          className={styles.manageLink}
+          aria-label="Challenges"
+        >
+          <span className={styles.manageIcon}>
+            <Trophy size={22} aria-hidden="true" />
+          </span>
+          <span className={styles.manageText}>
+            <span className={styles.manageLabel}>Challenges</span>
+            <span className={styles.manageHint}>Goals &amp; bonuses</span>
           </span>
           <ChevronRight
             size={20}
