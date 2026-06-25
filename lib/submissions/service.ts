@@ -10,6 +10,7 @@ import {
 } from "@/lib/chores/assignment";
 import { getSubtasksByChore } from "@/lib/chores/subtasks";
 import { eligibleFor } from "@/lib/chores/eligibility";
+import { coreStreak } from "@/lib/chores/streak";
 
 export class LimitReachedError extends Error {
   constructor(message: string) {
@@ -64,12 +65,39 @@ export interface SubmittableChore {
   points: number;
   limitPeriod: LimitPeriod;
   limitCount: number;
+  /** A daily "must-do" that counts toward the kid's core progress + streak. */
+  isCore: boolean;
+  /** This chore is the kid's to do (assignment/rotation allows it). */
+  eligible: boolean;
+  /** The kid already logged this at least once today (pending or approved). */
+  loggedToday: boolean;
   /** Checklist the kid must complete before logging it. */
   subtasks: string[];
   /** Remaining claims in the current window, or null when unlimited. */
   remaining: number | null;
   canSubmit: boolean;
   reason: string | null;
+}
+
+/** Chores the kid has an active (pending/approved) submission for today. */
+async function loggedTodaySet(
+  db: Database,
+  familyId: string,
+  personId: string,
+  today: string,
+): Promise<Set<string>> {
+  const rows = await db
+    .select({ choreId: choreSubmissions.choreId })
+    .from(choreSubmissions)
+    .where(
+      and(
+        eq(choreSubmissions.familyId, familyId),
+        eq(choreSubmissions.personId, personId),
+        inArray(choreSubmissions.status, ACTIVE),
+        eq(choreSubmissions.localDate, today),
+      ),
+    );
+  return new Set(rows.map((r) => r.choreId).filter((id): id is string => !!id));
 }
 
 /** Active chores a kid can log, with per-chore availability for today/this week. */
@@ -101,6 +129,7 @@ export async function listSubmittableChores(
     .where(and(eq(people.familyId, familyId), eq(people.role, "kid")));
   const nameById = new Map(kids.map((k) => [k.id, k.name]));
   const nameOf = (pid: string) => nameById.get(pid) ?? "Someone";
+  const loggedToday = await loggedTodaySet(db, familyId, personId, today);
 
   const base = (c: (typeof active)[number]) => ({
     id: c.id,
@@ -111,6 +140,8 @@ export async function listSubmittableChores(
     points: c.points,
     limitPeriod: c.limitPeriod,
     limitCount: c.limitCount,
+    isCore: c.isCore,
+    loggedToday: loggedToday.has(c.id),
     subtasks: subtasks.get(c.id) ?? [],
   });
 
@@ -130,6 +161,7 @@ export async function listSubmittableChores(
     if (!elig.allowed) {
       out.push({
         ...base(c),
+        eligible: false,
         remaining: null,
         canSubmit: false,
         reason: elig.reason,
@@ -138,7 +170,13 @@ export async function listSubmittableChores(
     }
 
     if (c.limitPeriod === "none") {
-      out.push({ ...base(c), remaining: null, canSubmit: true, reason: null });
+      out.push({
+        ...base(c),
+        eligible: true,
+        remaining: null,
+        canSubmit: true,
+        reason: null,
+      });
       continue;
     }
     const used = await usedInWindow(
@@ -153,12 +191,48 @@ export async function listSubmittableChores(
     const unit = c.limitPeriod === "day" ? "today" : "this week";
     out.push({
       ...base(c),
+      eligible: true,
       remaining,
       canSubmit: remaining > 0,
       reason: remaining > 0 ? null : `Done ${unit}`,
     });
   }
   return out;
+}
+
+/**
+ * The kid's "all core chores done" streak — consecutive days every core chore
+ * they're responsible for was logged. `coreChoreIds` are the core chores
+ * currently eligible to this kid (derive from `listSubmittableChores`).
+ */
+export async function getCoreStreak(
+  db: Database,
+  familyId: string,
+  personId: string,
+  timezone: string,
+  coreChoreIds: string[],
+  now: Date = new Date(),
+): Promise<number> {
+  if (coreChoreIds.length === 0) return 0;
+  const rows = await db
+    .selectDistinct({
+      localDate: choreSubmissions.localDate,
+      choreId: choreSubmissions.choreId,
+    })
+    .from(choreSubmissions)
+    .where(
+      and(
+        eq(choreSubmissions.familyId, familyId),
+        eq(choreSubmissions.personId, personId),
+        inArray(choreSubmissions.status, ACTIVE),
+        inArray(choreSubmissions.choreId, coreChoreIds),
+      ),
+    );
+  const doneByDay = new Map<string, number>();
+  for (const r of rows) {
+    doneByDay.set(r.localDate, (doneByDay.get(r.localDate) ?? 0) + 1);
+  }
+  return coreStreak(doneByDay, coreChoreIds.length, localDate(timezone, now));
 }
 
 /** Kid logs a completed chore (pending). Enforces the per-chore limit. */

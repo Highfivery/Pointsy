@@ -52,6 +52,7 @@ test("a rotating chore is locked for whoever isn't up", async ({ page }) => {
 
   // The overview shows whose turn it is.
   await expect(page.getByText("Robin's turn")).toBeVisible();
+  await expect(page).toHaveTitle(/chores/i); // let the soft-nav title settle
   await expectNoA11yViolations(page, "/manage/chores");
 
   // Sign in as Sky — Dishes shows but is locked ("Robin's turn").
@@ -64,8 +65,8 @@ test("a rotating chore is locked for whoever isn't up", async ({ page }) => {
   await expect(page).toHaveURL(/\/me$/);
 
   await page.goto("/submit");
-  const dishes = page.getByRole("button", { name: /dishes/i });
-  await expect(dishes).toBeVisible();
-  await expect(dishes).toBeDisabled();
+  // The chore is shown as a locked card (not a tappable button) with the reason.
+  await expect(page.getByText("Dishes", { exact: true })).toBeVisible();
   await expect(page.getByText("Robin's turn")).toBeVisible();
+  await expect(page.getByRole("button", { name: /dishes/i })).toHaveCount(0);
 });

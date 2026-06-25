@@ -87,7 +87,8 @@ test.describe("redemption loop", () => {
     await enterPin(page, "4321");
     await expect(page).toHaveURL(/\/me$/);
 
-    await page.getByRole("link", { name: /redeem rewards/i }).click();
+    // Navigate via the kid tab bar.
+    await page.getByRole("link", { name: "Rewards", exact: true }).click();
     await expect(page).toHaveURL(/\/redeem$/);
     await expect(page).toHaveTitle(/redeem/i); // let the soft-nav title settle
     await expectNoA11yViolations(page, "/redeem");
