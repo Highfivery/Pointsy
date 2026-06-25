@@ -158,7 +158,7 @@ export async function getKidBalances(
 export interface ActivityEntry {
   id: string;
   amount: number;
-  type: "earn" | "redeem" | "adjust";
+  type: "earn" | "redeem" | "adjust" | "bonus";
   reason: string;
   createdAt: Date;
   kidName: string;

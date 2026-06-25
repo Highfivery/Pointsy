@@ -8,6 +8,8 @@ import { awardChore, awardCustom, adjustPoints } from "@/lib/points/service";
 import { customAwardSchema, adjustSchema } from "@/lib/validation/schemas";
 import { toFieldErrors, type FormState } from "@/lib/validation/form";
 import { notifyPerson } from "@/lib/push/send";
+import { getFamilyTimezone } from "@/lib/family/settings";
+import { evaluateChallenges } from "@/lib/challenges/service";
 
 async function notifyKidEarned(
   familyId: string,
@@ -48,6 +50,7 @@ export async function awardChoreAction(formData: FormData): Promise<void> {
   );
   if (kidIds.length === 0) return;
 
+  const tz = await getFamilyTimezone(getDb(), session.familyId);
   for (const kidId of kidIds) {
     const entry = await awardChore(
       getDb(),
@@ -57,6 +60,7 @@ export async function awardChoreAction(formData: FormData): Promise<void> {
       session.personId,
     );
     await notifyKidEarned(session.familyId, kidId, entry.amount, entry.reason);
+    await evaluateChallenges(getDb(), session.familyId, kidId, tz);
     revalidateFor(kidId);
   }
 }
@@ -91,6 +95,8 @@ export async function awardCustomAction(
     parsed.data.amount,
     parsed.data.reason,
   );
+  const tz = await getFamilyTimezone(getDb(), session.familyId);
+  await evaluateChallenges(getDb(), session.familyId, parsed.data.kidId, tz);
   revalidateFor(parsed.data.kidId);
   return { ok: true };
 }

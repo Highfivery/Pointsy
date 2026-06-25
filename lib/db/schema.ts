@@ -28,6 +28,7 @@ export const ledgerTypeEnum = pgEnum("ledger_type", [
   "earn",
   "redeem",
   "adjust",
+  "bonus",
 ]);
 export const redemptionStatusEnum = pgEnum("redemption_status", [
   "requested",
@@ -65,6 +66,16 @@ export const choreAssignmentEnum = pgEnum("chore_assignment", [
   "everyone",
   "specific",
   "rotating",
+]);
+
+/** Whether a challenge is tracked per kid or as one shared family goal. */
+export const challengeScopeEnum = pgEnum("challenge_scope", ["kid", "family"]);
+
+/** What a challenge measures: points earned, chores logged, or core-chore days. */
+export const challengeGoalEnum = pgEnum("challenge_goal", [
+  "points",
+  "chore_count",
+  "core_days",
 ]);
 
 /* --------------------------------------------------------------- families */
@@ -400,6 +411,81 @@ export const choreSubmissions = pgTable(
   ],
 );
 
+/* -------------------------------------------------------------- challenges */
+
+/**
+ * A time-boxed goal a parent sets. `scope` decides whether each kid is tracked
+ * on their own ("kid") or all participants share one tally ("family"). The bonus
+ * is awarded once per kid when the goal is met (family goals award every
+ * participating kid the full bonus). Dates are family-local "YYYY-MM-DD".
+ */
+export const challenges = pgTable(
+  "challenges",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    familyId: uuid("family_id")
+      .notNull()
+      .references(() => families.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    description: text("description"),
+    scope: challengeScopeEnum("scope").notNull().default("kid"),
+    goalType: challengeGoalEnum("goal_type").notNull(),
+    /** Target count for the goal (points, chores, or days). */
+    goalTarget: integer("goal_target").notNull(),
+    /** Points awarded to each completing kid. */
+    bonusPoints: integer("bonus_points").notNull(),
+    startsOn: text("starts_on").notNull(),
+    endsOn: text("ends_on").notNull(),
+    isActive: boolean("is_active").notNull().default(true),
+    createdBy: uuid("created_by").references(() => people.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [index("challenges_family_idx").on(t.familyId)],
+);
+
+/** Which kids a challenge applies to. No rows ⇒ every kid in the family. */
+export const challengeParticipants = pgTable(
+  "challenge_participants",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    challengeId: uuid("challenge_id")
+      .notNull()
+      .references(() => challenges.id, { onDelete: "cascade" }),
+    personId: uuid("person_id")
+      .notNull()
+      .references(() => people.id, { onDelete: "cascade" }),
+  },
+  (t) => [
+    index("challenge_participants_challenge_idx").on(t.challengeId),
+    uniqueIndex("challenge_participants_unique").on(t.challengeId, t.personId),
+  ],
+);
+
+/** Records the one-time bonus award so a kid is never paid twice for a goal. */
+export const challengeAwards = pgTable(
+  "challenge_awards",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    challengeId: uuid("challenge_id")
+      .notNull()
+      .references(() => challenges.id, { onDelete: "cascade" }),
+    personId: uuid("person_id")
+      .notNull()
+      .references(() => people.id, { onDelete: "cascade" }),
+    awardedAt: timestamp("awarded_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("challenge_awards_challenge_idx").on(t.challengeId),
+    uniqueIndex("challenge_awards_unique").on(t.challengeId, t.personId),
+  ],
+);
+
 /* ------------------------------------------------------------------ types */
 
 export type Family = typeof families.$inferSelect;
@@ -426,6 +512,12 @@ export type ParentInvite = typeof parentInvites.$inferSelect;
 export type NewParentInvite = typeof parentInvites.$inferInsert;
 export type ChoreSubmission = typeof choreSubmissions.$inferSelect;
 export type NewChoreSubmission = typeof choreSubmissions.$inferInsert;
+export type Challenge = typeof challenges.$inferSelect;
+export type NewChallenge = typeof challenges.$inferInsert;
+export type ChallengeScope = (typeof challengeScopeEnum.enumValues)[number];
+export type ChallengeGoal = (typeof challengeGoalEnum.enumValues)[number];
+export type ChallengeParticipant = typeof challengeParticipants.$inferSelect;
+export type ChallengeAward = typeof challengeAwards.$inferSelect;
 
 export const schema = {
   families,
@@ -439,6 +531,9 @@ export const schema = {
   pushSubscriptions,
   parentInvites,
   choreSubmissions,
+  challenges,
+  challengeParticipants,
+  challengeAwards,
   roleEnum,
   ledgerTypeEnum,
   redemptionStatusEnum,
@@ -446,4 +541,6 @@ export const schema = {
   submissionStatusEnum,
   choreCategoryEnum,
   choreAssignmentEnum,
+  challengeScopeEnum,
+  challengeGoalEnum,
 };
