@@ -6,7 +6,7 @@
   width: 100%;
   max-width: 32rem;
   margin: 0 auto;
-  padding: var(--space-6) var(--space-4) var(--space-8);
+  padding: var(--space-6) var(--space-4) calc(var(--space-8) + 4.5rem);
 }
 
 .header {
@@ -81,71 +81,6 @@
   font-weight: 600;
   color: var(--color-primary);
   cursor: pointer;
-}
-
-.manageNav {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.manageLink {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  min-height: var(--tap-target);
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-surface-raised);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
-  color: var(--color-text);
-  text-decoration: none;
-  transition:
-    border-color 0.12s ease,
-    transform 0.12s ease;
-}
-
-.manageIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  flex-shrink: 0;
-  color: var(--color-primary);
-  background: var(--color-primary-weak);
-  border-radius: var(--radius-md);
-}
-
-.manageText {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 0;
-}
-
-.manageLabel {
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: var(--color-text);
-}
-
-.manageHint {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-}
-
-.manageChevron {
-  flex-shrink: 0;
-  color: var(--color-text-muted);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .manageLink:hover {
-    border-color: var(--color-primary);
-    transform: translateY(-1px);
-  }
 }
 
 .note {
@@ -312,8 +247,7 @@
   }
 }
 
-.kidCard:active,
-.manageLink:active {
+.kidCard:active {
   transform: scale(0.99);
 }
 .approveBtn:active,
@@ -323,7 +257,6 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .kidCard:active,
-  .manageLink:active,
   .approveBtn:active,
   .denyBtn:active,
   .deliverBtn:active {
