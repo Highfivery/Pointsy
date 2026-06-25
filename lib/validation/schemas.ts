@@ -155,6 +155,7 @@ export const challengeSchema = z
     title: z.string().trim().min(1, "Name is required.").max(80),
     description: z.string().trim().max(280).optional(),
     scope: z.enum(["kid", "family"]).default("kid"),
+    recurrence: z.enum(["none", "weekly"]).default("none"),
     goalType: z.enum(["points", "chore_count", "core_days"]),
     goalTarget: z.coerce
       .number()

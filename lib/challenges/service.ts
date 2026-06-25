@@ -10,8 +10,9 @@ import {
   type Challenge,
   type ChallengeScope,
   type ChallengeGoal,
+  type ChallengeRecurrence,
 } from "@/lib/db/schema";
-import { localDate } from "@/lib/timezone";
+import { localDate, weekStart, addDays } from "@/lib/timezone";
 import { listSubmittableChores } from "@/lib/submissions/service";
 
 /**
@@ -30,6 +31,7 @@ export interface ChallengeInput {
   goalType: ChallengeGoal;
   goalTarget: number;
   bonusPoints: number;
+  recurrence?: ChallengeRecurrence;
   startsOn: string;
   endsOn: string;
   /** Participating kids; empty ⇒ the whole family. */
@@ -93,6 +95,7 @@ export async function createChallenge(
       goalType: input.goalType,
       goalTarget: input.goalTarget,
       bonusPoints: input.bonusPoints,
+      recurrence: input.recurrence ?? "none",
       startsOn: input.startsOn,
       endsOn: input.endsOn,
       createdBy: createdBy ?? null,
@@ -117,6 +120,7 @@ export async function updateChallenge(
       goalType: input.goalType,
       goalTarget: input.goalTarget,
       bonusPoints: input.bonusPoints,
+      recurrence: input.recurrence ?? "none",
       startsOn: input.startsOn,
       endsOn: input.endsOn,
     })
@@ -274,26 +278,54 @@ async function coreCompleteDays(
   return done;
 }
 
-/** The progress value for a challenge across the given participating kids. */
+/** The active scoring window + idempotency key for a challenge on `today`, or
+ *  null if the challenge isn't running today. One-off → its whole span (key "");
+ *  weekly → the current Mon–Sun week clamped to the span (key = week start). */
+export interface ChallengeWindow {
+  start: string;
+  end: string;
+  key: string;
+}
+
+export function currentWindow(
+  challenge: Pick<Challenge, "startsOn" | "endsOn" | "recurrence">,
+  today: string,
+): ChallengeWindow | null {
+  if (today < challenge.startsOn || today > challenge.endsOn) return null;
+  if (challenge.recurrence === "weekly") {
+    const ws = weekStart(today);
+    const we = addDays(ws, 6);
+    return {
+      start: ws < challenge.startsOn ? challenge.startsOn : ws,
+      end: we > challenge.endsOn ? challenge.endsOn : we,
+      key: ws,
+    };
+  }
+  return { start: challenge.startsOn, end: challenge.endsOn, key: "" };
+}
+
+/** The progress value for a challenge over a window, across participating kids. */
 export async function challengeValue(
   db: Database,
   familyId: string,
   challenge: Challenge,
   kidIds: string[],
+  window: ChallengeWindow,
   timezone: string,
   now: Date,
 ): Promise<number> {
-  const { goalType, startsOn, endsOn } = challenge;
+  const { goalType } = challenge;
+  const { start, end } = window;
   if (goalType === "points") {
-    return earnedPoints(db, familyId, kidIds, timezone, startsOn, endsOn);
+    return earnedPoints(db, familyId, kidIds, timezone, start, end);
   }
   if (goalType === "chore_count") {
-    return choreCount(db, familyId, kidIds, startsOn, endsOn);
+    return choreCount(db, familyId, kidIds, start, end);
   }
   // core_days: per-kid = the kid's complete days; family = days *everyone* did.
   const sets = await Promise.all(
     kidIds.map((id) =>
-      coreCompleteDays(db, familyId, id, timezone, startsOn, endsOn, now),
+      coreCompleteDays(db, familyId, id, timezone, start, end, now),
     ),
   );
   if (sets.length === 0) return 0;
@@ -340,25 +372,39 @@ export async function listKidChallenges(
     .orderBy(challenges.endsOn);
 
   const awardedRows = await db
-    .select({ challengeId: challengeAwards.challengeId })
+    .select({
+      challengeId: challengeAwards.challengeId,
+      periodKey: challengeAwards.periodKey,
+    })
     .from(challengeAwards)
     .where(eq(challengeAwards.personId, kidId));
-  const awarded = new Set(awardedRows.map((r) => r.challengeId));
+  const awarded = new Set(
+    awardedRows.map((r) => `${r.challengeId}:${r.periodKey}`),
+  );
 
   const out: ChallengeProgress[] = [];
   for (const c of all) {
-    if (today < c.startsOn || today > c.endsOn) continue;
+    const window = currentWindow(c, today);
+    if (!window) continue;
     const parts = await participantKidIds(db, familyId, c.id);
     if (!parts.includes(kidId)) continue;
     const kids = c.scope === "family" ? parts : [kidId];
-    const value = await challengeValue(db, familyId, c, kids, timezone, now);
+    const value = await challengeValue(
+      db,
+      familyId,
+      c,
+      kids,
+      window,
+      timezone,
+      now,
+    );
     out.push({
       challenge: c,
       value,
       target: c.goalTarget,
       pct: pct(value, c.goalTarget),
       complete: value >= c.goalTarget,
-      awarded: awarded.has(c.id),
+      awarded: awarded.has(`${c.id}:${window.key}`),
     });
   }
   return out;
@@ -372,11 +418,12 @@ async function awardBonus(
   familyId: string,
   challenge: Challenge,
   kidId: string,
+  periodKey: string,
 ): Promise<boolean> {
   return db.transaction(async (tx) => {
     const claimed = await tx
       .insert(challengeAwards)
-      .values({ challengeId: challenge.id, personId: kidId })
+      .values({ challengeId: challenge.id, personId: kidId, periodKey })
       .onConflictDoNothing()
       .returning({ id: challengeAwards.id });
     if (claimed.length === 0) return false; // already paid
@@ -422,14 +469,15 @@ export async function evaluateChallenges(
 
   const wins: ChallengeWin[] = [];
   for (const c of active) {
-    if (today < c.startsOn || today > c.endsOn) continue;
+    const window = currentWindow(c, today);
+    if (!window) continue;
     const parts = await participantKidIds(db, familyId, c.id);
     if (!parts.includes(personId)) continue;
 
     if (c.scope === "kid") {
-      const value = await challengeValue(db, familyId, c, [personId], timezone, now); // prettier-ignore
+      const value = await challengeValue(db, familyId, c, [personId], window, timezone, now); // prettier-ignore
       if (value < c.goalTarget) continue;
-      if (await awardBonus(db, familyId, c, personId)) {
+      if (await awardBonus(db, familyId, c, personId, window.key)) {
         wins.push({
           challengeId: c.id,
           title: c.title,
@@ -438,10 +486,10 @@ export async function evaluateChallenges(
         });
       }
     } else {
-      const value = await challengeValue(db, familyId, c, parts, timezone, now);
+      const value = await challengeValue(db, familyId, c, parts, window, timezone, now); // prettier-ignore
       if (value < c.goalTarget) continue;
       for (const kid of parts) {
-        if (await awardBonus(db, familyId, c, kid)) {
+        if (await awardBonus(db, familyId, c, kid, window.key)) {
           wins.push({
             challengeId: c.id,
             title: c.title,

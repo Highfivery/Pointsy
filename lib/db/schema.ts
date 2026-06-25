@@ -78,6 +78,12 @@ export const challengeGoalEnum = pgEnum("challenge_goal", [
   "core_days",
 ]);
 
+/** Whether a challenge runs once or resets every week within its date span. */
+export const challengeRecurrenceEnum = pgEnum("challenge_recurrence", [
+  "none",
+  "weekly",
+]);
+
 /* --------------------------------------------------------------- families */
 
 export const families = pgTable("families", {
@@ -429,6 +435,7 @@ export const challenges = pgTable(
     title: text("title").notNull(),
     description: text("description"),
     scope: challengeScopeEnum("scope").notNull().default("kid"),
+    recurrence: challengeRecurrenceEnum("recurrence").notNull().default("none"),
     goalType: challengeGoalEnum("goal_type").notNull(),
     /** Target count for the goal (points, chores, or days). */
     goalTarget: integer("goal_target").notNull(),
@@ -476,13 +483,19 @@ export const challengeAwards = pgTable(
     personId: uuid("person_id")
       .notNull()
       .references(() => people.id, { onDelete: "cascade" }),
+    /** Period this award is for: "" for one-off, the week-start date for weekly. */
+    periodKey: text("period_key").notNull().default(""),
     awardedAt: timestamp("awarded_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
   },
   (t) => [
     index("challenge_awards_challenge_idx").on(t.challengeId),
-    uniqueIndex("challenge_awards_unique").on(t.challengeId, t.personId),
+    uniqueIndex("challenge_awards_unique").on(
+      t.challengeId,
+      t.personId,
+      t.periodKey,
+    ),
   ],
 );
 
@@ -516,6 +529,8 @@ export type Challenge = typeof challenges.$inferSelect;
 export type NewChallenge = typeof challenges.$inferInsert;
 export type ChallengeScope = (typeof challengeScopeEnum.enumValues)[number];
 export type ChallengeGoal = (typeof challengeGoalEnum.enumValues)[number];
+export type ChallengeRecurrence =
+  (typeof challengeRecurrenceEnum.enumValues)[number];
 export type ChallengeParticipant = typeof challengeParticipants.$inferSelect;
 export type ChallengeAward = typeof challengeAwards.$inferSelect;
 
@@ -543,4 +558,5 @@ export const schema = {
   choreAssignmentEnum,
   challengeScopeEnum,
   challengeGoalEnum,
+  challengeRecurrenceEnum,
 };
