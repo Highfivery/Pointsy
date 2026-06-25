@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft, Plus } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { listChores } from "@/lib/catalog/service";
 import { getAssigneesByChore } from "@/lib/chores/assignment";
 import { getKidBalances } from "@/lib/points/service";
 import { groupByCategory } from "@/lib/catalog/category";
-import { ChoreRow } from "@/components/catalog/ChoreRow";
-import { IconByName } from "@/components/icons/registry";
+import {
+  ChoreCatalog,
+  type ChoreGroup,
+} from "@/components/catalog/ChoreCatalog";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { ManageNav } from "@/components/manage/ManageNav";
 import type { Chore } from "@/lib/db/schema";
 import manage from "@/components/manage/manage.module.css";
 
@@ -43,55 +45,37 @@ export default async function ChoresPage() {
     return names.length > 0 ? names.join(", ") : "No one yet";
   }
 
+  const groups: ChoreGroup[] = groupByCategory(chores).map(
+    ({ meta, items }) => ({
+      meta,
+      items: items.map((c) => ({
+        id: c.id,
+        name: c.name,
+        emoji: c.emoji,
+        points: c.points,
+        isActive: c.isActive,
+        pinned: c.pinned,
+        isCore: c.isCore,
+        limitPeriod: c.limitPeriod,
+        limitCount: c.limitCount,
+        whoLabel: whoLabel(c),
+      })),
+    }),
+  );
+
   return (
     <main id="main" className={manage.main}>
-      <Link href="/dashboard" className={manage.back}>
-        <ArrowLeft size={18} aria-hidden="true" />
-        Back to dashboard
-      </Link>
-      <h1 className={manage.title}>Chores</h1>
+      <ScreenHeader title="Chores" intro="Ways for kids to earn points." />
 
-      <Link href="/manage/chores/new" className={manage.addBtn}>
-        <Plus size={18} aria-hidden="true" />
-        Add a chore
-      </Link>
-
-      {chores.length > 0 ? (
-        groupByCategory(chores).map(({ meta, items }) => (
-          <section
-            key={meta.key}
-            className={manage.section}
-            aria-label={meta.label}
-          >
-            <h2 className={manage.sectionTitle}>
-              <IconByName name={meta.icon} size={18} />
-              {meta.label}
-            </h2>
-            <ul className={manage.list}>
-              {items.map((c) => (
-                <li key={c.id}>
-                  <ChoreRow
-                    item={{
-                      id: c.id,
-                      name: c.name,
-                      emoji: c.emoji,
-                      points: c.points,
-                      isActive: c.isActive,
-                      pinned: c.pinned,
-                      isCore: c.isCore,
-                      limitPeriod: c.limitPeriod,
-                      limitCount: c.limitCount,
-                      whoLabel: whoLabel(c),
-                    }}
-                  />
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))
+      {groups.length > 0 ? (
+        <ChoreCatalog groups={groups} />
       ) : (
-        <p className={manage.empty}>No chores yet — add your first.</p>
+        <p className={manage.empty}>
+          No chores yet — tap “Add a chore” to add your first.
+        </p>
       )}
+
+      <ManageNav section="chores" />
     </main>
   );
 }

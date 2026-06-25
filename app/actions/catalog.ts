@@ -135,7 +135,8 @@ export async function createCatalogItemAction(
     await createReward(getDb(), session.familyId, parsed.data);
   }
   revalidatePath(PATHS[kind.data]);
-  return { ok: true };
+  // The add form lives on a dedicated /new page — return to the list on success.
+  redirect(PATHS[kind.data]);
 }
 
 export async function updateCatalogItemAction(

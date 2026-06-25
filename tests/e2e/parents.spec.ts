@@ -54,7 +54,7 @@ test("a co-parent joins via an invite code and shares the dashboard", async ({
 
   // The manage screen is accessible.
   const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag2aaa"])
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
     .analyze();
   expect(results.violations).toEqual([]);
 

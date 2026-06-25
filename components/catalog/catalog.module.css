@@ -21,6 +21,63 @@
   flex-direction: column;
   flex: 1;
   min-width: 0;
+  gap: var(--space-1);
+}
+
+.name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* ---- chores overview: category filter ---- */
+.catalog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 2.25rem;
+  padding: 0 var(--space-3);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+.filterChip:hover {
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+.filterChip[data-active="true"] {
+  color: var(--color-on-accent);
+  background-image: var(--accent-gradient);
+  border-color: transparent;
+}
+
+.filterCount {
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .value {
@@ -138,16 +195,13 @@
   min-width: 0;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
   color: var(--color-text);
   text-decoration: none;
+  border-radius: var(--radius-md);
 }
 
-.rowLink:hover {
-  border-color: var(--color-primary);
+.rowLink:hover .name {
+  color: var(--color-primary);
 }
 
 .rowText {

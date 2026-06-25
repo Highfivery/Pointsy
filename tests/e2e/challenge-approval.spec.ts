@@ -19,7 +19,7 @@ test("a parent-confirm challenge waits for approval, then pays the bonus", async
   page,
 }) => {
   await signUp(page);
-  await page.goto("/manage/kids");
+  await page.goto("/manage/kids/new");
   const add = page.getByRole("region", { name: /add a child/i });
   await add.getByLabel("Name").fill("Robin");
   await add.getByLabel("4-digit PIN").fill("4321");

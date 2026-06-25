@@ -7,7 +7,7 @@ function uniqueEmail() {
 }
 
 async function addKid(page: Page, name: string, pin: string) {
-  await page.goto("/manage/kids");
+  await page.goto("/manage/kids/new");
   const add = page.getByRole("region", { name: /add a child/i });
   await add.getByLabel("Name").fill(name);
   await add.getByLabel("4-digit PIN").fill(pin);
@@ -58,7 +58,7 @@ test("kids team up for a reward and a parent approves the split", async ({
   await addKid(page, "Ava", "1111");
   await addKid(page, "Bo", "2222");
 
-  await page.goto("/manage/rewards");
+  await page.goto("/manage/rewards/new");
   const add = page.getByRole("region", { name: /add a reward/i });
   await add.getByLabel("Name").fill("Movie night");
   await add.getByLabel("Cost (points)").fill("30");

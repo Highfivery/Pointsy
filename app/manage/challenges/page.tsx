@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Plus, ChevronRight, Trophy } from "lucide-react";
+import { ChevronRight, Trophy } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { getFamilyTimezone } from "@/lib/family/settings";
@@ -14,6 +14,8 @@ import {
   challengeStatus,
   type ChallengeStatus,
 } from "@/lib/challenges/format";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { ManageNav } from "@/components/manage/ManageNav";
 import manage from "@/components/manage/manage.module.css";
 import styles from "@/components/challenges/challenges.module.css";
 
@@ -41,20 +43,10 @@ export default async function ChallengesPage() {
 
   return (
     <main id="main" className={manage.main}>
-      <Link href="/dashboard" className={manage.back}>
-        <ArrowLeft size={18} aria-hidden="true" />
-        Back to dashboard
-      </Link>
-      <h1 className={manage.title}>Challenges</h1>
-      <p className={styles.intro}>
-        Time-boxed goals that pay a bonus when a kid (or the whole family) hits
-        them.
-      </p>
-
-      <Link href="/manage/challenges/new" className={manage.addBtn}>
-        <Plus size={18} aria-hidden="true" />
-        Add a challenge
-      </Link>
+      <ScreenHeader
+        title="Challenges"
+        intro="Time-boxed goals that pay a bonus when a kid (or the whole family) hits them."
+      />
 
       {sorted.length === 0 ? (
         <p className={styles.empty}>
@@ -99,6 +91,8 @@ export default async function ChallengesPage() {
           })}
         </ul>
       )}
+
+      <ManageNav section="challenges" />
     </main>
   );
 }

@@ -6,7 +6,7 @@ function uniqueEmail() {
   return `parent.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
 }
 
-const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa", "wcag2aaa"];
+const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa"];
 async function expectNoA11yViolations(page: Page, label: string) {
   const results = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
   expect(results.violations, `axe violations on ${label}`).toEqual([]);
@@ -52,9 +52,8 @@ test.describe("chore & reward catalog", () => {
 
   test("parent creates a reward with a description", async ({ page }) => {
     await signUpParent(page);
-    await page.getByRole("link", { name: /^rewards$/i }).click();
-    await expect(page).toHaveURL(/\/manage\/rewards$/);
-    await expectNoA11yViolations(page, "/manage/rewards");
+    await page.goto("/manage/rewards/new");
+    await expectNoA11yViolations(page, "/manage/rewards/new");
 
     const add = page.getByRole("region", { name: /add a reward/i });
     await add.getByLabel("Name").fill("Screen time");

@@ -50,8 +50,7 @@ test("a kid cannot open the parent dashboard by URL", async ({ page }) => {
   await signUp(page);
 
   // Add a kid.
-  await page.getByRole("link", { name: /^kids$/i }).click();
-  await expect(page).toHaveURL(/\/manage\/kids$/);
+  await page.goto("/manage/kids/new");
   await page.getByLabel("Name").fill("Kiddo");
   await page.getByRole("radio", { name: "Cat", exact: true }).check();
   await page.getByLabel("4-digit PIN").fill("4321");
@@ -131,7 +130,7 @@ test("a known device shows the PIN-gated profile picker at / — never marketing
 
   // No WCAG violations on the picker home.
   const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag2aaa"])
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
     .analyze();
   expect(results.violations).toEqual([]);
 

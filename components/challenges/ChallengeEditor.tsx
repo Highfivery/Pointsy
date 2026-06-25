@@ -31,7 +31,7 @@ export interface ChallengeDefaults {
   bonusPoints?: number;
   autoAward?: boolean;
   startsOn?: string;
-  endsOn?: string;
+  endsOn?: string | null;
   kidIds?: string[];
 }
 
@@ -227,14 +227,25 @@ export function ChallengeEditor({
           error={errors?.startsOn}
           required
         />
-        <Field
-          label="Ends"
-          name="endsOn"
-          type="date"
-          defaultValue={defaults?.endsOn}
-          error={errors?.endsOn}
-          required
-        />
+        {recurrence === "weekly" ? (
+          <Field
+            label="Ends (optional)"
+            name="endsOn"
+            type="date"
+            defaultValue={defaults?.endsOn ?? undefined}
+            error={errors?.endsOn}
+            hint="Leave blank to repeat every week until you pause it."
+          />
+        ) : (
+          <Field
+            label="Ends"
+            name="endsOn"
+            type="date"
+            defaultValue={defaults?.endsOn ?? undefined}
+            error={errors?.endsOn}
+            required
+          />
+        )}
       </section>
 
       <section className={styles.section}>

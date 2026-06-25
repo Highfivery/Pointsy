@@ -21,10 +21,7 @@ export function AddKidForm() {
   }, [state.ok]);
 
   return (
-    <section className={styles.card} aria-labelledby="add-kid-title">
-      <h2 id="add-kid-title" className={styles.cardTitle}>
-        Add a child
-      </h2>
+    <section className={styles.card} aria-label="Add a child">
       <form ref={formRef} action={action} className={form.form} noValidate>
         <Field
           label="Name"

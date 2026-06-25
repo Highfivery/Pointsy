@@ -46,9 +46,10 @@
   flex-direction: column;
   gap: var(--space-2);
   padding: var(--space-6);
-  background: var(--color-surface);
+  background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
 }
 
 .cardTitle {
@@ -94,9 +95,10 @@
   gap: var(--space-4);
   min-height: var(--tap-target);
   padding: var(--space-3) var(--space-4);
-  background: var(--color-surface);
+  background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
   color: var(--color-text);
   text-decoration: none;
   transition:
@@ -173,9 +175,10 @@
   gap: var(--space-4);
   min-height: var(--tap-target);
   padding: var(--space-3) var(--space-4);
-  background: var(--color-surface);
+  background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
   text-decoration: none;
   transition:
     border-color 0.12s ease,
@@ -223,8 +226,8 @@
   padding: var(--space-2) var(--space-3);
   font-weight: 700;
   font-size: 0.9rem;
-  color: var(--color-primary-text);
-  background: var(--color-primary);
+  color: var(--color-on-accent);
+  background-image: var(--accent-gradient);
   border-radius: var(--radius-full);
   flex-shrink: 0;
 }
@@ -244,9 +247,10 @@
   flex-wrap: wrap;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  background: var(--color-surface);
+  background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
 }
 
 .queueText {
@@ -297,13 +301,32 @@
 }
 
 .deliverBtn {
-  color: var(--color-primary-text);
-  background: var(--color-primary);
+  color: var(--color-on-accent);
+  background-image: var(--accent-gradient);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .kidCard:hover {
     border-color: var(--color-primary);
     transform: translateY(-1px);
+  }
+}
+
+.kidCard:active,
+.manageLink:active {
+  transform: scale(0.99);
+}
+.approveBtn:active,
+.denyBtn:active,
+.deliverBtn:active {
+  transform: scale(0.96);
+}
+@media (prefers-reduced-motion: reduce) {
+  .kidCard:active,
+  .manageLink:active,
+  .approveBtn:active,
+  .denyBtn:active,
+  .deliverBtn:active {
+    transform: none;
   }
 }

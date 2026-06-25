@@ -180,13 +180,30 @@ export const challengeSchema = z
       .min(1, "Bonus must be at least 1.")
       .max(100000),
     startsOn: isoDateSchema,
-    endsOn: isoDateSchema,
+    /** Optional: blank is allowed (and means "no end") for weekly challenges. */
+    endsOn: z
+      .union([isoDateSchema, z.literal("")])
+      .optional()
+      .transform((v) => (v ? v : undefined)),
     /** Participating kids; empty ⇒ the whole family. */
     kidIds: z.array(z.string().uuid()).default([]),
   })
-  .refine((d) => d.endsOn >= d.startsOn, {
-    message: "The end date must be on or after the start date.",
-    path: ["endsOn"],
+  .superRefine((d, ctx) => {
+    // A one-off challenge must have an end date; weekly may run indefinitely.
+    if (d.recurrence !== "weekly" && !d.endsOn) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Pick an end date.",
+        path: ["endsOn"],
+      });
+    }
+    if (d.endsOn && d.endsOn < d.startsOn) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "The end date must be on or after the start date.",
+        path: ["endsOn"],
+      });
+    }
   });
 
 /* ---------------------------------------------------- points & redemptions */

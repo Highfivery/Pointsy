@@ -21,10 +21,10 @@ export function AddCatalogForm({ kind }: { kind: CatalogKind }) {
   }, [state.ok]);
 
   return (
-    <section className={styles.card} aria-labelledby="add-item-title">
-      <h2 id="add-item-title" className={styles.cardTitle}>
-        {kind === "chore" ? "Add a chore" : "Add a reward"}
-      </h2>
+    <section
+      className={styles.card}
+      aria-label={kind === "chore" ? "Add a chore" : "Add a reward"}
+    >
       <form ref={formRef} action={action} className={form.form} noValidate>
         <input type="hidden" name="kind" value={kind} />
         <CatalogFields kind={kind} errors={state.fieldErrors} />

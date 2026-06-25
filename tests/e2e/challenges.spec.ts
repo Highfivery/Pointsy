@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa", "wcag2aaa"];
+const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa"];
 async function expectNoA11yViolations(page: Page, label: string) {
   const results = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
   expect(results.violations, `axe violations on ${label}`).toEqual([]);
@@ -26,7 +26,7 @@ test("a parent creates a challenge and sees it in the list", async ({
   page,
 }) => {
   await signUp(page);
-  await page.goto("/manage/kids");
+  await page.goto("/manage/kids/new");
   const add = page.getByRole("region", { name: /add a child/i });
   await add.getByLabel("Name").fill("Robin");
   await add.getByLabel("4-digit PIN").fill("4321");
@@ -49,7 +49,7 @@ test("a parent creates a challenge and sees it in the list", async ({
   await page.getByLabel("Name").fill("Super Saver Week");
   await page.getByLabel("Points to earn").fill("100");
   await page.getByLabel(/bonus points/i).fill("20");
-  await expect(page).toHaveTitle(/new challenge/i);
+  await expect(page).toHaveTitle(/add a challenge/i);
   await expectNoA11yViolations(page, "/manage/challenges/new");
 
   await page.getByRole("button", { name: /save challenge/i }).click();

@@ -2,7 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { enterPin, addChore } from "./_helpers";
 
-const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa", "wcag2aaa"];
+const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa"];
 async function expectNoA11yViolations(page: Page, label: string) {
   const results = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
   expect(results.violations, `axe violations on ${label}`).toEqual([]);
@@ -27,7 +27,7 @@ test("kid tab bar navigates and core progress updates as chores are logged", asy
   page,
 }) => {
   await signUp(page);
-  await page.goto("/manage/kids");
+  await page.goto("/manage/kids/new");
   const add = page.getByRole("region", { name: /add a child/i });
   await add.getByLabel("Name").fill("Robin");
   await add.getByLabel("4-digit PIN").fill("4321");

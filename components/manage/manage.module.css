@@ -2,7 +2,7 @@
   width: 100%;
   max-width: 32rem;
   margin: 0 auto;
-  padding: var(--space-6) var(--space-4) var(--space-8);
+  padding: var(--space-6) var(--space-4) calc(var(--space-8) + 4.5rem);
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
@@ -29,9 +29,10 @@
   flex-direction: column;
   gap: var(--space-3);
   padding: var(--space-4);
-  background: var(--color-surface);
+  background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
 }
 
 .cardTitle {
@@ -46,6 +47,35 @@
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+/* Staggered entrance for list cards (auto-disabled by the global
+   reduced-motion rule). `backwards` fill keeps press/hover transforms working. */
+.list > li {
+  animation: riseIn var(--dur-base) var(--ease-out) backwards;
+}
+.list > li:nth-child(2) {
+  animation-delay: 0.04s;
+}
+.list > li:nth-child(3) {
+  animation-delay: 0.08s;
+}
+.list > li:nth-child(4) {
+  animation-delay: 0.12s;
+}
+.list > li:nth-child(5) {
+  animation-delay: 0.16s;
+}
+.list > li:nth-child(n + 6) {
+  animation-delay: 0.2s;
+}
+@keyframes riseIn {
+  from {
+    transform: translateY(10px);
+  }
+  to {
+    transform: none;
+  }
 }
 
 .kidHead {

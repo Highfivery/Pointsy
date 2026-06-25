@@ -17,7 +17,7 @@ async function signUp(page: Page) {
 }
 
 async function addKid(page: Page, name: string) {
-  await page.goto("/manage/kids");
+  await page.goto("/manage/kids/new");
   const add = page.getByRole("region", { name: /add a child/i });
   await add.getByLabel("Name").fill(name);
   await add.getByLabel("4-digit PIN").fill("4321");

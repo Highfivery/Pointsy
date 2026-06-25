@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { getKidBalances } from "@/lib/points/service";
 import { getFamilyTimezone } from "@/lib/family/settings";
 import { localDate, addDays } from "@/lib/timezone";
 import { ChallengeEditor } from "@/components/challenges/ChallengeEditor";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { ManageNav } from "@/components/manage/ManageNav";
 import manage from "@/components/manage/manage.module.css";
 
-export const metadata: Metadata = { title: "New challenge" };
+export const metadata: Metadata = { title: "Add a challenge" };
 
 export default async function NewChallengePage() {
   const session = await getSession();
@@ -26,11 +26,10 @@ export default async function NewChallengePage() {
 
   return (
     <main id="main" className={manage.main}>
-      <Link href="/manage/challenges" className={manage.back}>
-        <ArrowLeft size={18} aria-hidden="true" />
-        Back to challenges
-      </Link>
-      <h1 className={manage.title}>New challenge</h1>
+      <ScreenHeader
+        title="Add a challenge"
+        intro="A time-boxed goal that pays a bonus when it’s hit."
+      />
       <ChallengeEditor
         kids={kids.map((k) => ({
           id: k.id,
@@ -40,6 +39,7 @@ export default async function NewChallengePage() {
         }))}
         defaults={{ startsOn: today, endsOn: addDays(today, 7) }}
       />
+      <ManageNav section="challenges" />
     </main>
   );
 }

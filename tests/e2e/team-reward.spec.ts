@@ -19,7 +19,7 @@ test("a parent can mark a reward as a team reward, and it persists", async ({
   page,
 }) => {
   await signUp(page);
-  await page.goto("/manage/rewards");
+  await page.goto("/manage/rewards/new");
 
   const add = page.getByRole("region", { name: /add a reward/i });
   await add.getByLabel("Name").fill("Movie night");
@@ -35,7 +35,7 @@ test("a parent can mark a reward as a team reward, and it persists", async ({
   // Re-open the card's edit form — the toggles and minimum stuck.
   await page.goto("/manage/rewards");
   const card = page.getByRole("region", { name: "Manage Movie night" });
-  await card.getByText("Edit").click();
+  await card.getByTitle("Edit").click();
   await expect(card.getByLabel("Team reward")).toBeChecked();
   await expect(card.getByLabel("Minimum kids")).toHaveValue("3");
   await expect(card.getByLabel("Also redeemable solo")).toBeChecked();
