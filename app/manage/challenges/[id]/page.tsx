@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { getKidBalances } from "@/lib/points/service";
@@ -10,6 +8,8 @@ import { challengeParticipants } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { ChallengeEditor } from "@/components/challenges/ChallengeEditor";
 import { ChallengeDangerZone } from "@/components/challenges/ChallengeDangerZone";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { ManageNav } from "@/components/manage/ManageNav";
 import manage from "@/components/manage/manage.module.css";
 
 export const metadata: Metadata = { title: "Edit challenge" };
@@ -39,11 +39,7 @@ export default async function EditChallengePage({
 
   return (
     <main id="main" className={manage.main}>
-      <Link href="/manage/challenges" className={manage.back}>
-        <ArrowLeft size={18} aria-hidden="true" />
-        Back to challenges
-      </Link>
-      <h1 className={manage.title}>Edit challenge</h1>
+      <ScreenHeader title="Edit challenge" />
       <ChallengeEditor
         kids={kids.map((k) => ({
           id: k.id,
@@ -71,6 +67,7 @@ export default async function EditChallengePage({
         title={challenge.title}
         isActive={challenge.isActive}
       />
+      <ManageNav section="challenges" />
     </main>
   );
 }

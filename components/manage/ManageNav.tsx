@@ -1,10 +1,18 @@
 "use client";
 
-import { House, Gift, ListChecks, Trophy, Users, Plus } from "lucide-react";
+import {
+  House,
+  Gift,
+  ListChecks,
+  Trophy,
+  Users,
+  UserPlus,
+  Plus,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { BottomNav, type BottomNavItem } from "@/components/ui/BottomNav";
 
-type Section = "rewards" | "chores" | "challenges" | "kids";
+type Section = "rewards" | "chores" | "challenges" | "kids" | "parents";
 
 const SECTIONS: Record<
   Section,
@@ -12,8 +20,9 @@ const SECTIONS: Record<
     href: string;
     label: string;
     Icon: LucideIcon;
-    addHref: string;
-    addLabel: string;
+    /** Omitted for sections without a dedicated "add" page (e.g. parents). */
+    addHref?: string;
+    addLabel?: string;
   }
 > = {
   rewards: {
@@ -44,15 +53,27 @@ const SECTIONS: Record<
     addHref: "/manage/kids/new",
     addLabel: "Add a kid",
   },
+  parents: {
+    href: "/manage/parents",
+    label: "Parents",
+    Icon: UserPlus,
+  },
 };
 
-/** Contextual [Dashboard · Section · Add] bottom nav for the manage screens. */
+/** Contextual [Dashboard · Section · Add?] bottom nav for the manage screens. */
 export function ManageNav({ section }: { section: Section }) {
   const s = SECTIONS[section];
-  const items: readonly BottomNavItem[] = [
+  const items: BottomNavItem[] = [
     { href: "/dashboard", label: "Dashboard", Icon: House },
     { href: s.href, label: s.label, Icon: s.Icon },
-    { href: s.addHref, label: s.addLabel, Icon: Plus, accent: true },
   ];
+  if (s.addHref && s.addLabel) {
+    items.push({
+      href: s.addHref,
+      label: s.addLabel,
+      Icon: Plus,
+      accent: true,
+    });
+  }
   return <BottomNav items={items} label="Manage" />;
 }

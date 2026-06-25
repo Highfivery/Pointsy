@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft, Crown } from "lucide-react";
+import { Crown } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { listParents, listPendingInvites } from "@/lib/parents/service";
 import { revokeParentInviteAction } from "@/app/actions/parents";
 import { InviteParent } from "@/components/parents/InviteParent";
 import { RemoveParentButton } from "@/components/parents/RemoveParentButton";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { ManageNav } from "@/components/manage/ManageNav";
 import styles from "@/components/parents/parents.module.css";
 
 export const metadata: Metadata = { title: "Parents" };
@@ -31,15 +32,10 @@ export default async function ManageParentsPage() {
 
   return (
     <main id="main" className={styles.main}>
-      <Link href="/dashboard" className={styles.back}>
-        <ArrowLeft size={18} aria-hidden="true" />
-        Dashboard
-      </Link>
-      <h1 className={styles.title}>Parents</h1>
-      <p className={styles.intro}>
-        Co-parents share this dashboard — they can award points, approve
-        redemptions, and manage kids.
-      </p>
+      <ScreenHeader
+        title="Parents"
+        intro="Co-parents share this dashboard — they can award points, approve redemptions, and manage kids."
+      />
 
       <section aria-labelledby="parents-heading">
         <h2 id="parents-heading" className={styles.sectionTitle}>
@@ -97,6 +93,8 @@ export default async function ManageParentsPage() {
           </ul>
         ) : null}
       </section>
+
+      <ManageNav section="parents" />
     </main>
   );
 }

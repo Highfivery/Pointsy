@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { getPersonById } from "@/lib/db/queries";
@@ -16,6 +15,7 @@ import { AwardBoard } from "@/components/points/AwardBoard";
 import { AwardExtras } from "@/components/points/AwardExtras";
 import { ActivityList } from "@/components/points/ActivityList";
 import { IconByName } from "@/components/icons/registry";
+import { AwardNav } from "@/components/manage/AwardNav";
 import manage from "@/components/manage/manage.module.css";
 import styles from "@/components/points/points.module.css";
 
@@ -66,11 +66,6 @@ export default async function AwardPage({
 
   return (
     <main id="main" className={manage.main}>
-      <Link href="/dashboard" className={manage.back}>
-        <ArrowLeft size={18} aria-hidden="true" />
-        Back to dashboard
-      </Link>
-
       <div className={styles.awardHeader}>
         <span className={styles.avatar} style={{ background: kid.color }}>
           <IconByName name={kid.avatar} size={28} />
@@ -116,6 +111,8 @@ export default async function AwardPage({
           }))}
         />
       </section>
+
+      <AwardNav />
     </main>
   );
 }
