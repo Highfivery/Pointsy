@@ -15,11 +15,13 @@ import {
   listSubmittableChores,
   getCoreStreak,
 } from "@/lib/submissions/service";
+import { listKidChallenges } from "@/lib/challenges/service";
 import { cancelSubmissionAction } from "@/app/actions/submissions";
 import { IconByName } from "@/components/icons/registry";
 import { ActivityList } from "@/components/points/ActivityList";
 import { Celebration } from "@/components/me/Celebration";
 import { CoreProgress } from "@/components/me/CoreProgress";
+import { KidChallenges } from "@/components/me/KidChallenges";
 import { RewardShelf } from "@/components/me/RewardShelf";
 import { KidGoal } from "@/components/me/KidGoal";
 import { EnableNotifications } from "@/components/push/EnableNotifications";
@@ -48,6 +50,7 @@ export default async function MePage() {
     redeemable,
     goal,
     submittable,
+    challenges,
   ] = await Promise.all([
     getBalance(db, session.familyId, session.personId),
     getPendingPoints(db, session.familyId, session.personId),
@@ -57,6 +60,7 @@ export default async function MePage() {
     listRedeemableRewards(db, session.familyId, session.personId),
     getKidGoal(db, session.familyId, session.personId),
     listSubmittableChores(db, session.familyId, session.personId, tz),
+    listKidChallenges(db, session.familyId, session.personId, tz),
   ]);
   const waiting = submissions.filter((s) => s.status === "pending");
   const available = redeemable.available;
@@ -177,6 +181,8 @@ export default async function MePage() {
           ) : null}
         </section>
       ) : null}
+
+      <KidChallenges items={challenges} />
 
       <KidGoal goal={goal} rewardOptions={rewardOptions} />
 
