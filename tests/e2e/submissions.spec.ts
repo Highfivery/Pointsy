@@ -43,8 +43,8 @@ test("kid logs a chore, parent approves, points are added", async ({
   await enterPin(page, "4321");
   await expect(page).toHaveURL(/\/me$/);
 
-  // Kid logs the chore.
-  await page.getByRole("link", { name: /log a chore/i }).click();
+  // Kid logs the chore (via the tab bar).
+  await page.getByRole("link", { name: "Chores", exact: true }).click();
   await expect(page).toHaveURL(/\/submit$/);
   await page.getByRole("button", { name: /make bed/i }).click();
 

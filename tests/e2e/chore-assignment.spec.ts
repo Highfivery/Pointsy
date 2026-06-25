@@ -52,6 +52,7 @@ test("a rotating chore is locked for whoever isn't up", async ({ page }) => {
 
   // The overview shows whose turn it is.
   await expect(page.getByText("Robin's turn")).toBeVisible();
+  await expect(page).toHaveTitle(/chores/i); // let the soft-nav title settle
   await expectNoA11yViolations(page, "/manage/chores");
 
   // Sign in as Sky — Dishes shows but is locked ("Robin's turn").
