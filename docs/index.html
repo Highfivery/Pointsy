@@ -1,0 +1,1029 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pointsy — points, chores & rewards your kids will love</title>
+    <meta
+      name="description"
+      content="Pointsy is a free, mobile-first app where parents reward kids for chores and good habits, and kids redeem their points for rewards. Multi-family, privacy-first, open-source."
+    />
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+
+    <!-- Open Graph / social -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Pointsy — points, chores & rewards your kids will love" />
+    <meta
+      property="og:description"
+      content="Parents reward kids for chores and good habits; kids redeem points for rewards. Free, privacy-first, installable PWA."
+    />
+    <meta property="og:image" content="assets/kid-home.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg: #04130e;
+        --surface: #0a1f18;
+        --surface-raised: #0e2a20;
+        --surface-strong: #123528;
+        --border: #1f3d31;
+        --border-strong: #2d5544;
+        --text: #ecfdf5;
+        --text-muted: #9fcdbb;
+        --text-faint: #6f9a88;
+        --primary: #34d399;
+        --cyan: #22d3ee;
+        --on-accent: #03251b;
+        --accent-gradient: linear-gradient(135deg, #34d399 0%, #22d3ee 100%);
+        --bg-gradient: radial-gradient(130% 120% at 50% -10%, #06231a 0%, #04130e 48%, #02100b 100%);
+        --radius-md: 0.875rem;
+        --radius-lg: 1.25rem;
+        --radius-xl: 1.75rem;
+        --maxw: 1120px;
+        --focus-ring: 3px solid #67e8f9;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: var(--bg);
+        background-image: var(--bg-gradient);
+        background-attachment: fixed;
+        color: var(--text);
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: "Sora", "Inter", sans-serif;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+      }
+      a {
+        color: var(--primary);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      :focus-visible {
+        outline: var(--focus-ring);
+        outline-offset: 2px;
+        border-radius: 6px;
+      }
+      img {
+        max-width: 100%;
+        display: block;
+      }
+      .wrap {
+        width: 100%;
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+      .gradient-text {
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      /* ---- buttons ---- */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        padding: 13px 22px;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.2s ease,
+          background 0.2s ease;
+        white-space: nowrap;
+      }
+      .btn:hover {
+        text-decoration: none;
+        transform: translateY(-2px);
+      }
+      .btn-primary {
+        background: var(--accent-gradient);
+        color: var(--on-accent);
+        box-shadow: 0 10px 30px rgba(34, 211, 238, 0.25);
+      }
+      .btn-primary:hover {
+        box-shadow: 0 14px 40px rgba(34, 211, 238, 0.4);
+      }
+      .btn-ghost {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: var(--border-strong);
+        color: var(--text);
+      }
+      .btn-ghost:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      /* ---- header ---- */
+      header.site {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        backdrop-filter: blur(12px);
+        background: rgba(4, 19, 14, 0.72);
+        border-bottom: 1px solid var(--border);
+      }
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 68px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: "Sora", sans-serif;
+        font-weight: 800;
+        font-size: 1.25rem;
+        color: var(--text);
+      }
+      .brand:hover {
+        text-decoration: none;
+      }
+      .brand img {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+      }
+      .nav-links a {
+        color: var(--text-muted);
+        font-weight: 500;
+        font-size: 0.95rem;
+      }
+      .nav-links a:hover {
+        color: var(--text);
+        text-decoration: none;
+      }
+      .nav-cta {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      @media (max-width: 860px) {
+        .nav-links {
+          display: none;
+        }
+      }
+
+      /* ---- hero ---- */
+      .hero {
+        position: relative;
+        padding: 84px 0 60px;
+      }
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 48px;
+        align-items: center;
+      }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--primary);
+        background: rgba(52, 211, 153, 0.1);
+        border: 1px solid rgba(52, 211, 153, 0.25);
+        padding: 6px 14px;
+        border-radius: 999px;
+        margin-bottom: 22px;
+      }
+      .hero h1 {
+        font-size: clamp(2.4rem, 5.4vw, 3.9rem);
+        font-weight: 800;
+      }
+      .hero h1 span {
+        display: inline;
+      }
+      .hero p.lede {
+        margin-top: 22px;
+        font-size: 1.2rem;
+        color: var(--text-muted);
+        max-width: 520px;
+      }
+      .hero-cta {
+        margin-top: 34px;
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+      .hero-note {
+        margin-top: 18px;
+        font-size: 0.9rem;
+        color: var(--text-faint);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* ---- phone mockups ---- */
+      .phones {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        min-height: 540px;
+      }
+      .phone {
+        position: relative;
+        width: 248px;
+        border-radius: 36px;
+        padding: 10px;
+        background: linear-gradient(160deg, #14352a, #081c15);
+        border: 1px solid var(--border-strong);
+        box-shadow:
+          0 30px 60px rgba(0, 0, 0, 0.55),
+          0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+      }
+      .phone::before {
+        content: "";
+        position: absolute;
+        top: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 86px;
+        height: 7px;
+        background: #02100b;
+        border-radius: 999px;
+        z-index: 2;
+      }
+      .phone img {
+        border-radius: 28px;
+        width: 100%;
+        height: auto;
+      }
+      .phone.back {
+        position: absolute;
+        left: 8%;
+        bottom: 30px;
+        transform: rotate(-7deg) scale(0.92);
+        opacity: 0.95;
+        z-index: 1;
+        filter: saturate(0.95);
+      }
+      .phone.front {
+        position: relative;
+        transform: rotate(3deg);
+        z-index: 3;
+      }
+      .hero-glow {
+        position: absolute;
+        inset: -10% -20% auto auto;
+        width: 460px;
+        height: 460px;
+        background: radial-gradient(circle, rgba(34, 211, 238, 0.22), transparent 62%);
+        filter: blur(20px);
+        z-index: 0;
+        pointer-events: none;
+      }
+      @media (max-width: 860px) {
+        .hero-grid {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+        .phones {
+          min-height: 520px;
+          margin-top: 12px;
+        }
+        .hero p.lede {
+          max-width: none;
+        }
+      }
+      @media (max-width: 480px) {
+        .phone {
+          width: 210px;
+        }
+        .phone.back {
+          left: 2%;
+        }
+      }
+
+      /* ---- trust strip ---- */
+      .trust {
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.015);
+      }
+      .trust-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px 36px;
+        justify-content: center;
+        padding: 22px 0;
+      }
+      .trust-row span {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        color: var(--text-muted);
+        font-weight: 500;
+        font-size: 0.96rem;
+      }
+      .trust-row svg {
+        color: var(--primary);
+        flex: none;
+      }
+
+      /* ---- sections ---- */
+      section.block {
+        padding: 88px 0;
+      }
+      .section-head {
+        text-align: center;
+        max-width: 680px;
+        margin: 0 auto 54px;
+      }
+      .section-head .eyebrow {
+        margin-bottom: 16px;
+      }
+      .section-head h2 {
+        font-size: clamp(1.9rem, 3.6vw, 2.7rem);
+        font-weight: 800;
+      }
+      .section-head p {
+        margin-top: 16px;
+        color: var(--text-muted);
+        font-size: 1.1rem;
+      }
+
+      /* ---- steps ---- */
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+      }
+      .step {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 30px 26px;
+        position: relative;
+      }
+      .step-num {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: var(--accent-gradient);
+        color: var(--on-accent);
+        font-family: "Sora", sans-serif;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        margin-bottom: 18px;
+      }
+      .step h3 {
+        font-size: 1.25rem;
+        margin-bottom: 8px;
+      }
+      .step p {
+        color: var(--text-muted);
+        font-size: 1rem;
+      }
+
+      /* ---- feature grid ---- */
+      .features {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+      }
+      .feature {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0));
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 26px;
+        transition:
+          transform 0.18s ease,
+          border-color 0.18s ease;
+      }
+      .feature:hover {
+        transform: translateY(-3px);
+        border-color: var(--border-strong);
+      }
+      .feature-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        background: rgba(52, 211, 153, 0.12);
+        border: 1px solid rgba(52, 211, 153, 0.22);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+        margin-bottom: 16px;
+      }
+      .feature h3 {
+        font-size: 1.15rem;
+        margin-bottom: 7px;
+      }
+      .feature p {
+        color: var(--text-muted);
+        font-size: 0.97rem;
+      }
+      @media (max-width: 860px) {
+        .steps,
+        .features {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ---- showcase / alternating rows ---- */
+      .showcase {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        align-items: start;
+      }
+      .shot {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 14px 14px 18px;
+        text-align: center;
+      }
+      .shot img {
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        margin-bottom: 14px;
+        width: 100%;
+        height: 340px;
+        object-fit: cover;
+        object-position: top;
+      }
+      .shot h3 {
+        font-size: 1.02rem;
+        margin-bottom: 4px;
+      }
+      .shot p {
+        color: var(--text-muted);
+        font-size: 0.88rem;
+      }
+      @media (max-width: 860px) {
+        .showcase {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 480px) {
+        .showcase {
+          grid-template-columns: 1fr;
+          max-width: 320px;
+          margin: 0 auto;
+        }
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 56px;
+        align-items: center;
+        margin-top: 36px;
+      }
+      .split.reverse .split-media {
+        order: 2;
+      }
+      .split-media {
+        display: flex;
+        justify-content: center;
+      }
+      .split-media .phone {
+        transform: rotate(-2deg);
+      }
+      .split-copy h3 {
+        font-size: clamp(1.5rem, 3vw, 2rem);
+        margin-bottom: 14px;
+      }
+      .split-copy p {
+        color: var(--text-muted);
+        font-size: 1.06rem;
+        margin-bottom: 14px;
+      }
+      .check-list {
+        list-style: none;
+        margin-top: 18px;
+        display: grid;
+        gap: 12px;
+      }
+      .check-list li {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        color: var(--text);
+      }
+      .check-list svg {
+        color: var(--primary);
+        flex: none;
+        margin-top: 3px;
+      }
+      @media (max-width: 860px) {
+        .split {
+          grid-template-columns: 1fr;
+          gap: 28px;
+        }
+        .split.reverse .split-media {
+          order: 0;
+        }
+      }
+
+      /* ---- privacy block ---- */
+      .privacy {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        padding: 48px;
+      }
+      .privacy-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 22px 40px;
+        margin-top: 28px;
+      }
+      .privacy-grid li {
+        list-style: none;
+        display: flex;
+        gap: 12px;
+        color: var(--text-muted);
+      }
+      .privacy-grid svg {
+        color: var(--primary);
+        flex: none;
+        margin-top: 3px;
+      }
+      .privacy-grid b {
+        color: var(--text);
+        font-weight: 600;
+      }
+      @media (max-width: 700px) {
+        .privacy {
+          padding: 30px;
+        }
+        .privacy-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ---- open source / stack ---- */
+      .stack {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 26px;
+      }
+      .badge {
+        font-size: 0.86rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border);
+        padding: 7px 13px;
+        border-radius: 999px;
+      }
+
+      /* ---- final CTA ---- */
+      .cta-final {
+        text-align: center;
+        background: linear-gradient(180deg, rgba(52, 211, 153, 0.08), rgba(34, 211, 238, 0.04));
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius-xl);
+        padding: 64px 32px;
+      }
+      .cta-final h2 {
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 800;
+      }
+      .cta-final p {
+        color: var(--text-muted);
+        font-size: 1.15rem;
+        margin: 16px auto 30px;
+        max-width: 540px;
+      }
+      .cta-final .hero-cta {
+        justify-content: center;
+      }
+
+      /* ---- footer ---- */
+      footer.site {
+        border-top: 1px solid var(--border);
+        padding: 46px 0 60px;
+        margin-top: 40px;
+      }
+      .foot {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 24px;
+        align-items: center;
+      }
+      .foot-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 22px;
+      }
+      .foot-links a {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+      }
+      .foot-links a:hover {
+        color: var(--text);
+        text-decoration: none;
+      }
+      .foot small {
+        color: var(--text-faint);
+        display: block;
+        margin-top: 14px;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          scroll-behavior: auto !important;
+          transition: none !important;
+        }
+        .btn:hover,
+        .feature:hover {
+          transform: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- ================= HEADER ================= -->
+    <header class="site">
+      <div class="wrap nav">
+        <a class="brand" href="#top">
+          <img src="assets/icon.svg" alt="" />
+          Pointsy
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+          <a href="#how">How it works</a>
+          <a href="#features">Features</a>
+          <a href="#challenges">Challenges</a>
+          <a href="#privacy">Privacy</a>
+          <a href="https://github.com/Highfivery/Pointsy">GitHub</a>
+        </nav>
+        <div class="nav-cta">
+          <a class="btn btn-primary" href="https://pointsy-six.vercel.app">Try it free</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="top">
+      <!-- ================= HERO ================= -->
+      <section class="hero">
+        <div class="hero-glow" aria-hidden="true"></div>
+        <div class="wrap hero-grid">
+          <div>
+            <span class="eyebrow">Free · Open-source · No ads</span>
+            <h1>
+              Chores, points &amp; rewards your kids will
+              <span class="gradient-text">actually love</span>.
+            </h1>
+            <p class="lede">
+              Pointsy turns everyday chores into a game the whole family can see. Parents award
+              points with a tap; kids watch their balance grow and spend it on rewards you set —
+              all in one sleek, mobile-first app.
+            </p>
+            <div class="hero-cta">
+              <a class="btn btn-primary" href="https://pointsy-six.vercel.app">
+                Get started free
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </a>
+              <a class="btn btn-ghost" href="https://github.com/Highfivery/Pointsy">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.93c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.54-3.88-1.54-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.8 1.18 1.82 1.18 3.08 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5Z"/></svg>
+                View on GitHub
+              </a>
+            </div>
+            <p class="hero-note">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              No app store needed — install it straight to your home screen.
+            </p>
+          </div>
+
+          <div class="phones">
+            <div class="phone back">
+              <img
+                src="assets/parent-dashboard.png"
+                alt="Pointsy parent dashboard showing pending approvals, team-up approvals and each kid's points balance"
+              />
+            </div>
+            <div class="phone front">
+              <img
+                src="assets/kid-home.png"
+                alt="A kid's Pointsy home screen with a big points balance, today's chores, challenges and a savings goal"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TRUST ================= -->
+      <div class="trust">
+        <div class="wrap trust-row">
+          <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Free forever</span>
+          <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>Kids' data stays private</span>
+          <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M11 18h2"/></svg>Installable PWA</span>
+          <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 18 22 12 16 6M8 6 2 12l6 6"/></svg>Open-source &amp; self-hostable</span>
+        </div>
+      </div>
+
+      <!-- ================= HOW IT WORKS ================= -->
+      <section class="block" id="how">
+        <div class="wrap">
+          <div class="section-head">
+            <span class="eyebrow">How it works</span>
+            <h2>From zero to awarding points in minutes</h2>
+            <p>Everything is set up inside the app — no spreadsheets, no accounts for the kids.</p>
+          </div>
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <h3>Set up your family</h3>
+              <p>
+                Create a family, add your kids with an avatar and a 4-digit PIN, and pick from a
+                starter set of chores and rewards — or make your own.
+              </p>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <h3>Award points for chores</h3>
+              <p>
+                Tap a chore to award points, or let kids log their own for your approval. Set
+                rotations, daily limits, and checklists so it's fair and clear.
+              </p>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <h3>Kids redeem rewards</h3>
+              <p>
+                Kids spend points on rewards you've set. You approve each redemption, so nothing is
+                spent by accident — and every point is tracked.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= FEATURES ================= -->
+      <section class="block" id="features" style="padding-top: 0">
+        <div class="wrap">
+          <div class="section-head">
+            <span class="eyebrow">Features</span>
+            <h2>Everything a family rewards system needs</h2>
+            <p>Thoughtfully built for real households — fair, flexible, and genuinely fun for kids.</p>
+          </div>
+          <div class="features">
+            <div class="feature">
+              <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+              <h3>Smart chore catalog</h3>
+              <p>Categories, ~200 icons, per-chore daily/weekly limits, core chores, and take-turns rotation between kids.</p>
+            </div>
+            <div class="feature">
+              <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v4H4zM4 12h16M4 18h10"/></svg></div>
+              <h3>Checklists &amp; kid submissions</h3>
+              <p>Break a chore into steps. Kids can log completed chores themselves and you approve them from a tidy queue.</p>
+            </div>
+            <div class="feature">
+              <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
+              <h3>Rewards &amp; safe redemptions</h3>
+              <p>Points are reserved while a request is pending; you approve, then mark it delivered. Overdrawn kids can't redeem.</p>
+            </div>
+            <div class="feature">
+              <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C6 4 6 9 6 9zM18 9h1.5a2.5 2.5 0 0 0 0-5C18 4 18 9 18 9zM6 9v6a6 6 0 0 0 12 0V9M9 22h6M12 15v7"/></svg></div>
+              <h3>Challenges</h3>
+              <p>Time-boxed goals that pay a bonus — per-kid or whole-family, with optional weekly repeat and parent approval.</p>
+            </div>
+            <div class="feature">
+              <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+              <h3>Team-up rewards</h3>
+              <p>Kids pool their points for a shared reward, splitting the cost evenly — with invites and a single parent approval.</p>
+            </div>
+            <div class="feature">
+              <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18M7 14l4-4 3 3 5-6"/></svg></div>
+              <h3>Trustworthy points</h3>
+              <p>Balances are derived from an append-only ledger, so they can never silently drift. Every change is auditable.</p>
+            </div>
+            <div class="feature">
+              <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg></div>
+              <h3>One household, many families</h3>
+              <p>A single deployment serves many families, each strictly isolated. Invite a co-parent with a one-time code.</p>
+            </div>
+            <div class="feature">
+              <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M11 18h2"/></svg></div>
+              <h3>Installable PWA</h3>
+              <p>Add it to the home screen for an app-like feel, an offline shell, and opt-in push notifications.</p>
+            </div>
+            <div class="feature">
+              <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20Z"/></svg></div>
+              <h3>Accessible by design</h3>
+              <p>Targets WCAG 2.1 AA, with big tap targets, visible focus, reduced-motion support, and screen-reader-friendly markup.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SHOWCASE ================= -->
+      <section class="block" style="padding-top: 0">
+        <div class="wrap">
+          <div class="section-head">
+            <span class="eyebrow">A look inside</span>
+            <h2>Sleek on every screen</h2>
+            <p>The dark "Emerald Noir" design system makes points feel rewarding — for parents and kids alike.</p>
+          </div>
+          <div class="showcase">
+            <div class="shot">
+              <img src="assets/parent-dashboard.png" alt="Parent dashboard with approval queues and kid balances" />
+              <h3>Parent dashboard</h3>
+              <p>Approvals, deliveries &amp; balances at a glance.</p>
+            </div>
+            <div class="shot">
+              <img src="assets/kid-home.png" alt="Kid home screen with balance, must-dos and challenges" />
+              <h3>Kid home</h3>
+              <p>Balance, today's must-dos, streaks &amp; goals.</p>
+            </div>
+            <div class="shot">
+              <img src="assets/challenges.png" alt="Challenges list with point goals and bonuses" />
+              <h3>Challenges</h3>
+              <p>Goals that pay a bonus when hit.</p>
+            </div>
+            <div class="shot">
+              <img src="assets/kid-redeem.png" alt="Kid rewards screen with team-up and redeemable rewards" />
+              <h3>Rewards</h3>
+              <p>Spend points solo — or team up.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= CHALLENGES / TEAM-UP SPLIT ================= -->
+      <section class="block" id="challenges" style="padding-top: 0">
+        <div class="wrap">
+          <div class="split">
+            <div class="split-media">
+              <div class="phone"><img src="assets/challenges.png" alt="Challenge list showing Family Clean-Up, Super Saver and a weekly Reading Streak" /></div>
+            </div>
+            <div class="split-copy">
+              <span class="eyebrow">Challenges</span>
+              <h3>Goals that keep kids motivated</h3>
+              <p>
+                Set a time-boxed challenge — earn 300 points this fortnight, log 10 chores a week,
+                or keep a daily core-chore streak — and Pointsy pays a bonus the moment it's hit.
+              </p>
+              <ul class="check-list">
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Per-kid races or one shared family goal</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Optional weekly repeat that resets each Monday</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Auto-pay the bonus, or hold it for your approval</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="split reverse" style="margin-top: 64px">
+            <div class="split-media">
+              <div class="phone"><img src="assets/kid-redeem.png" alt="Kid rewards screen with a Pizza & game night team reward and a Team up button" /></div>
+            </div>
+            <div class="split-copy">
+              <span class="eyebrow">Team-up rewards</span>
+              <h3>Bigger rewards, earned together</h3>
+              <p>
+                Some rewards are better shared. Mark a reward as a team reward and kids can pool
+                their points — pizza &amp; game night, a family outing — splitting the cost evenly.
+              </p>
+              <ul class="check-list">
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Each kid sees their even share before opting in</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Invites, live previews, and one parent approval</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Shares are held until everyone's in</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PRIVACY ================= -->
+      <section class="block" id="privacy" style="padding-top: 0">
+        <div class="wrap">
+          <div class="privacy">
+            <span class="eyebrow">Privacy by design</span>
+            <h2 style="font-size: clamp(1.7rem, 3.2vw, 2.4rem); margin-top: 14px">
+              Built around children's privacy
+            </h2>
+            <p style="color: var(--text-muted); margin-top: 14px; max-width: 720px">
+              Pointsy is designed for data minimization, so the compliance surface (COPPA / GDPR-K)
+              stays small. Kids aren't users in the PII sense — they're just a name, an avatar, and
+              a PIN inside your family.
+            </p>
+            <ul class="privacy-grid">
+              <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>Only parents have accounts.</b> No kid email, no contact info, no behavioural tracking on children.</span></li>
+              <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>No ads, no selling data.</b> Ever. There's nothing to monetize and no third-party trackers on kids.</span></li>
+              <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>Parental consent at sign-up.</b> The account owner affirms they're the parent or guardian.</span></li>
+              <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>Export &amp; erasure built in.</b> Export your family's data, or delete the whole family in one action.</span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= OPEN SOURCE ================= -->
+      <section class="block" style="padding-top: 0">
+        <div class="wrap">
+          <div class="section-head">
+            <span class="eyebrow">Open-source</span>
+            <h2>Use ours, or run your own</h2>
+            <p>
+              Pointsy is MIT-licensed and built to fork. Point it at a free Neon database, deploy to
+              Vercel, and you have your own private instance.
+            </p>
+          </div>
+          <div style="text-align: center">
+            <div class="hero-cta" style="justify-content: center">
+              <a class="btn btn-primary" href="https://github.com/Highfivery/Pointsy">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.93c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.54-3.88-1.54-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.8 1.18 1.82 1.18 3.08 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5Z"/></svg>
+                Star on GitHub
+              </a>
+              <a class="btn btn-ghost" href="https://github.com/Highfivery/Pointsy#deploy-your-own">Deploy your own</a>
+            </div>
+            <div class="stack" style="justify-content: center; max-width: 760px; margin: 30px auto 0">
+              <span class="badge">Next.js 16</span>
+              <span class="badge">React 19</span>
+              <span class="badge">TypeScript</span>
+              <span class="badge">CSS Modules</span>
+              <span class="badge">Neon Postgres</span>
+              <span class="badge">Drizzle ORM</span>
+              <span class="badge">Zod</span>
+              <span class="badge">Serwist PWA</span>
+              <span class="badge">Vitest + Playwright</span>
+              <span class="badge">Vercel</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= FINAL CTA ================= -->
+      <section class="block" style="padding-top: 0">
+        <div class="wrap">
+          <div class="cta-final">
+            <h2>Make chores rewarding</h2>
+            <p>Set up your family in a few minutes — it's free, and there's nothing to install.</p>
+            <div class="hero-cta">
+              <a class="btn btn-primary" href="https://pointsy-six.vercel.app">
+                Get started free
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="site">
+      <div class="wrap foot">
+        <div>
+          <a class="brand" href="#top"><img src="assets/icon.svg" alt="" />Pointsy</a>
+          <small>Free, open-source family rewards. © Highfivery · MIT licensed.</small>
+        </div>
+        <nav class="foot-links" aria-label="Footer">
+          <a href="https://pointsy-six.vercel.app">Live app</a>
+          <a href="https://github.com/Highfivery/Pointsy">GitHub</a>
+          <a href="https://pointsy-six.vercel.app/privacy">Privacy</a>
+          <a href="https://pointsy-six.vercel.app/terms">Terms</a>
+          <a href="https://github.com/Highfivery/Pointsy/blob/main/LICENSE">License</a>
+        </nav>
+      </div>
+    </footer>
+  </body>
+</html>
