@@ -40,6 +40,7 @@ test("a parent creates a challenge and sees it in the list", async ({
   await expect(
     page.getByRole("heading", { name: "Challenges", level: 1 }),
   ).toBeVisible();
+  await expect(page).toHaveTitle(/challenges/i); // settle soft-nav title
   await expectNoA11yViolations(page, "/manage/challenges (empty)");
 
   // Create a points challenge (dates come pre-filled).
@@ -48,6 +49,7 @@ test("a parent creates a challenge and sees it in the list", async ({
   await page.getByLabel("Name").fill("Super Saver Week");
   await page.getByLabel("Points to earn").fill("100");
   await page.getByLabel(/bonus points/i).fill("20");
+  await expect(page).toHaveTitle(/new challenge/i);
   await expectNoA11yViolations(page, "/manage/challenges/new");
 
   await page.getByRole("button", { name: /save challenge/i }).click();
@@ -55,5 +57,6 @@ test("a parent creates a challenge and sees it in the list", async ({
   await expect(page.getByText("Super Saver Week")).toBeVisible();
   await expect(page.getByText(/Earn 100 points/)).toBeVisible();
   await expect(page.getByText("+20")).toBeVisible();
+  await expect(page).toHaveTitle(/challenges/i); // settle soft-nav title
   await expectNoA11yViolations(page, "/manage/challenges (one)");
 });
