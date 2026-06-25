@@ -73,7 +73,7 @@ is designed around **data minimization** so the compliance surface (COPPA / GDPR
 | Backend DB    | **Neon Postgres**                               | Serverless Postgres, autoscaling, pooling, DB branching, free tier |
 | ORM           | **Drizzle ORM**                                 | Type-safe, lightweight, first-class migrations, easy to test       |
 | Hosting       | **Vercel**                                      | Native Next.js, preview deploys, edge network                      |
-| Parent auth   | **Email + password** (+ reset)                  | Self-contained, recoverable, no 3rd-party dependency               |
+| Parent auth   | **Email + password** (no email/reset)           | Self-contained, no 3rd-party email dependency (see §5.2)           |
 | Kid auth      | **Avatar + 4-digit PIN**                        | Remembered device by default, family-code fallback                 |
 | Multi-tenancy | `family_id` on every row (+ Postgres RLS-ready) | Strict isolation, scalable                                         |
 | Redemptions   | **Parent approval required**                    | Mirrors real life; prevents impulse/accidental spends              |
@@ -261,8 +261,9 @@ shows negative balances clearly (e.g. red) and disables redemption requests whil
 - **Sign up**: email, password (zxcvbn strength check), parent display name → creates `families`
   row + parent `people` row, signs in.
 - **Sign in**: email + password (argon2id verify).
-- **Password reset**: token emailed (Resend free tier) — _can ship in v1.1 if email infra is
-  deferred; until then, reset is via "I forgot" → security questions or admin re-provision._
+- **No email-based password reset.** Pointsy deliberately ships **no email dependency**: there is
+  no transactional-email provider and no reset-link flow. A parent who is locked out is
+  re-provisioned by an admin/co-parent. (This is a settled decision, not a deferral — see §13.)
 
 ### 5.3 Kid flows
 
@@ -373,7 +374,8 @@ needs, webhooks, health). All validate with Zod and derive `family_id`/`role` fr
 - `signIn(email, password)`
 - `signInKid(familyId|code, personId, pin)`
 - `signOut()`
-- `requestPasswordReset(email)` / `resetPassword(token, newPassword)` _(v1.1 if email deferred)_
+- Co-parents join via a one-time **invite code** (`inviteCoParent` → `acceptInvite`); there is
+  **no email-based password reset** (see §5.2).
 
 ### 7.2 People
 
@@ -499,7 +501,8 @@ pointsy/
 
 ### 10.4 Environments & secrets
 
-- `DATABASE_URL` (Neon pooled), `AUTH_SECRET` (JWT signing), `RESEND_API_KEY` (when email ships).
+- `DATABASE_URL` (Neon pooled), `AUTH_SECRET` (JWT signing), and an optional Web Push VAPID
+  keypair (`NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY`). No email/transactional-mail keys.
 - Vercel: Production + Preview environments. Neon: main branch (prod) + per-PR branches (E2E).
 - `.env.example` documents all required vars.
 
@@ -575,10 +578,14 @@ Dashboards, activity feeds, animations, dark mode, empty/skeleton states, Lighth
 **Phase 7 — Ship**
 Production Neon, Vercel deploy, README/onboarding docs, first release via Changesets.
 
-**Post-v1 candidates**
-Web push notifications (approval/award), password reset email, recurring/scheduled chores,
-streaks & badges, allowance auto-credit, photo proof for chores, CSV import, co-parent invites
-polish, i18n.
+**Shipped since v1** (now part of the app — see `CHANGELOG.md`)
+Web Push notifications, co-parent invites, kid-submitted chores + approval, chore categories /
+limits / rotation / checklists / core chores, challenges (weekly + parent approval), and team-up
+rewards.
+
+**Post-v1 candidates** (not email — see §13)
+Recurring/scheduled chores, badges, allowance auto-credit, photo proof for chores, CSV import,
+i18n.
 
 ---
 
@@ -587,8 +594,9 @@ polish, i18n.
 1. **Parent PIN on shared device** — ✅ Yes. Parents may set an optional quick PIN for fast
    re-entry on a trusted, already-set-up device; the full password is still required for new
    devices and sensitive admin actions (regenerate family code, delete data, manage co-parents).
-2. **Email service** — ⏳ Deferred to **v1.1**. v1 has no email dependency: co-parents join via
-   the family code; password reset is handled by admin re-provision until Resend is wired up.
+2. **Email service** — ❌ Out of scope (settled, not deferred). Pointsy ships **no email
+   dependency** at all: co-parents join via a one-time invite **code**, and there is no
+   email-based password reset (a locked-out parent is re-provisioned by an admin/co-parent).
 3. **Negative balances** — ✅ Allowed. `adjust` may take a kid below zero ("debt you earn back");
    balance is not floored. UI shows negatives clearly and blocks redemptions while `Available < 0`.
 4. **Reward fulfillment** — ✅ Tracked. Lifecycle adds a `fulfilled` state: points deduct on

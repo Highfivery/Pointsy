@@ -1,0 +1,10 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pointsy">
+  <defs>
+    <linearGradient id="pointsy-accent" x1="64" y1="64" x2="448" y2="448" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#34D399"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#pointsy-accent)"/>
+  <path d="M256 120 C 272 196, 316 240, 392 256 C 316 272, 272 316, 256 392 C 240 316, 196 272, 120 256 C 196 240, 240 196, 256 120 Z" fill="#03251B"/>
+</svg>

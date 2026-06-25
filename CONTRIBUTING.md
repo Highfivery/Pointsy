@@ -14,7 +14,7 @@ skills under [`.claude/`](.claude). Please read [SPEC.md](SPEC.md) first.
    - Validate every input with Zod; hash secrets; never log them.
 3. **Test** — unit (`lib/domain`), integration (PGlite, incl. tenant isolation),
    and E2E + axe for new screens.
-4. **Accessibility** — meet the AAA checklist in
+4. **Accessibility** — meet the WCAG 2.1 **AA** checklist in
    [`docs/accessibility.md`](docs/accessibility.md).
 5. **Changeset** — run `npm run changeset` for any user-facing change.
 6. **Open a PR** — fill in the template; CI + E2E + Lighthouse must pass.
