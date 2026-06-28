@@ -85,6 +85,25 @@ Follow `docs/accessibility.md`. Semantic HTML, labelled controls, visible focus,
 green; tests added; a11y checked; a changeset added for user-facing changes;
 verified in a mobile viewport.
 
+**Migrations must reach the real database — green tests do NOT prove this.**
+Every automated test (Vitest/PGlite and Playwright) runs `db:migrate` against a
+_throwaway_ DB, so a new column always exists there even when production is
+behind. A change that adds or edits a migration is **not done** until:
+
+1. The migration is **applied to the database the app actually uses** (the Neon
+   DB — `npm run db:migrate`, which reads `.env.local`). This is a guarded
+   production action: surface the exact command and get explicit authorization;
+   never claim the feature works until it has run there.
+2. The **running app is exercised against that migrated DB** — not just the
+   throwaway test/Docker DB used for screenshots. If your dev server / screenshots
+   ran against a different DB than the user's, you have **not** verified the change.
+3. The **deploy applies migrations automatically** (production Vercel builds run
+   `scripts/vercel-migrate.mjs` before `next build`). If a project ever lacks an
+   auto-migrate step, that gap is part of the bug — fix it, don't ship around it.
+
+Shipping a schema-dependent query ahead of its migration is what broke kid login
+in 0.31.x. Treat "it passed E2E" as **insufficient** for any migration change.
+
 **Look at the UI before you ship it.** For any change that touches a screen,
 actually render it and look — don't ship UI you've only reasoned about. Run the
 app (or Playwright against a throwaway Postgres) and capture a screenshot of each
