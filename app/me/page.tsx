@@ -7,7 +7,11 @@ import { signOutAction } from "@/app/actions/auth";
 import { getDb } from "@/lib/db/client";
 import { getPersonById } from "@/lib/db/queries";
 import { getBalance, listKidActivity, getStreak } from "@/lib/points/service";
-import { listRedeemableRewards, getKidGoal } from "@/lib/redemptions/service";
+import {
+  listRedeemableRewards,
+  getKidGoal,
+  listKidAssignedRewards,
+} from "@/lib/redemptions/service";
 import { getFamilyTimezone } from "@/lib/family/settings";
 import {
   getPendingPoints,
@@ -24,6 +28,7 @@ import { CoreProgress } from "@/components/me/CoreProgress";
 import { KidChallenges } from "@/components/me/KidChallenges";
 import { RewardShelf } from "@/components/me/RewardShelf";
 import { KidGoal } from "@/components/me/KidGoal";
+import { KidRewardGoals } from "@/components/me/KidRewardGoals";
 import { EnableNotifications } from "@/components/push/EnableNotifications";
 import { KidTabBar } from "@/components/kid/KidTabBar";
 import { CountUp } from "@/components/me/CountUp";
@@ -50,6 +55,7 @@ export default async function MePage() {
     earnStreak,
     redeemable,
     goal,
+    assignedRewards,
     submittable,
     challenges,
   ] = await Promise.all([
@@ -60,6 +66,7 @@ export default async function MePage() {
     getStreak(db, session.familyId, session.personId, tz),
     listRedeemableRewards(db, session.familyId, session.personId),
     getKidGoal(db, session.familyId, session.personId),
+    listKidAssignedRewards(db, session.familyId, session.personId),
     listSubmittableChores(db, session.familyId, session.personId, tz),
     listKidChallenges(db, session.familyId, session.personId, tz),
   ]);
@@ -82,7 +89,13 @@ export default async function MePage() {
         )
       : 0;
 
-  const affordable = redeemable.rewards
+  // Personal "just for you" rewards get their own hero card below, so keep them
+  // out of the generic shelf/goal lists to avoid showing the same reward twice.
+  const assignedIds = new Set(assignedRewards.map((g) => g.reward.id));
+  const generalRewards = redeemable.rewards.filter(
+    (r) => !assignedIds.has(r.id),
+  );
+  const affordable = generalRewards
     .filter((r) => r.affordable)
     .map((r) => ({
       id: r.id,
@@ -91,7 +104,7 @@ export default async function MePage() {
       cost: r.cost,
       moreNeeded: r.moreNeeded,
     }));
-  const nextReward = redeemable.rewards
+  const nextReward = generalRewards
     .filter((r) => !r.affordable)
     .sort((a, b) => a.moreNeeded - b.moreNeeded)[0];
   const nextUp = nextReward
@@ -103,7 +116,7 @@ export default async function MePage() {
         moreNeeded: nextReward.moreNeeded,
       }
     : null;
-  const rewardOptions = redeemable.rewards.map((r) => ({
+  const rewardOptions = generalRewards.map((r) => ({
     id: r.id,
     name: r.name,
     cost: r.cost,
@@ -153,6 +166,8 @@ export default async function MePage() {
           </p>
         ) : null}
       </section>
+
+      <KidRewardGoals rewards={assignedRewards} />
 
       {coreTotal > 0 ? (
         <section className={styles.today} aria-labelledby="core-heading">

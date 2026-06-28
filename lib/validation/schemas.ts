@@ -149,6 +149,14 @@ export const rewardSchema = z.object({
     .default(2),
   /** For team rewards: also redeemable solo at full cost. */
   allowSolo: z.coerce.boolean().default(false),
+  /**
+   * Optional: a kid this reward is just for. Empty string ("Everyone") becomes
+   * undefined; ownership is re-checked server-side.
+   */
+  assignedToKidId: z
+    .union([z.string().uuid(), z.literal("")])
+    .optional()
+    .transform((v) => (v ? v : undefined)),
 });
 
 /* --------------------------------------------------------------- challenges */

@@ -42,6 +42,7 @@ export interface CatalogItem {
   isTeam?: boolean;
   minKids?: number;
   allowSolo?: boolean;
+  assignedToKidId?: string | null;
 }
 
 const initialState: FormState = {};
@@ -49,9 +50,11 @@ const initialState: FormState = {};
 export function CatalogItemCard({
   kind,
   item,
+  kids,
 }: {
   kind: CatalogKind;
   item: CatalogItem;
+  kids?: { id: string; name: string }[];
 }) {
   const [editState, editAction, editPending] = useActionState(
     updateCatalogItemAction,
@@ -150,6 +153,7 @@ export function CatalogItemCard({
             <CatalogFields
               kind={kind}
               errors={editState.fieldErrors}
+              kids={kids}
               defaults={{
                 name: item.name,
                 emoji: item.emoji,
@@ -160,6 +164,7 @@ export function CatalogItemCard({
                 isTeam: item.isTeam,
                 minKids: item.minKids,
                 allowSolo: item.allowSolo,
+                assignedToKidId: item.assignedToKidId,
               }}
             />
             <button

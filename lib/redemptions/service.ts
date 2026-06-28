@@ -1,4 +1,4 @@
-import { and, desc, eq, ne, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, ne, or, sql } from "drizzle-orm";
 import type { Database } from "@/lib/db/types";
 import {
   redemptions,
@@ -240,7 +240,14 @@ export async function listRedeemableRewards(
   const rows = await db
     .select()
     .from(rewards)
-    .where(and(eq(rewards.familyId, familyId), eq(rewards.isActive, true)))
+    .where(
+      and(
+        eq(rewards.familyId, familyId),
+        eq(rewards.isActive, true),
+        // Family-wide rewards plus this kid's own — never another kid's.
+        or(isNull(rewards.assignedToKidId), eq(rewards.assignedToKidId, kidId)),
+      ),
+    )
     .orderBy(rewards.sortOrder, rewards.createdAt);
 
   return {
@@ -305,6 +312,54 @@ export async function getKidGoal(
     moreNeeded: Math.max(0, reward.cost - available),
     pct,
   };
+}
+
+/**
+ * Rewards a parent set aside just for this kid, each with the kid's progress
+ * toward it — closest-to-reach first, so the dashboard can lead with the most
+ * motivating one. Empty if none are assigned.
+ */
+export async function listKidAssignedRewards(
+  db: Database,
+  familyId: string,
+  kidId: string,
+): Promise<GoalProgress[]> {
+  const rows = await db
+    .select()
+    .from(rewards)
+    .where(
+      and(
+        eq(rewards.familyId, familyId),
+        eq(rewards.isActive, true),
+        eq(rewards.assignedToKidId, kidId),
+      ),
+    )
+    .orderBy(rewards.sortOrder, rewards.createdAt);
+  if (rows.length === 0) return [];
+
+  const available = await getAvailable(db, familyId, kidId);
+  return rows
+    .map((reward) => {
+      const pct =
+        reward.cost > 0
+          ? Math.min(
+              100,
+              Math.max(0, Math.round((available / reward.cost) * 100)),
+            )
+          : 100;
+      return {
+        reward: {
+          id: reward.id,
+          name: reward.name,
+          emoji: reward.emoji,
+          cost: reward.cost,
+        },
+        available,
+        moreNeeded: Math.max(0, reward.cost - available),
+        pct,
+      };
+    })
+    .sort((a, b) => b.pct - a.pct);
 }
 
 /** Set (or clear, with null) the kid's savings-goal reward. */

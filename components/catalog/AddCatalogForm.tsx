@@ -9,7 +9,13 @@ import styles from "@/components/manage/manage.module.css";
 
 const initialState: FormState = {};
 
-export function AddCatalogForm({ kind }: { kind: CatalogKind }) {
+export function AddCatalogForm({
+  kind,
+  kids,
+}: {
+  kind: CatalogKind;
+  kids?: { id: string; name: string }[];
+}) {
   const [state, action, pending] = useActionState(
     createCatalogItemAction,
     initialState,
@@ -27,7 +33,7 @@ export function AddCatalogForm({ kind }: { kind: CatalogKind }) {
     >
       <form ref={formRef} action={action} className={form.form} noValidate>
         <input type="hidden" name="kind" value={kind} />
-        <CatalogFields kind={kind} errors={state.fieldErrors} />
+        <CatalogFields kind={kind} errors={state.fieldErrors} kids={kids} />
         {state.error ? (
           <p role="alert" className={form.formError}>
             {state.error}

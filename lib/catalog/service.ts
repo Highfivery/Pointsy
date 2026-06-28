@@ -67,6 +67,23 @@ export interface RewardInput {
   isTeam?: boolean;
   minKids?: number;
   allowSolo?: boolean;
+  /** When set, the reward is a personal goal for just this kid (else family-wide). */
+  assignedToKidId?: string | null;
+}
+
+/**
+ * Validate an "assigned to" kid against this family. A client-supplied id is
+ * honoured only if it's an active kid in the family; anything else (including
+ * "everyone") becomes null — never trust the id (tenant isolation).
+ */
+async function resolveAssignedKid(
+  db: Database,
+  familyId: string,
+  kidId: string | null | undefined,
+): Promise<string | null> {
+  if (!kidId) return null;
+  const ids = await familyKidIds(db, familyId, [kidId]);
+  return ids[0] ?? null;
 }
 
 export type MoveDirection = "up" | "down";
@@ -273,6 +290,11 @@ export async function createReward(
   input: RewardInput,
 ): Promise<Reward> {
   const existing = await listRewards(db, familyId);
+  const assignedToKidId = await resolveAssignedKid(
+    db,
+    familyId,
+    input.assignedToKidId,
+  );
   const [row] = await db
     .insert(rewards)
     .values({
@@ -284,6 +306,7 @@ export async function createReward(
       isTeam: input.isTeam ?? false,
       minKids: input.minKids ?? 2,
       allowSolo: input.allowSolo ?? false,
+      assignedToKidId,
       sortOrder: existing.length,
     })
     .returning();
@@ -296,6 +319,11 @@ export async function updateReward(
   id: string,
   input: RewardInput,
 ): Promise<void> {
+  const assignedToKidId = await resolveAssignedKid(
+    db,
+    familyId,
+    input.assignedToKidId,
+  );
   await db
     .update(rewards)
     .set({
@@ -306,6 +334,7 @@ export async function updateReward(
       isTeam: input.isTeam ?? false,
       minKids: input.minKids ?? 2,
       allowSolo: input.allowSolo ?? false,
+      assignedToKidId,
     })
     .where(and(eq(rewards.familyId, familyId), eq(rewards.id, id)));
 }
