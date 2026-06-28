@@ -1,5 +1,71 @@
 # pointsy
 
+## 0.30.0
+
+### Minor Changes
+
+- dd0b312: **Custom chore categories.** Chore categories are no longer hard-coded — each
+  family now manages its own. A new **Manage → Categories** screen (reached from
+  the Chores screen) lets parents add, rename, re-icon, reorder, and delete
+  categories. Deleting a category that still holds chores prompts you to move them
+  to another category first, so nothing is ever orphaned, and the last category
+  can't be removed.
+
+  Every existing family is migrated automatically: the previous nine categories
+  are seeded per family and each chore is re-pointed to its matching one, so all
+  current groupings are preserved. New families start with the same sensible set.
+  The chore editor, award screen, kid "My chores" screen, and chore list all group
+  by the family's own categories.
+
+- fb27aeb: Add a bottom nav to the parent dashboard and refresh the app icons.
+
+  - The dashboard now carries the same fixed bottom navigation as the rest of the
+    app, with quick access to **Kids · Chores · Rewards · Challenges · Parents**.
+    This replaces the long vertical list of management links, making the dashboard
+    shorter and more consistent with the manage screens.
+  - App icons, the maskable icon, the Apple touch icon and `favicon.ico` are
+    regenerated to the Emerald Noir palette (emerald→cyan gradient mark), and the
+    PWA manifest's `theme_color`/`background_color` now match the dark theme.
+
+- 08e96b5: Rebrand to a dark, modern "Emerald Noir" design system and standardise the UI.
+
+  - **New look:** a dark-only theme with an emerald→cyan gradient accent, glassy
+    elevated surfaces, the Sora display + Inter body typefaces, and tasteful motion
+    (page fades, count-up balances, staggered list entrances, press feedback) — all
+    respecting `prefers-reduced-motion`. Accessibility target moves from WCAG AAA to
+    AA (still fully AA-conformant).
+  - **Shared components:** a single set of primitives (`Card`, `IconButton`, `Chip`,
+    `ScreenHeader`, `BottomNav`) now backs every card and screen for consistency.
+  - **Manage screens:** each of Rewards, Chores, Challenges and Kids gains a
+    contextual bottom nav (`Dashboard · Section · Add`), a dedicated "Add" page, and
+    fully-contained cards with inline icon actions (edit / hide / delete, etc.).
+    Chores can be filtered by category.
+  - **Challenges:** the end date is now optional when a challenge repeats every week,
+    so weekly challenges can run indefinitely.
+
+### Patch Changes
+
+- 049f790: Polish the award/deduct points card: the "Points awarded/deducted" confirmation
+  now hides itself if you switch direction without submitting, so it always
+  matches the toggle. Internally, the award-vs-deduct routing is centralised in a
+  `changePoints` service function (single source of truth for the sign) with a
+  direct integration test.
+- 6437255: Extend the fixed bottom nav to every authenticated screen for consistent
+  navigation. The parents page, the award screen, and the chore/challenge editor
+  pages now carry a contextual bottom nav (replacing their one-off "back" links),
+  matching the dashboard, manage, and kid screens.
+- 996fa25: Two parent/kid-facing fixes:
+
+  - **PIN pad now reacts to a wrong entry.** A rejected PIN flashes the dots red
+    and shakes them, then clears the pad so the next attempt visibly starts fresh.
+    Previously a repeated wrong PIN (identical error text) could leave the pad full
+    and unresponsive with no feedback. The flash honours `prefers-reduced-motion`.
+  - **Award screen can deduct points, not just award them.** The custom-points card
+    gains an Award / Deduct segmented toggle, so a parent enters a plain positive
+    amount and the button restates the action ("Award points" / "Deduct points") —
+    no more typing a minus sign into an "adjust" field. Deductions are recorded as
+    negative `adjust` ledger rows, keeping the ledger append-only.
+
 ## 0.29.0
 
 ### Minor Changes
