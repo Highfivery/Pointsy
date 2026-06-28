@@ -18,11 +18,24 @@ description: Safely change the Pointsy Drizzle schema and generate a migration. 
    `onDelete` are correct, and enums are altered (not recreated) where possible.
 5. **Verify against real SQL:** the PGlite integration tests run all migrations;
    `npm test` must pass. Add a tenant-isolation test for any new table.
-6. **Apply to a real DB** with `npm run db:migrate` (against a Neon branch for
-   review; production migrates on deploy).
+6. **Apply the migration to the DB the app actually uses** — **run
+   `npm run db:migrate` yourself** (reads `.env.local` → the Neon DB). The owner
+   wants this run as a matter of course, not handed back as a command to copy;
+   only pause if the harness permission layer blocks the write (then ask once to
+   allow it). The deploy also applies it automatically
+   (`scripts/vercel-migrate.mjs` runs before build on production).
+7. **Run the app against that migrated DB and exercise the changed read/write
+   paths** (e.g. the kid `/me` screen for a chores change). Screenshots/dev runs
+   against a throwaway Docker DB do **not** count — that DB isn't the one the user
+   runs.
 
 ## Guardrails
 
+- **Green tests do NOT mean the real DB is migrated.** Vitest/PGlite and Playwright
+  each migrate a _throwaway_ DB, so a new column always exists in tests even when
+  the real DB is behind. Never say "done" for a migration change until step 6 has
+  run against the real DB and step 7 confirms the live app works. (Shipping a
+  `category_id` query ahead of its migration broke kid login in 0.31.x.)
 - Never edit an already-committed migration file — add a new one.
 - Ledger stays append-only; don't add update/delete paths for it.
 - Money/points columns are `integer` and may be negative.
