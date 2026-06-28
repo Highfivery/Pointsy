@@ -91,9 +91,11 @@ _throwaway_ DB, so a new column always exists there even when production is
 behind. A change that adds or edits a migration is **not done** until:
 
 1. The migration is **applied to the database the app actually uses** (the Neon
-   DB — `npm run db:migrate`, which reads `.env.local`). This is a guarded
-   production action: surface the exact command and get explicit authorization;
-   never claim the feature works until it has run there.
+   DB — **run `npm run db:migrate` yourself**; it reads `.env.local`). The owner
+   wants this run as a matter of course, not handed back as a command to copy.
+   If the harness permission layer blocks the write, that's the only time to
+   pause — ask once to allow it, then run it. Never claim the feature works
+   until the migration has actually run against that DB.
 2. The **running app is exercised against that migrated DB** — not just the
    throwaway test/Docker DB used for screenshots. If your dev server / screenshots
    ran against a different DB than the user's, you have **not** verified the change.
