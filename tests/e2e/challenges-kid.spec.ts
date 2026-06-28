@@ -56,11 +56,8 @@ test("a kid sees challenge progress and an auto-paid bonus", async ({
 
   // Award 12: Sprint → 12/20, Quick Win → done (+10 bonus → balance 22).
   await page.goto("/dashboard");
-  await page.getByRole("link", { name: /robin/i }).click();
-  const custom = page.locator("details", {
-    has: page.getByText("Award or deduct points"),
-  });
-  await page.getByText("Award or deduct points").click();
+  await page.getByRole("link", { name: /manage robin/i }).click();
+  const custom = page.getByRole("region", { name: "Award or deduct points" });
   await custom.getByLabel("Points").fill("12");
   await custom.getByLabel("Reason").fill("Helping out");
   await custom.getByRole("button", { name: /^award points$/i }).click();

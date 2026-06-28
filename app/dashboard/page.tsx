@@ -2,7 +2,15 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { eq } from "drizzle-orm";
-import { LogOut, Users, Plus, Check, X, PackageCheck } from "lucide-react";
+import {
+  LogOut,
+  Users,
+  Plus,
+  Minus,
+  Check,
+  X,
+  PackageCheck,
+} from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
 import { getDb } from "@/lib/db/client";
@@ -295,8 +303,12 @@ export default async function DashboardPage() {
         {kids.length > 0 ? (
           <ul className={styles.kidList}>
             {kids.map((k) => (
-              <li key={k.id}>
-                <Link href={`/award/${k.id}`} className={styles.kidCard}>
+              <li key={k.id} className={styles.kidCard}>
+                <Link
+                  href={`/award/${k.id}`}
+                  className={styles.kidIdentity}
+                  aria-label={`Manage ${k.name}'s points`}
+                >
                   <span
                     className={styles.kidAvatar}
                     style={{ background: k.color }}
@@ -313,11 +325,25 @@ export default async function DashboardPage() {
                       {k.balance} pts
                     </span>
                   </span>
-                  <span className={styles.awardChip}>
+                </Link>
+                <div className={styles.kidActions}>
+                  <Link
+                    href={`/award/${k.id}`}
+                    className={styles.awardChip}
+                    aria-label={`Award points to ${k.name}`}
+                  >
                     <Plus size={16} aria-hidden="true" />
                     Award
-                  </span>
-                </Link>
+                  </Link>
+                  <Link
+                    href={`/award/${k.id}?mode=deduct`}
+                    className={styles.deductChip}
+                    aria-label={`Deduct points from ${k.name}`}
+                  >
+                    <Minus size={16} aria-hidden="true" />
+                    Deduct
+                  </Link>
+                </div>
               </li>
             ))}
           </ul>

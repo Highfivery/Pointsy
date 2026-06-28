@@ -58,7 +58,7 @@ test("award screen groups by category, searches, and awards to several kids", as
   await addChore(page, "Walk dog", { points: 5, category: "Pets" });
 
   await page.goto("/dashboard");
-  await page.getByRole("link", { name: /robin/i }).click();
+  await page.getByRole("link", { name: /manage robin/i }).click();
   await expect(page).toHaveURL(/\/award\//);
   await expect(page).toHaveTitle(/\S/);
 
@@ -96,7 +96,7 @@ test("kid dashboard shows redeem-now rewards and a savings goal", async ({
 
   // Give Robin enough to afford the reward.
   await page.goto("/dashboard");
-  await page.getByRole("link", { name: /robin/i }).click();
+  await page.getByRole("link", { name: /manage robin/i }).click();
   await page.getByRole("button", { name: /big job/i }).click();
   await expect(page.getByText("30 pts")).toBeVisible();
 

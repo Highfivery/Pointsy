@@ -36,11 +36,8 @@ test("a reward request asks for confirmation (no accidental redeem)", async ({
 
   // Give Robin enough.
   await page.goto("/dashboard");
-  await page.getByRole("link", { name: /robin/i }).click();
-  const custom = page.locator("details", {
-    has: page.getByText("Award or deduct points"),
-  });
-  await page.getByText("Award or deduct points").click();
+  await page.getByRole("link", { name: /manage robin/i }).click();
+  const custom = page.getByRole("region", { name: "Award or deduct points" });
   await custom.getByLabel("Points").fill("20");
   await custom.getByLabel("Reason").fill("Allowance");
   await custom.getByRole("button", { name: /^award points$/i }).click();
@@ -88,11 +85,8 @@ test("a kid in the red can't redeem and sees a clear message", async ({
 
   // Push Robin below zero.
   await page.goto("/dashboard");
-  await page.getByRole("link", { name: /robin/i }).click();
-  const adjust = page.locator("details", {
-    has: page.getByText("Award or deduct points"),
-  });
-  await page.getByText("Award or deduct points").click();
+  await page.getByRole("link", { name: /manage robin/i }).click();
+  const adjust = page.getByRole("region", { name: "Award or deduct points" });
   await adjust.getByRole("button", { name: /^deduct$/i }).click();
   await adjust.getByLabel("Points").fill("10");
   await adjust.getByLabel("Reason").fill("Penalty");

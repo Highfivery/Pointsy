@@ -24,10 +24,14 @@ export const metadata: Metadata = { title: "Award points" };
 
 export default async function AwardPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ kidId: string }>;
+  searchParams: Promise<{ mode?: string }>;
 }) {
   const { kidId } = await params;
+  const { mode } = await searchParams;
+  const initialMode = mode === "deduct" ? "deduct" : "award";
   const session = await getSession();
   if (!session) redirect("/sign-in");
   if (session.role !== "parent") redirect("/me");
@@ -80,6 +84,8 @@ export default async function AwardPage({
         </span>
       </div>
 
+      <AwardExtras kidId={kidId} initialMode={initialMode} />
+
       <section aria-labelledby="chores-title">
         <h2 id="chores-title" className={styles.sectionTitle}>
           Award a chore
@@ -102,8 +108,6 @@ export default async function AwardPage({
           </p>
         )}
       </section>
-
-      <AwardExtras kidId={kidId} />
 
       <section aria-labelledby="recent-title">
         <h2 id="recent-title" className={styles.sectionTitle}>

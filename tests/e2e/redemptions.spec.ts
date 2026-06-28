@@ -64,12 +64,9 @@ test.describe("redemption loop", () => {
 
     // Award the kid 10 points.
     await page.goto("/dashboard");
-    await page.getByRole("link", { name: /kiddo/i }).click();
+    await page.getByRole("link", { name: /manage kiddo/i }).click();
     await expect(page).toHaveURL(/\/award\//);
-    await page.getByText("Award or deduct points").click();
-    const custom = page.locator("details", {
-      has: page.getByText("Award or deduct points"),
-    });
+    const custom = page.getByRole("region", { name: "Award or deduct points" });
     await custom.getByLabel("Points").fill("10");
     await custom.getByLabel("Reason").fill("Great week");
     await custom.getByRole("button", { name: /^award points$/i }).click();

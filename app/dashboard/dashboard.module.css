@@ -106,18 +106,28 @@
 
 .kidCard {
   display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  min-height: var(--tap-target);
+  flex-direction: column;
+  gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
+}
+
+.kidIdentity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: var(--tap-target);
   text-decoration: none;
-  transition:
-    border-color 0.12s ease,
-    transform 0.12s ease;
+  border-radius: var(--radius-md);
+  transition: transform 0.12s ease;
+}
+
+.kidActions {
+  display: flex;
+  gap: var(--space-2);
 }
 
 .kidAvatar {
@@ -154,17 +164,30 @@
   color: var(--color-danger);
 }
 
-.awardChip {
+.awardChip,
+.deductChip {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-1);
+  flex: 1;
+  min-height: 2.75rem;
   padding: var(--space-2) var(--space-3);
   font-weight: 700;
   font-size: 0.9rem;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  transition: transform 0.12s ease;
+}
+
+.awardChip {
   color: var(--color-on-accent);
   background-image: var(--accent-gradient);
-  border-radius: var(--radius-full);
-  flex-shrink: 0;
+}
+
+.deductChip {
+  color: var(--color-on-danger);
+  background: var(--color-danger-strong);
 }
 
 .queueList {
@@ -243,12 +266,20 @@
 @media (hover: hover) and (pointer: fine) {
   .kidCard:hover {
     border-color: var(--color-primary);
+  }
+  .awardChip:hover,
+  .deductChip:hover {
     transform: translateY(-1px);
+  }
+  .kidIdentity:hover .kidCardName {
+    color: var(--color-primary);
   }
 }
 
-.kidCard:active {
-  transform: scale(0.99);
+.kidIdentity:active,
+.awardChip:active,
+.deductChip:active {
+  transform: scale(0.98);
 }
 .approveBtn:active,
 .denyBtn:active,
@@ -256,7 +287,9 @@
   transform: scale(0.96);
 }
 @media (prefers-reduced-motion: reduce) {
-  .kidCard:active,
+  .kidIdentity:active,
+  .awardChip:active,
+  .deductChip:active,
   .approveBtn:active,
   .denyBtn:active,
   .deliverBtn:active {

@@ -17,11 +17,10 @@ async function addKid(page: Page, name: string, pin: string) {
 
 async function awardCustom(page: Page, kidName: string, points: string) {
   await page.goto("/dashboard");
-  await page.getByRole("link", { name: new RegExp(kidName, "i") }).click();
-  const custom = page.locator("details", {
-    has: page.getByText("Award or deduct points"),
-  });
-  await page.getByText("Award or deduct points").click();
+  await page
+    .getByRole("link", { name: new RegExp(`manage ${kidName}`, "i") })
+    .click();
+  const custom = page.getByRole("region", { name: "Award or deduct points" });
   await custom.getByLabel("Points").fill(points);
   await custom.getByLabel("Reason").fill("seed");
   await custom.getByRole("button", { name: /^award points$/i }).click();
