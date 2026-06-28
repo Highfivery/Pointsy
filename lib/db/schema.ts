@@ -65,18 +65,6 @@ export const submissionStatusEnum = pgEnum("submission_status", [
   "rejected",
   "cancelled",
 ]);
-/** Area a chore belongs to, used to group chores across every view. */
-export const choreCategoryEnum = pgEnum("chore_category", [
-  "bedroom",
-  "bathroom",
-  "kitchen",
-  "home",
-  "outdoor",
-  "pets",
-  "school",
-  "selfcare",
-  "other",
-]);
 /** Who a chore is for. "rotating" takes turns among its assignees. */
 export const choreAssignmentEnum = pgEnum("chore_assignment", [
   "everyone",
@@ -174,6 +162,30 @@ export const people = pgTable(
   ],
 );
 
+/* ----------------------------------------------- chore categories (per family) */
+
+/**
+ * Per-family chore categories — the groups parents organise chores into across
+ * every view. Editable, reorderable, and seeded with a sensible default set on
+ * sign-up. `icon` is a key in the shared icon registry.
+ */
+export const choreCategories = pgTable(
+  "chore_categories",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    familyId: uuid("family_id")
+      .notNull()
+      .references(() => families.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    icon: text("icon").notNull().default("sparkles"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [index("chore_categories_family_idx").on(t.familyId)],
+);
+
 /* ------------------------------------------------- chores (behavior catalog) */
 
 export const chores = pgTable(
@@ -189,8 +201,10 @@ export const chores = pgTable(
     description: text("description"),
     /** Default award value (overridable at award time). */
     points: integer("points").notNull(),
-    /** Area used to group chores in every view. */
-    category: choreCategoryEnum("category").notNull().default("other"),
+    /** The per-family category this chore is grouped under. */
+    categoryId: uuid("category_id")
+      .notNull()
+      .references(() => choreCategories.id, { onDelete: "restrict" }),
     /** Favourited chores surface first on the award screen. */
     pinned: boolean("pinned").notNull().default(false),
     /** A "core" chore that's expected daily (drives challenges). */
@@ -211,7 +225,10 @@ export const chores = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (t) => [index("chores_family_idx").on(t.familyId)],
+  (t) => [
+    index("chores_family_idx").on(t.familyId),
+    index("chores_category_idx").on(t.categoryId),
+  ],
 );
 
 /**
@@ -601,7 +618,8 @@ export type Person = typeof people.$inferSelect;
 export type NewPerson = typeof people.$inferInsert;
 export type Chore = typeof chores.$inferSelect;
 export type NewChore = typeof chores.$inferInsert;
-export type ChoreCategory = (typeof choreCategoryEnum.enumValues)[number];
+export type ChoreCategory = typeof choreCategories.$inferSelect;
+export type NewChoreCategory = typeof choreCategories.$inferInsert;
 export type ChoreAssignment = (typeof choreAssignmentEnum.enumValues)[number];
 export type ChoreSubtask = typeof choreSubtasks.$inferSelect;
 export type NewChoreSubtask = typeof choreSubtasks.$inferInsert;
@@ -633,6 +651,7 @@ export type ChallengeAward = typeof challengeAwards.$inferSelect;
 export const schema = {
   families,
   people,
+  choreCategories,
   chores,
   choreAssignees,
   choreSubtasks,
@@ -654,7 +673,6 @@ export const schema = {
   teamMemberStatusEnum,
   choreLimitPeriodEnum,
   submissionStatusEnum,
-  choreCategoryEnum,
   choreAssignmentEnum,
   challengeScopeEnum,
   challengeGoalEnum,

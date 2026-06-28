@@ -54,8 +54,8 @@ test("award screen groups by category, searches, and awards to several kids", as
   await signUpParent(page);
   await addKid(page, "Robin");
   await addKid(page, "Sky");
-  await addChore(page, "Brush teeth", { points: 3, category: "selfcare" });
-  await addChore(page, "Walk dog", { points: 5, category: "pets" });
+  await addChore(page, "Brush teeth", { points: 3, category: "Self-care" });
+  await addChore(page, "Walk dog", { points: 5, category: "Pets" });
 
   await page.goto("/dashboard");
   await page.getByRole("link", { name: /robin/i }).click();
@@ -91,7 +91,7 @@ test("kid dashboard shows redeem-now rewards and a savings goal", async ({
 }) => {
   await signUpParent(page);
   await addKid(page, "Robin");
-  await addChore(page, "Big job", { points: 30, category: "home" });
+  await addChore(page, "Big job", { points: 30, category: "Around the home" });
   await addReward(page, "Ice cream", 10);
 
   // Give Robin enough to afford the reward.

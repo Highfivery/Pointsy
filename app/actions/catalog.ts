@@ -32,7 +32,7 @@ function parseChore(formData: FormData) {
     name: formData.get("name"),
     emoji: formData.get("emoji"),
     points: formData.get("points"),
-    category: formData.get("category") ?? "other",
+    categoryId: formData.get("categoryId") || undefined,
     description: formData.get("description") || undefined,
     isCore: formData.get("isCore"),
     assignment: formData.get("assignment") ?? "everyone",

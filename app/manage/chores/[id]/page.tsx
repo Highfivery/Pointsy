@@ -6,6 +6,7 @@ import { getChore } from "@/lib/catalog/service";
 import { getAssigneeIds } from "@/lib/chores/assignment";
 import { getSubtasks } from "@/lib/chores/subtasks";
 import { getKidBalances } from "@/lib/points/service";
+import { listCategories } from "@/lib/categories/service";
 import { ChoreEditor } from "@/components/catalog/ChoreEditor";
 import { ChoreDangerZone } from "@/components/catalog/ChoreDangerZone";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
@@ -28,10 +29,11 @@ export default async function EditChorePage({
   const chore = await getChore(db, session.familyId, id);
   if (!chore) redirect("/manage/chores");
 
-  const [assigneeIds, subtasks, kids] = await Promise.all([
+  const [assigneeIds, subtasks, kids, categories] = await Promise.all([
     getAssigneeIds(db, chore.id),
     getSubtasks(db, chore.id),
     getKidBalances(db, session.familyId),
+    listCategories(db, session.familyId),
   ]);
 
   return (
@@ -44,12 +46,13 @@ export default async function EditChorePage({
           avatar: k.avatar,
           color: k.color,
         }))}
+        categories={categories.map((c) => ({ id: c.id, name: c.name }))}
         defaults={{
           id: chore.id,
           name: chore.name,
           emoji: chore.emoji,
           points: chore.points,
-          category: chore.category,
+          categoryId: chore.categoryId,
           description: chore.description,
           isCore: chore.isCore,
           assignment: chore.assignment,

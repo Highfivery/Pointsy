@@ -7,7 +7,6 @@ import { Field } from "@/components/auth/Field";
 import { IconPicker } from "@/components/icons/IconPicker";
 import { IconByName } from "@/components/icons/registry";
 import { ICON_KEYS, DEFAULT_CHORE_ICON } from "@/lib/icons";
-import { CHORE_CATEGORIES } from "@/lib/catalog/category";
 import { saveChoreAction } from "@/app/actions/catalog";
 import type { FormState } from "@/lib/validation/form";
 import type { ChoreAssignment } from "@/lib/db/schema";
@@ -22,12 +21,17 @@ export interface EditorKid {
   color: string;
 }
 
+export interface EditorCategory {
+  id: string;
+  name: string;
+}
+
 export interface ChoreDefaults {
   id?: string;
   name?: string;
   emoji?: string;
   points?: number;
-  category?: string;
+  categoryId?: string;
   description?: string | null;
   isCore?: boolean;
   assignment?: ChoreAssignment;
@@ -55,9 +59,11 @@ const initialState: FormState = {};
 
 export function ChoreEditor({
   kids,
+  categories,
   defaults,
 }: {
   kids: EditorKid[];
+  categories: EditorCategory[];
   defaults?: ChoreDefaults;
 }) {
   const [state, action, pending] = useActionState(
@@ -112,18 +118,25 @@ export function ChoreEditor({
           <label htmlFor={categoryId} className={form.label}>
             Category
           </label>
-          <select
-            id={categoryId}
-            name="category"
-            defaultValue={defaults?.category ?? "other"}
-            className={styles.select}
-          >
-            {CHORE_CATEGORIES.map((c) => (
-              <option key={c.key} value={c.key}>
-                {c.label}
-              </option>
-            ))}
-          </select>
+          {categories.length > 0 ? (
+            <select
+              id={categoryId}
+              name="categoryId"
+              defaultValue={defaults?.categoryId ?? categories[0].id}
+              className={styles.select}
+            >
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <p className={styles.muted}>
+              No categories yet.{" "}
+              <Link href="/manage/categories">Add one first</Link>.
+            </p>
+          )}
         </div>
       </section>
 

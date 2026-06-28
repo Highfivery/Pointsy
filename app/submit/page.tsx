@@ -5,6 +5,7 @@ import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { getFamilyTimezone } from "@/lib/family/settings";
 import { listSubmittableChores } from "@/lib/submissions/service";
+import { listCategories } from "@/lib/categories/service";
 import { groupByCategory } from "@/lib/catalog/category";
 import { IconByName } from "@/components/icons/registry";
 import { SubmitChoreCard } from "@/components/submit/SubmitChoreCard";
@@ -20,12 +21,10 @@ export default async function SubmitPage() {
 
   const db = getDb();
   const tz = await getFamilyTimezone(db, session.familyId);
-  const chores = await listSubmittableChores(
-    db,
-    session.familyId,
-    session.personId,
-    tz,
-  );
+  const [chores, categories] = await Promise.all([
+    listSubmittableChores(db, session.familyId, session.personId, tz),
+    listCategories(db, session.familyId),
+  ]);
   const core = chores.filter((c) => c.isCore);
   const others = chores.filter((c) => !c.isCore);
 
@@ -56,15 +55,15 @@ export default async function SubmitPage() {
             </section>
           ) : null}
 
-          {groupByCategory(others).map(({ meta, items }) => (
+          {groupByCategory(others, categories).map(({ meta, items }) => (
             <section
-              key={meta.key}
+              key={meta.id}
               className={styles.section}
-              aria-label={meta.label}
+              aria-label={meta.name}
             >
               <h2 className={styles.sectionTitle}>
                 <IconByName name={meta.icon} size={18} />
-                {meta.label}
+                {meta.name}
               </h2>
               <ul className={styles.list}>
                 {items.map((c) => (

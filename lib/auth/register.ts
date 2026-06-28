@@ -5,6 +5,7 @@ import { hashSecret, verifySecret } from "./password";
 import { generateFamilyCode } from "./family-code";
 import { DEFAULT_PARENT_AVATAR_ICON } from "@/lib/icons";
 import { normalizeTimezone } from "@/lib/timezone";
+import { seedDefaultCategories } from "@/lib/categories/service";
 
 /** Bump when the ToS/Privacy wording materially changes (recorded per parent). */
 export const CONSENT_VERSION = "2026-06-22";
@@ -98,6 +99,9 @@ export async function registerFamily(
       .update(families)
       .set({ ownerId: parent.id })
       .where(eq(families.id, family.id));
+
+    // Give the family a sensible starter set of chore categories to organise into.
+    await seedDefaultCategories(tx, family.id);
 
     return {
       familyId: family.id,

@@ -66,9 +66,9 @@ test.describe("redemption loop", () => {
     await page.goto("/dashboard");
     await page.getByRole("link", { name: /kiddo/i }).click();
     await expect(page).toHaveURL(/\/award\//);
-    await page.getByText("Award custom points").click();
+    await page.getByText("Award or deduct points").click();
     const custom = page.locator("details", {
-      has: page.getByText("Award custom points"),
+      has: page.getByText("Award or deduct points"),
     });
     await custom.getByLabel("Points").fill("10");
     await custom.getByLabel("Reason").fill("Great week");

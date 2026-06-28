@@ -1,32 +1,34 @@
 import { describe, it, expect } from "vitest";
 import {
-  CHORE_CATEGORIES,
-  categoryLabel,
-  categoryIcon,
+  DEFAULT_CHORE_CATEGORIES,
   groupByCategory,
+  type CategoryMeta,
 } from "@/lib/catalog/category";
 import { addDays } from "@/lib/timezone";
 
 describe("chore categories", () => {
-  it("labels and icons fall back to Other for unknown keys", () => {
-    expect(categoryLabel("pets")).toBe("Pets");
-    expect(categoryLabel("nonsense")).toBe("Other");
-    expect(categoryIcon("nonsense")).toBe("sparkles");
+  it("ships a non-empty default starter set with an 'Other' catch-all", () => {
+    expect(DEFAULT_CHORE_CATEGORIES.length).toBeGreaterThan(0);
+    expect(DEFAULT_CHORE_CATEGORIES.some((c) => c.name === "Other")).toBe(true);
+    // Every default carries an icon key for the section glyph.
+    expect(DEFAULT_CHORE_CATEGORIES.every((c) => c.icon.length > 0)).toBe(true);
   });
 
-  it("groups items in category order, dropping empties", () => {
-    const items = [
-      { id: "1", category: "pets" },
-      { id: "2", category: "bedroom" },
-      { id: "3", category: "pets" },
+  it("groups items into the family's category order, dropping empties", () => {
+    const categories: CategoryMeta[] = [
+      { id: "bed", name: "Bedroom", icon: "bed" },
+      { id: "pets", name: "Pets", icon: "paw" },
+      { id: "yard", name: "Outdoor", icon: "yard" }, // no items → dropped
     ];
-    const groups = groupByCategory(items);
-    // bedroom precedes pets in CHORE_CATEGORIES order.
-    expect(groups.map((g) => g.meta.key)).toEqual(["bedroom", "pets"]);
+    const items = [
+      { id: "1", categoryId: "pets" },
+      { id: "2", categoryId: "bed" },
+      { id: "3", categoryId: "pets" },
+    ];
+    const groups = groupByCategory(items, categories);
+    // Order follows the categories list, and the empty Outdoor group is dropped.
+    expect(groups.map((g) => g.meta.id)).toEqual(["bed", "pets"]);
     expect(groups[1].items.map((i) => i.id)).toEqual(["1", "3"]);
-    // every category key is real.
-    const keys = new Set(CHORE_CATEGORIES.map((c) => c.key));
-    expect(keys.has("other")).toBe(true);
   });
 });
 

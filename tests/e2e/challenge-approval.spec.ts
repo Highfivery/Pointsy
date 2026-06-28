@@ -39,9 +39,9 @@ test("a parent-confirm challenge waits for approval, then pays the bonus", async
   await page.goto("/dashboard");
   await page.getByRole("link", { name: /robin/i }).click();
   const custom = page.locator("details", {
-    has: page.getByText("Award custom points"),
+    has: page.getByText("Award or deduct points"),
   });
-  await page.getByText("Award custom points").click();
+  await page.getByText("Award or deduct points").click();
   await custom.getByLabel("Points").fill("10");
   await custom.getByLabel("Reason").fill("Allowance");
   await custom.getByRole("button", { name: /^award points$/i }).click();

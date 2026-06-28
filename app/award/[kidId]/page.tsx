@@ -5,6 +5,7 @@ import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { getPersonById } from "@/lib/db/queries";
 import { listChores } from "@/lib/catalog/service";
+import { listCategories } from "@/lib/categories/service";
 import {
   getBalance,
   listKidActivity,
@@ -35,13 +36,14 @@ export default async function AwardPage({
   const kid = await getPersonById(db, session.familyId, kidId);
   if (!kid || kid.role !== "kid") redirect("/dashboard");
 
-  const [balance, allChores, activity, mostUsedIds, kidBalances] =
+  const [balance, allChores, activity, mostUsedIds, kidBalances, categories] =
     await Promise.all([
       getBalance(db, session.familyId, kidId),
       listChores(db, session.familyId),
       listKidActivity(db, session.familyId, kidId, 15),
       mostUsedChoreIds(db, session.familyId, kidId, 6),
       getKidBalances(db, session.familyId),
+      listCategories(db, session.familyId),
     ]);
   const activeChores = allChores
     .filter((c) => c.isActive)
@@ -50,7 +52,7 @@ export default async function AwardPage({
       name: c.name,
       emoji: c.emoji,
       points: c.points,
-      category: c.category,
+      categoryId: c.categoryId,
       pinned: c.pinned,
       limitPeriod: c.limitPeriod,
       limitCount: c.limitCount,
@@ -86,6 +88,11 @@ export default async function AwardPage({
           <AwardBoard
             kidId={kidId}
             chores={activeChores}
+            categories={categories.map((c) => ({
+              id: c.id,
+              name: c.name,
+              icon: c.icon,
+            }))}
             mostUsedIds={mostUsedIds}
             otherKids={otherKids}
           />

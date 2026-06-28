@@ -5,7 +5,7 @@ import { Search, Star } from "lucide-react";
 import { IconByName } from "@/components/icons/registry";
 import { awardChoreAction } from "@/app/actions/points";
 import { formatChoreLimit } from "@/lib/catalog/limit";
-import { CHORE_CATEGORIES } from "@/lib/catalog/category";
+import type { CategoryMeta } from "@/lib/catalog/category";
 import styles from "./points.module.css";
 
 export interface AwardChore {
@@ -13,7 +13,7 @@ export interface AwardChore {
   name: string;
   emoji: string;
   points: number;
-  category: string;
+  categoryId: string;
   pinned: boolean;
   limitPeriod: "none" | "day" | "week";
   limitCount: number;
@@ -34,11 +34,13 @@ export interface AwardKid {
 export function AwardBoard({
   kidId,
   chores,
+  categories,
   mostUsedIds,
   otherKids,
 }: {
   kidId: string;
   chores: AwardChore[];
+  categories: CategoryMeta[];
   mostUsedIds: string[];
   otherKids: AwardKid[];
 }) {
@@ -151,14 +153,14 @@ export function AwardBoard({
               <div className={styles.choreGrid}>{favourites.map(card)}</div>
             </section>
           )}
-          {CHORE_CATEGORIES.map((cat) => {
-            const items = chores.filter((c) => c.category === cat.key);
+          {categories.map((cat) => {
+            const items = chores.filter((c) => c.categoryId === cat.id);
             if (items.length === 0) return null;
             return (
-              <details key={cat.key} open className={styles.group}>
+              <details key={cat.id} open className={styles.group}>
                 <summary className={styles.groupSummary}>
                   <IconByName name={cat.icon} size={16} />
-                  {cat.label}
+                  {cat.name}
                   <span className={styles.groupCount}>{items.length}</span>
                 </summary>
                 <div className={styles.choreGrid}>{items.map(card)}</div>
