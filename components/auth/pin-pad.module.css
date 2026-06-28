@@ -19,22 +19,32 @@
 .dot,
 .dotFilled,
 .dotError {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   border-radius: var(--radius-full);
-  transition: background-color 0.12s ease;
+  box-sizing: border-box;
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease,
+    transform 0.12s ease;
 }
 
+/* Empty slot: a clearly visible hollow ring so all positions always read. */
 .dot {
-  background: var(--color-border);
+  background: transparent;
+  border: 2px solid var(--color-text-faint);
 }
 
+/* Entered: solid emerald, and slightly larger so filling is obvious. */
 .dotFilled {
   background: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  transform: scale(1.05);
 }
 
 .dotError {
   background: var(--color-danger);
+  border: 2px solid var(--color-danger);
 }
 
 /* Wrong-attempt flash: shake the dot row so the rejection is unmissable. */
