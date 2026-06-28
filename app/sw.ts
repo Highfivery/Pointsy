@@ -22,6 +22,14 @@ const serwist = new Serwist({
 
 serwist.addEventListeners();
 
+// Let the page promote a waiting worker (see ServiceWorkerUpdater) so a stuck
+// "waiting" service worker can be told to take over immediately.
+self.addEventListener("message", (event) => {
+  if ((event.data as { type?: string } | undefined)?.type === "SKIP_WAITING") {
+    void self.skipWaiting();
+  }
+});
+
 // --- Web Push -------------------------------------------------------------
 
 interface PushPayload {
