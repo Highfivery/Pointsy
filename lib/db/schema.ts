@@ -287,13 +287,25 @@ export const rewards = pgTable(
     minKids: integer("min_kids").notNull().default(2),
     /** For team rewards: may a kid also redeem it solo at full cost? */
     allowSolo: boolean("allow_solo").notNull().default(false),
+    /**
+     * When set, this reward is a personal goal for one kid — only they see it
+     * (in redeem + a motivational card on their dashboard). NULL = available to
+     * the whole family. Cleared (set null) if that kid is removed.
+     */
+    assignedToKidId: uuid("assigned_to_kid_id").references(
+      (): AnyPgColumn => people.id,
+      { onDelete: "set null" },
+    ),
     isActive: boolean("is_active").notNull().default(true),
     sortOrder: integer("sort_order").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
   },
-  (t) => [index("rewards_family_idx").on(t.familyId)],
+  (t) => [
+    index("rewards_family_idx").on(t.familyId),
+    index("rewards_assigned_kid_idx").on(t.assignedToKidId),
+  ],
 );
 
 /* ------------------------------------------------------------ redemptions */

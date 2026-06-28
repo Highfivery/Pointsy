@@ -127,6 +127,13 @@
       "when": 1782673864697,
       "tag": "0017_custom_chore_categories",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1782685489847,
+      "tag": "0018_reward_assigned_kid",
+      "breakpoints": true
     }
   ]
 }

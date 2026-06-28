@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { listRewards } from "@/lib/catalog/service";
+import { getKidBalances } from "@/lib/points/service";
 import { CatalogItemCard } from "@/components/catalog/CatalogItemCard";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { ManageNav } from "@/components/manage/ManageNav";
@@ -15,7 +16,12 @@ export default async function RewardsPage() {
   if (!session) redirect("/sign-in");
   if (session.role !== "parent") redirect("/me");
 
-  const rewards = await listRewards(getDb(), session.familyId);
+  const db = getDb();
+  const [rewards, kidBalances] = await Promise.all([
+    listRewards(db, session.familyId),
+    getKidBalances(db, session.familyId),
+  ]);
+  const kids = kidBalances.map((k) => ({ id: k.id, name: k.name }));
 
   return (
     <main id="main" className={manage.main}>
@@ -30,6 +36,7 @@ export default async function RewardsPage() {
             <li key={r.id}>
               <CatalogItemCard
                 kind="reward"
+                kids={kids}
                 item={{
                   id: r.id,
                   name: r.name,
@@ -40,6 +47,7 @@ export default async function RewardsPage() {
                   isTeam: r.isTeam,
                   minKids: r.minKids,
                   allowSolo: r.allowSolo,
+                  assignedToKidId: r.assignedToKidId,
                 }}
               />
             </li>

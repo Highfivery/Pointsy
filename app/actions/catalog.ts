@@ -114,6 +114,7 @@ function parseReward(formData: FormData) {
     isTeam: formData.get("isTeam") ?? false,
     minKids: formData.get("minKids") ?? 2,
     allowSolo: formData.get("allowSolo") ?? false,
+    assignedToKidId: formData.get("assignedToKidId") ?? "",
   });
 }
 

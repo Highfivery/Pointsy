@@ -19,6 +19,8 @@ export type { LimitPeriod };
 interface CatalogFieldsProps {
   kind: CatalogKind;
   errors?: Record<string, string>;
+  /** Kids in the family — enables the "just for one kid" reward option. */
+  kids?: { id: string; name: string }[];
   defaults?: {
     name?: string;
     emoji?: string;
@@ -29,16 +31,23 @@ interface CatalogFieldsProps {
     isTeam?: boolean;
     minKids?: number;
     allowSolo?: boolean;
+    assignedToKidId?: string | null;
   };
 }
 
 /** Shared form fields for creating/editing a chore or reward. */
-export function CatalogFields({ kind, errors, defaults }: CatalogFieldsProps) {
+export function CatalogFields({
+  kind,
+  errors,
+  kids,
+  defaults,
+}: CatalogFieldsProps) {
   const isChore = kind === "chore";
   const valueName = isChore ? "points" : "cost";
   // Unique per instance — the add form and every edit card render these fields,
   // so static ids would collide and mis-wire the labels (issue #56).
   const periodId = useId();
+  const forKidId = useId();
   const [period, setPeriod] = useState<LimitPeriod>(
     defaults?.limitPeriod ?? "none",
   );
@@ -109,6 +118,31 @@ export function CatalogFields({ kind, errors, defaults }: CatalogFieldsProps) {
               />
             </div>
           )}
+        </div>
+      ) : null}
+
+      {!isChore && kids && kids.length > 0 ? (
+        <div className={form.field}>
+          <label htmlFor={forKidId} className={form.label}>
+            Who&rsquo;s it for?
+          </label>
+          <select
+            id={forKidId}
+            name="assignedToKidId"
+            defaultValue={defaults?.assignedToKidId ?? ""}
+            className={styles.select}
+          >
+            <option value="">Everyone</option>
+            {kids.map((k) => (
+              <option key={k.id} value={k.id}>
+                Just for {k.name}
+              </option>
+            ))}
+          </select>
+          <p className={form.hint}>
+            Pick a kid to make it their personal goal — only they see it, with a
+            progress tracker on their dashboard.
+          </p>
         </div>
       ) : null}
 
