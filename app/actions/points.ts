@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getDb } from "@/lib/db/client";
 import { requireParent } from "@/lib/auth/session";
-import { awardChore, awardCustom, adjustPoints } from "@/lib/points/service";
+import { awardChore, changePoints } from "@/lib/points/service";
 import { changePointsSchema } from "@/lib/validation/schemas";
 import { toFieldErrors, type FormState } from "@/lib/validation/form";
 import { notifyPerson } from "@/lib/push/send";
@@ -87,25 +87,15 @@ export async function changePointsAction(
   const { kidId, direction, amount, reason } = parsed.data;
 
   try {
-    if (direction === "award") {
-      await awardCustom(
-        getDb(),
-        session.familyId,
-        kidId,
-        amount,
-        reason,
-        session.personId,
-      );
-    } else {
-      await adjustPoints(
-        getDb(),
-        session.familyId,
-        kidId,
-        -amount,
-        reason,
-        session.personId,
-      );
-    }
+    await changePoints(
+      getDb(),
+      session.familyId,
+      kidId,
+      direction,
+      amount,
+      reason,
+      session.personId,
+    );
   } catch {
     return {
       error:

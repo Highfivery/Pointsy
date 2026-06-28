@@ -90,11 +90,9 @@ export function AwardExtras({ kidId }: { kidId: string }) {
               ? "Deduct points"
               : "Award points"}
         </button>
-        {state.ok ? (
+        {state.ok && state.direction === mode ? (
           <p className={styles.success}>
-            {state.direction === "deduct"
-              ? "Points deducted."
-              : "Points awarded!"}
+            {isDeduct ? "Points deducted." : "Points awarded!"}
           </p>
         ) : null}
       </form>
