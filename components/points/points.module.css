@@ -111,6 +111,70 @@
   color: var(--color-success);
 }
 
+/* ---------------------------------------- award / deduct segmented control */
+
+.segment {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1);
+  margin: 0;
+  min-inline-size: 0;
+  padding: var(--space-1);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+.segBtn,
+.segBtnAward,
+.segBtnDeduct {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.segBtnAward {
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+}
+
+.segBtnDeduct {
+  color: var(--color-on-danger);
+  background: var(--color-danger-strong);
+}
+
+.segBtn:hover {
+  color: var(--color-text);
+}
+
+/* Deduct submit — same shape as the primary button, danger styling. */
+.deductSubmit {
+  min-height: var(--tap-target);
+  margin-top: var(--space-2);
+  padding: 0 var(--space-6);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-on-danger);
+  background: var(--color-danger-strong);
+  border: 2px solid transparent;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.deductSubmit:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
 .activity {
   display: flex;
   flex-direction: column;

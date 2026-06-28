@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
-import { awardCustomAction, adjustPointsAction } from "@/app/actions/points";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { Minus, Plus } from "lucide-react";
+import { changePointsAction } from "@/app/actions/points";
 import { Field } from "@/components/auth/Field";
 import type { FormState } from "@/lib/validation/form";
 import form from "@/components/auth/auth-form.module.css";
@@ -9,90 +10,94 @@ import styles from "./points.module.css";
 
 const initial: FormState = {};
 
+/**
+ * Manual points control for a kid: award a custom amount or take points away.
+ * A segmented toggle picks the direction so the parent always types a plain
+ * positive number — no minus-sign guesswork — and the submit button restates
+ * exactly what will happen.
+ */
 export function AwardExtras({ kidId }: { kidId: string }) {
-  const [cState, cAction, cPending] = useActionState(
-    awardCustomAction,
-    initial,
-  );
-  const [aState, aAction, aPending] = useActionState(
-    adjustPointsAction,
-    initial,
-  );
-  const cRef = useRef<HTMLFormElement>(null);
-  const aRef = useRef<HTMLFormElement>(null);
+  const [state, action, pending] = useActionState(changePointsAction, initial);
+  const [mode, setMode] = useState<"award" | "deduct">("award");
+  const ref = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (cState.ok) cRef.current?.reset();
-  }, [cState.ok]);
-  useEffect(() => {
-    if (aState.ok) aRef.current?.reset();
-  }, [aState.ok]);
+    if (state.ok) ref.current?.reset();
+  }, [state.ok]);
+
+  const isDeduct = mode === "deduct";
 
   return (
-    <>
-      <details className={styles.extra}>
-        <summary className={styles.extraSummary}>Award custom points</summary>
-        <form ref={cRef} action={cAction} className={form.form} noValidate>
-          <input type="hidden" name="kidId" value={kidId} />
-          <Field
-            label="Points"
-            name="amount"
-            type="text"
-            inputMode="numeric"
-            autoComplete="off"
-            error={cState.fieldErrors?.amount}
-            required
-          />
-          <Field
-            label="Reason"
-            name="reason"
-            autoComplete="off"
-            error={cState.fieldErrors?.reason}
-            required
-          />
-          {cState.error ? (
-            <p role="alert" className={form.formError}>
-              {cState.error}
-            </p>
-          ) : null}
-          <button type="submit" className={form.submit} disabled={cPending}>
-            {cPending ? "Awarding…" : "Award points"}
-          </button>
-          {cState.ok ? <p className={styles.success}>Points awarded!</p> : null}
-        </form>
-      </details>
+    <details className={styles.extra}>
+      <summary className={styles.extraSummary}>Award or deduct points</summary>
+      <form ref={ref} action={action} className={form.form} noValidate>
+        <input type="hidden" name="kidId" value={kidId} />
+        <input type="hidden" name="direction" value={mode} />
 
-      <details className={styles.extra}>
-        <summary className={styles.extraSummary}>Adjust points (+/−)</summary>
-        <form ref={aRef} action={aAction} className={form.form} noValidate>
-          <input type="hidden" name="kidId" value={kidId} />
-          <Field
-            label="Amount"
-            name="amount"
-            type="text"
-            autoComplete="off"
-            hint="Use a minus sign to subtract, e.g. -5"
-            error={aState.fieldErrors?.amount}
-            required
-          />
-          <Field
-            label="Reason"
-            name="reason"
-            autoComplete="off"
-            error={aState.fieldErrors?.reason}
-            required
-          />
-          {aState.error ? (
-            <p role="alert" className={form.formError}>
-              {aState.error}
-            </p>
-          ) : null}
-          <button type="submit" className={form.submit} disabled={aPending}>
-            {aPending ? "Saving…" : "Apply adjustment"}
+        <fieldset className={styles.segment}>
+          <legend className="sr-only">Choose award or deduct</legend>
+          <button
+            type="button"
+            className={isDeduct ? styles.segBtn : styles.segBtnAward}
+            aria-pressed={!isDeduct}
+            onClick={() => setMode("award")}
+          >
+            <Plus size={16} aria-hidden="true" />
+            Award
           </button>
-          {aState.ok ? <p className={styles.success}>Adjusted.</p> : null}
-        </form>
-      </details>
-    </>
+          <button
+            type="button"
+            className={isDeduct ? styles.segBtnDeduct : styles.segBtn}
+            aria-pressed={isDeduct}
+            onClick={() => setMode("deduct")}
+          >
+            <Minus size={16} aria-hidden="true" />
+            Deduct
+          </button>
+        </fieldset>
+
+        <Field
+          label="Points"
+          name="amount"
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          error={state.fieldErrors?.amount}
+          required
+        />
+        <Field
+          label="Reason"
+          name="reason"
+          autoComplete="off"
+          error={state.fieldErrors?.reason}
+          required
+        />
+        {state.error ? (
+          <p role="alert" className={form.formError}>
+            {state.error}
+          </p>
+        ) : null}
+        <button
+          type="submit"
+          className={isDeduct ? styles.deductSubmit : form.submit}
+          disabled={pending}
+        >
+          {pending
+            ? isDeduct
+              ? "Deducting…"
+              : "Awarding…"
+            : isDeduct
+              ? "Deduct points"
+              : "Award points"}
+        </button>
+        {state.ok ? (
+          <p className={styles.success}>
+            {state.direction === "deduct"
+              ? "Points deducted."
+              : "Points awarded!"}
+          </p>
+        ) : null}
+      </form>
+    </details>
   );
 }

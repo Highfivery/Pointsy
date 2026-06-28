@@ -81,6 +81,11 @@ test.describe("kids & PIN auth", () => {
 
     await expect(page.getByText(/isn.?t right|try/i)).toBeVisible();
     await expect(page).toHaveURL(/\/enter$/);
+
+    // The pad flashes, clears, and re-enables itself, so a second attempt with
+    // the correct PIN goes through — it must never get stuck after a rejection.
+    await enterPin(page, "4321");
+    await expect(page).toHaveURL(/\/me$/);
   });
 
   test("an unknown family code shows an error", async ({ page }) => {

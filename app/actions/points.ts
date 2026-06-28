@@ -5,7 +5,7 @@ import { z } from "zod";
 import { getDb } from "@/lib/db/client";
 import { requireParent } from "@/lib/auth/session";
 import { awardChore, awardCustom, adjustPoints } from "@/lib/points/service";
-import { customAwardSchema, adjustSchema } from "@/lib/validation/schemas";
+import { changePointsSchema } from "@/lib/validation/schemas";
 import { toFieldErrors, type FormState } from "@/lib/validation/form";
 import { notifyPerson } from "@/lib/push/send";
 import { getFamilyTimezone } from "@/lib/family/settings";
@@ -65,66 +65,61 @@ export async function awardChoreAction(formData: FormData): Promise<void> {
   }
 }
 
-export async function awardCustomAction(
+/**
+ * Award or deduct a custom amount in one action. The amount is always a
+ * positive number; `direction` decides the sign and the ledger semantics —
+ * awards are `earn` rows (and notify + count toward challenges), deductions are
+ * negative `adjust` rows (a correction, not "un-earning").
+ */
+export async function changePointsAction(
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
   const session = await requireParent();
-  const parsed = customAwardSchema.safeParse({
+  const parsed = changePointsSchema.safeParse({
     kidId: formData.get("kidId"),
+    direction: formData.get("direction"),
     amount: formData.get("amount"),
     reason: formData.get("reason"),
   });
   if (!parsed.success) return { fieldErrors: toFieldErrors(parsed.error) };
 
-  try {
-    await awardCustom(
-      getDb(),
-      session.familyId,
-      parsed.data.kidId,
-      parsed.data.amount,
-      parsed.data.reason,
-      session.personId,
-    );
-  } catch {
-    return { error: "Could not award points. Please try again." };
-  }
-  await notifyKidEarned(
-    session.familyId,
-    parsed.data.kidId,
-    parsed.data.amount,
-    parsed.data.reason,
-  );
-  const tz = await getFamilyTimezone(getDb(), session.familyId);
-  await evaluateChallenges(getDb(), session.familyId, parsed.data.kidId, tz);
-  revalidateFor(parsed.data.kidId);
-  return { ok: true };
-}
-
-export async function adjustPointsAction(
-  _prev: FormState,
-  formData: FormData,
-): Promise<FormState> {
-  const session = await requireParent();
-  const parsed = adjustSchema.safeParse({
-    kidId: formData.get("kidId"),
-    amount: formData.get("amount"),
-    reason: formData.get("reason"),
-  });
-  if (!parsed.success) return { fieldErrors: toFieldErrors(parsed.error) };
+  const { kidId, direction, amount, reason } = parsed.data;
 
   try {
-    await adjustPoints(
-      getDb(),
-      session.familyId,
-      parsed.data.kidId,
-      parsed.data.amount,
-      parsed.data.reason,
-      session.personId,
-    );
+    if (direction === "award") {
+      await awardCustom(
+        getDb(),
+        session.familyId,
+        kidId,
+        amount,
+        reason,
+        session.personId,
+      );
+    } else {
+      await adjustPoints(
+        getDb(),
+        session.familyId,
+        kidId,
+        -amount,
+        reason,
+        session.personId,
+      );
+    }
   } catch {
-    return { error: "Could not adjust points. Please try again." };
+    return {
+      error:
+        direction === "award"
+          ? "Could not award points. Please try again."
+          : "Could not deduct points. Please try again.",
+    };
   }
-  revalidateFor(parsed.data.kidId);
-  return { ok: true };
+
+  if (direction === "award") {
+    await notifyKidEarned(session.familyId, kidId, amount, reason);
+    const tz = await getFamilyTimezone(getDb(), session.familyId);
+    await evaluateChallenges(getDb(), session.familyId, kidId, tz);
+  }
+  revalidateFor(kidId);
+  return { ok: true, direction };
 }

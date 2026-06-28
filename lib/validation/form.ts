@@ -5,6 +5,8 @@ export interface FormState {
   error?: string;
   fieldErrors?: Record<string, string>;
   ok?: boolean;
+  /** Echoes which way a points change went, so the UI can confirm it precisely. */
+  direction?: "award" | "deduct";
 }
 
 /** First error message per field, keyed by the field name. */

@@ -53,20 +53,18 @@ test.describe("points engine", () => {
     await page.getByRole("button", { name: /made bed/i }).click();
     await expect(page.getByText("5 pts")).toBeVisible();
 
-    // Custom award.
+    // Custom award (Award is the default direction).
     const custom = page.locator("details", {
-      has: page.getByText("Award custom points"),
+      has: page.getByText("Award or deduct points"),
     });
-    await page.getByText("Award custom points").click();
+    await page.getByText("Award or deduct points").click();
     await custom.getByLabel("Points").fill("3");
     await custom.getByLabel("Reason").fill("Helped out");
     await custom.getByRole("button", { name: /^award points$/i }).click();
     await expect(page.getByText("8 pts")).toBeVisible();
   });
 
-  test("a negative adjustment can take the balance below zero", async ({
-    page,
-  }) => {
+  test("deducting points can take the balance below zero", async ({ page }) => {
     await signUpParent(page);
     await addKid(page, "Kiddo");
 
@@ -74,13 +72,15 @@ test.describe("points engine", () => {
     await page.getByRole("link", { name: /kiddo/i }).click();
     await expect(page).toHaveURL(/\/award\//);
 
-    const adjust = page.locator("details", {
-      has: page.getByText("Adjust points"),
+    const panel = page.locator("details", {
+      has: page.getByText("Award or deduct points"),
     });
-    await page.getByText("Adjust points").click();
-    await adjust.getByLabel("Amount").fill("-4");
-    await adjust.getByLabel("Reason").fill("Penalty");
-    await adjust.getByRole("button", { name: /apply adjustment/i }).click();
+    await page.getByText("Award or deduct points").click();
+    // Switch to the Deduct direction, then enter a plain positive amount.
+    await panel.getByRole("button", { name: /^deduct$/i }).click();
+    await panel.getByLabel("Points").fill("4");
+    await panel.getByLabel("Reason").fill("Penalty");
+    await panel.getByRole("button", { name: /^deduct points$/i }).click();
     await expect(page.getByText("-4 pts")).toBeVisible();
   });
 });
