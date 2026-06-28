@@ -16,6 +16,10 @@ jobs:
   playwright:
     name: Playwright (mobile + desktop) + axe
     runs-on: ubuntu-latest
+    # Safety net: the suite finishes in a few minutes, so a job sitting far
+    # past that is a hung runner — fail fast instead of pinning a check for
+    # hours (GitHub's default job limit is 6h).
+    timeout-minutes: 30
 
     services:
       postgres:
@@ -56,6 +60,7 @@ jobs:
 
       - name: Run E2E + accessibility checks
         run: npm run test:e2e
+        timeout-minutes: 20
         env:
           CI: "true"
 
