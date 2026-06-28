@@ -18,6 +18,27 @@
   text-decoration: none;
 }
 
+/* Subtle pill link used as a secondary header action (e.g. "Categories"). */
+.headerLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  align-self: flex-start;
+  min-height: 2.5rem;
+  margin-top: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--color-primary);
+  background: var(--color-primary-weak);
+  border-radius: var(--radius-full);
+  text-decoration: none;
+}
+
+.headerLink:hover {
+  background: var(--color-surface-strong);
+}
+
 .title {
   font-size: clamp(1.5rem, 6vw, 2rem);
   letter-spacing: -0.02em;

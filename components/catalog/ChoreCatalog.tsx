@@ -18,7 +18,7 @@ export interface ChoreGroup {
  */
 export function ChoreCatalog({ groups }: { groups: ChoreGroup[] }) {
   const [active, setActive] = useState<string | null>(null);
-  const shown = active ? groups.filter((g) => g.meta.key === active) : groups;
+  const shown = active ? groups.filter((g) => g.meta.id === active) : groups;
   const total = groups.reduce((n, g) => n + g.items.length, 0);
 
   return (
@@ -38,15 +38,15 @@ export function ChoreCatalog({ groups }: { groups: ChoreGroup[] }) {
           </button>
           {groups.map((g) => (
             <button
-              key={g.meta.key}
+              key={g.meta.id}
               type="button"
               className={styles.filterChip}
-              data-active={active === g.meta.key}
-              aria-pressed={active === g.meta.key}
-              onClick={() => setActive(g.meta.key)}
+              data-active={active === g.meta.id}
+              aria-pressed={active === g.meta.id}
+              onClick={() => setActive(g.meta.id)}
             >
               <IconByName name={g.meta.icon} size={15} />
-              {g.meta.label}
+              {g.meta.name}
               <span className={styles.filterCount}>{g.items.length}</span>
             </button>
           ))}
@@ -55,13 +55,13 @@ export function ChoreCatalog({ groups }: { groups: ChoreGroup[] }) {
 
       {shown.map(({ meta, items }) => (
         <section
-          key={meta.key}
+          key={meta.id}
           className={manage.section}
-          aria-label={meta.label}
+          aria-label={meta.name}
         >
           <h2 className={manage.sectionTitle}>
             <IconByName name={meta.icon} size={18} />
-            {meta.label}
+            {meta.name}
           </h2>
           <ul className={manage.list}>
             {items.map((c) => (

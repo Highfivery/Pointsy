@@ -8,6 +8,7 @@ import {
   createReward,
 } from "@/lib/catalog/service";
 import { mostUsedChoreIds, getStreak } from "@/lib/points/service";
+import { listCategories } from "@/lib/categories/service";
 import { getKidGoal, setKidGoal } from "@/lib/redemptions/service";
 import { ledger } from "@/lib/db/schema";
 import { createTestDb, type TestDb } from "../helpers/test-db";
@@ -34,34 +35,49 @@ describe("chore categories, pins, most-used, streak, goals", () => {
     ctx = await createTestDb();
   });
 
-  it("persists a chore category and keeps it tenant-isolated", async () => {
+  it("persists a chore's category and keeps it tenant-isolated", async () => {
     const { db } = ctx;
     const a = await setup(db, "A");
     const b = await setup(db, "B");
+    const aCats = await listCategories(db, a.fam.familyId);
+    const pets = aCats.find((c) => c.name === "Pets")!;
 
     const chore = await createChore(db, a.fam.familyId, {
       name: "Feed the dog",
       emoji: "paw",
       points: 5,
-      category: "pets",
+      categoryId: pets.id,
     });
-    expect(chore.category).toBe("pets");
+    expect(chore.categoryId).toBe(pets.id);
 
     expect(await listChores(db, b.fam.familyId)).toHaveLength(0);
     const mine = await listChores(db, a.fam.familyId);
-    expect(mine[0]?.category).toBe("pets");
+    expect(mine[0]?.categoryId).toBe(pets.id);
+
+    // A category id from another family is ignored, not trusted: the chore
+    // falls back to one of our own categories.
+    const bCats = await listCategories(db, b.fam.familyId);
+    const crossed = await createChore(db, a.fam.familyId, {
+      name: "Sneaky",
+      emoji: "tidy",
+      points: 1,
+      categoryId: bCats[0].id,
+    });
+    expect(crossed.categoryId).not.toBe(bCats[0].id);
+    expect(aCats.some((c) => c.id === crossed.categoryId)).toBe(true);
   });
 
-  it("defaults category to other and toggles pinned within the family", async () => {
+  it("defaults a chore to the family's first category and toggles pinned", async () => {
     const { db } = ctx;
     const a = await setup(db, "A");
     const b = await setup(db, "B");
+    const aCats = await listCategories(db, a.fam.familyId);
     const chore = await createChore(db, a.fam.familyId, {
       name: "Tidy",
       emoji: "tidy",
       points: 2,
     });
-    expect(chore.category).toBe("other");
+    expect(chore.categoryId).toBe(aCats[0].id);
     expect(chore.pinned).toBe(false);
 
     // A foreign family can't pin our chore.

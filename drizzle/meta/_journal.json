@@ -120,6 +120,13 @@
       "when": 1782404833841,
       "tag": "0016_talented_captain_cross",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1782673864697,
+      "tag": "0017_custom_chore_categories",
+      "breakpoints": true
     }
   ]
 }

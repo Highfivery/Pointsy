@@ -36,7 +36,6 @@ export interface CatalogItem {
   value: number;
   description: string | null;
   isActive: boolean;
-  category?: string;
   pinned?: boolean;
   limitPeriod?: LimitPeriod;
   limitCount?: number;
@@ -156,7 +155,6 @@ export function CatalogItemCard({
                 emoji: item.emoji,
                 value: item.value,
                 description: item.description,
-                category: item.category,
                 limitPeriod: item.limitPeriod,
                 limitCount: item.limitCount,
                 isTeam: item.isTeam,

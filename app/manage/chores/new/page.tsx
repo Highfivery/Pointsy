@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { getKidBalances } from "@/lib/points/service";
+import { listCategories } from "@/lib/categories/service";
 import { ChoreEditor } from "@/components/catalog/ChoreEditor";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { ManageNav } from "@/components/manage/ManageNav";
@@ -15,7 +16,11 @@ export default async function NewChorePage() {
   if (!session) redirect("/sign-in");
   if (session.role !== "parent") redirect("/me");
 
-  const kids = await getKidBalances(getDb(), session.familyId);
+  const db = getDb();
+  const [kids, categories] = await Promise.all([
+    getKidBalances(db, session.familyId),
+    listCategories(db, session.familyId),
+  ]);
 
   return (
     <main id="main" className={manage.main}>
@@ -30,6 +35,7 @@ export default async function NewChorePage() {
           avatar: k.avatar,
           color: k.color,
         }))}
+        categories={categories.map((c) => ({ id: c.id, name: c.name }))}
       />
       <ManageNav section="chores" />
     </main>

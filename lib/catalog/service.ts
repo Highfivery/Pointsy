@@ -6,12 +6,12 @@ import {
   rewards,
   type Chore,
   type ChoreAssignment,
-  type ChoreCategory,
   type Reward,
 } from "@/lib/db/schema";
 import { replaceAssignees } from "@/lib/chores/assignment";
 import { replaceSubtasks } from "@/lib/chores/subtasks";
 import { initialTurn } from "@/lib/chores/eligibility";
+import { listCategories } from "@/lib/categories/service";
 
 /**
  * Catalog services for the chore and reward catalogs. All functions take an
@@ -24,7 +24,8 @@ export interface ChoreInput {
   name: string;
   emoji: string;
   points: number;
-  category?: ChoreCategory;
+  /** Target category id; resolved against this family (falls back to the first). */
+  categoryId?: string;
   description?: string;
   isCore?: boolean;
   assignment?: ChoreAssignment;
@@ -70,6 +71,24 @@ export interface RewardInput {
 
 export type MoveDirection = "up" | "down";
 
+/**
+ * Resolve a chore's category to a valid id owned by this family. A client-
+ * supplied id is honoured only if it belongs to the family; otherwise we fall
+ * back to the family's first category (tenant isolation — never trust the id).
+ */
+async function resolveCategoryId(
+  db: Database,
+  familyId: string,
+  categoryId: string | undefined,
+): Promise<string> {
+  const cats = await listCategories(db, familyId);
+  if (cats.length === 0) {
+    throw new Error("Family has no chore categories");
+  }
+  if (categoryId && cats.some((c) => c.id === categoryId)) return categoryId;
+  return cats[0].id;
+}
+
 /* --------------------------------------------------------------- chores */
 
 export async function listChores(
@@ -109,6 +128,7 @@ export async function createChore(
       : await familyKidIds(db, familyId, input.kidIds ?? []);
   const currentTurnPersonId =
     assignment === "rotating" ? initialTurn(kidIds, null) : null;
+  const categoryId = await resolveCategoryId(db, familyId, input.categoryId);
 
   const [row] = await db
     .insert(chores)
@@ -117,7 +137,7 @@ export async function createChore(
       name: input.name.trim(),
       emoji: input.emoji,
       points: input.points,
-      category: input.category ?? "other",
+      categoryId,
       description: input.description?.trim() || null,
       isCore: input.isCore ?? false,
       assignment,
@@ -154,6 +174,7 @@ export async function updateChore(
       .limit(1);
     currentTurnPersonId = initialTurn(kidIds, prev?.turn ?? null);
   }
+  const categoryId = await resolveCategoryId(db, familyId, input.categoryId);
 
   await db
     .update(chores)
@@ -161,7 +182,7 @@ export async function updateChore(
       name: input.name.trim(),
       emoji: input.emoji,
       points: input.points,
-      category: input.category ?? "other",
+      categoryId,
       description: input.description?.trim() || null,
       isCore: input.isCore ?? false,
       assignment,

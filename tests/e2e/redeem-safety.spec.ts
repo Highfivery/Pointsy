@@ -38,9 +38,9 @@ test("a reward request asks for confirmation (no accidental redeem)", async ({
   await page.goto("/dashboard");
   await page.getByRole("link", { name: /robin/i }).click();
   const custom = page.locator("details", {
-    has: page.getByText("Award custom points"),
+    has: page.getByText("Award or deduct points"),
   });
-  await page.getByText("Award custom points").click();
+  await page.getByText("Award or deduct points").click();
   await custom.getByLabel("Points").fill("20");
   await custom.getByLabel("Reason").fill("Allowance");
   await custom.getByRole("button", { name: /^award points$/i }).click();
@@ -90,12 +90,13 @@ test("a kid in the red can't redeem and sees a clear message", async ({
   await page.goto("/dashboard");
   await page.getByRole("link", { name: /robin/i }).click();
   const adjust = page.locator("details", {
-    has: page.getByText("Adjust points"),
+    has: page.getByText("Award or deduct points"),
   });
-  await page.getByText("Adjust points").click();
-  await adjust.getByLabel("Amount").fill("-10");
+  await page.getByText("Award or deduct points").click();
+  await adjust.getByRole("button", { name: /^deduct$/i }).click();
+  await adjust.getByLabel("Points").fill("10");
   await adjust.getByLabel("Reason").fill("Penalty");
-  await adjust.getByRole("button", { name: /apply adjustment/i }).click();
+  await adjust.getByRole("button", { name: /^deduct points$/i }).click();
   await expect(page.getByText("-10 pts")).toBeVisible();
 
   // Robin opens Rewards → clear "back to zero" message, nothing redeemable.

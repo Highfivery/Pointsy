@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { Tags } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { listChores } from "@/lib/catalog/service";
+import { listCategories } from "@/lib/categories/service";
 import { getAssigneesByChore } from "@/lib/chores/assignment";
 import { getKidBalances } from "@/lib/points/service";
 import { groupByCategory } from "@/lib/catalog/category";
@@ -24,12 +27,13 @@ export default async function ChoresPage() {
 
   const db = getDb();
   const chores = await listChores(db, session.familyId);
-  const [assignees, kids] = await Promise.all([
+  const [assignees, kids, categories] = await Promise.all([
     getAssigneesByChore(
       db,
       chores.map((c) => c.id),
     ),
     getKidBalances(db, session.familyId),
+    listCategories(db, session.familyId),
   ]);
   const nameById = new Map(kids.map((k) => [k.id, k.name]));
   const nameOf = (id: string) => nameById.get(id) ?? "A kid";
@@ -45,7 +49,7 @@ export default async function ChoresPage() {
     return names.length > 0 ? names.join(", ") : "No one yet";
   }
 
-  const groups: ChoreGroup[] = groupByCategory(chores).map(
+  const groups: ChoreGroup[] = groupByCategory(chores, categories).map(
     ({ meta, items }) => ({
       meta,
       items: items.map((c) => ({
@@ -65,7 +69,12 @@ export default async function ChoresPage() {
 
   return (
     <main id="main" className={manage.main}>
-      <ScreenHeader title="Chores" intro="Ways for kids to earn points." />
+      <ScreenHeader title="Chores" intro="Ways for kids to earn points.">
+        <Link href="/manage/categories" className={manage.headerLink}>
+          <Tags size={16} aria-hidden="true" />
+          Categories
+        </Link>
+      </ScreenHeader>
 
       {groups.length > 0 ? (
         <ChoreCatalog groups={groups} />

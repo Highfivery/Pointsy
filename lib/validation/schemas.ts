@@ -96,6 +96,12 @@ export const updateKidSchema = z.object({
 
 /* -------------------------------------------------------------- catalog */
 
+/** A custom chore category: a short name and an icon-registry key. */
+export const categorySchema = z.object({
+  name: z.string().trim().min(1, "Name is required.").max(40),
+  icon: iconSchema,
+});
+
 export const choreSchema = z.object({
   name: z.string().trim().min(1, "Name is required.").max(60),
   emoji: iconSchema,
@@ -104,19 +110,8 @@ export const choreSchema = z.object({
     .int("Points must be a whole number.")
     .min(0)
     .max(100000),
-  category: z
-    .enum([
-      "bedroom",
-      "bathroom",
-      "kitchen",
-      "home",
-      "outdoor",
-      "pets",
-      "school",
-      "selfcare",
-      "other",
-    ])
-    .default("other"),
+  /** The family category this chore belongs to; ownership re-checked server-side. */
+  categoryId: z.string().uuid("Pick a category.").optional(),
   description: z.string().trim().max(280).optional(),
   /** A "core" chore expected daily (drives challenges). */
   isCore: z.coerce.boolean().default(false),

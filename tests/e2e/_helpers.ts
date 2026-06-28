@@ -27,7 +27,8 @@ export async function addChore(
     await page.getByLabel("Core chore").check();
   }
   if (opts.category) {
-    await page.getByLabel("Category").selectOption(opts.category);
+    // Categories are per-family rows now — pick by visible name.
+    await page.getByLabel("Category").selectOption({ label: opts.category });
   }
   if (opts.perDay) {
     await page.getByLabel(/how often/i).selectOption("day");

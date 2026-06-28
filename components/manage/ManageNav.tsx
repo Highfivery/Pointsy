@@ -4,6 +4,7 @@ import {
   House,
   Gift,
   ListChecks,
+  Tags,
   Trophy,
   Users,
   UserPlus,
@@ -12,7 +13,13 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { BottomNav, type BottomNavItem } from "@/components/ui/BottomNav";
 
-type Section = "rewards" | "chores" | "challenges" | "kids" | "parents";
+type Section =
+  | "rewards"
+  | "chores"
+  | "categories"
+  | "challenges"
+  | "kids"
+  | "parents";
 
 const SECTIONS: Record<
   Section,
@@ -38,6 +45,11 @@ const SECTIONS: Record<
     Icon: ListChecks,
     addHref: "/manage/chores/new",
     addLabel: "Add a chore",
+  },
+  categories: {
+    href: "/manage/categories",
+    label: "Categories",
+    Icon: Tags,
   },
   challenges: {
     href: "/manage/challenges",
