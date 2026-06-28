@@ -14,13 +14,15 @@
 .dots {
   display: flex;
   gap: var(--space-3);
+  /* Reserve the row's height so the area never collapses to nothing. */
+  min-height: 18px;
 }
 
 .dot,
 .dotFilled,
 .dotError {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: var(--radius-full);
   box-sizing: border-box;
   transition:
@@ -29,17 +31,18 @@
     transform 0.12s ease;
 }
 
-/* Empty slot: a clearly visible hollow ring so all positions always read. */
+/* Empty slot: a filled grey dot with a bright ring — unmistakable on the dark
+   theme, so all four positions always read even before anything is typed. */
 .dot {
-  background: transparent;
-  border: 2px solid var(--color-text-faint);
+  background: var(--color-surface-strong);
+  border: 2px solid var(--color-text-muted);
 }
 
-/* Entered: solid emerald, and slightly larger so filling is obvious. */
+/* Entered: solid emerald, slightly larger so filling is obvious. */
 .dotFilled {
   background: var(--color-primary);
   border: 2px solid var(--color-primary);
-  transform: scale(1.05);
+  transform: scale(1.1);
 }
 
 .dotError {
