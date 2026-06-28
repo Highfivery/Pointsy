@@ -6,6 +6,7 @@ import {
   awardChore,
   awardCustom,
   adjustPoints,
+  changePoints,
   getBalance,
   getKidBalances,
   listFamilyActivity,
@@ -83,6 +84,38 @@ describe("points engine", () => {
       fam.personId,
     );
     expect(await getBalance(db, fam.familyId, kid.id)).toBe(-5); // not floored
+  });
+
+  it("changePoints routes by direction: award is +earn, deduct is -adjust", async () => {
+    const { db } = ctx;
+    const { fam, kid } = await setup(db);
+
+    const earn = await changePoints(
+      db,
+      fam.familyId,
+      kid.id,
+      "award",
+      8,
+      "Tidied room",
+      fam.personId,
+    );
+    expect(earn.amount).toBe(8);
+    expect(earn.type).toBe("earn");
+
+    // Deduct takes a positive amount and stores it negative as an adjustment.
+    const deduct = await changePoints(
+      db,
+      fam.familyId,
+      kid.id,
+      "deduct",
+      5,
+      "Late home",
+      fam.personId,
+    );
+    expect(deduct.amount).toBe(-5);
+    expect(deduct.type).toBe("adjust");
+
+    expect(await getBalance(db, fam.familyId, kid.id)).toBe(3);
   });
 
   it("reports per-kid balances (zero for kids with no ledger)", async () => {

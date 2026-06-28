@@ -106,6 +106,28 @@ export async function adjustPoints(
   return row;
 }
 
+export type PointsDirection = "award" | "deduct";
+
+/**
+ * Apply a custom points change. `amount` is always a positive number; the
+ * `direction` decides the sign and the ledger semantics: an award is a positive
+ * `earn`, a deduct is a negative `adjust` (a correction, not "un-earning").
+ * Centralises the routing the award screen depends on so the sign can't drift.
+ */
+export async function changePoints(
+  db: Database,
+  familyId: string,
+  kidId: string,
+  direction: PointsDirection,
+  amount: number,
+  reason: string,
+  awardedBy: string,
+): Promise<LedgerEntry> {
+  return direction === "award"
+    ? awardCustom(db, familyId, kidId, amount, reason, awardedBy)
+    : adjustPoints(db, familyId, kidId, -amount, reason, awardedBy);
+}
+
 /** A single kid's balance = SUM(ledger.amount). May be negative. */
 export async function getBalance(
   db: Database,
