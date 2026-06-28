@@ -29,6 +29,7 @@ import { KidChallenges } from "@/components/me/KidChallenges";
 import { RewardShelf } from "@/components/me/RewardShelf";
 import { KidGoal } from "@/components/me/KidGoal";
 import { KidRewardGoals } from "@/components/me/KidRewardGoals";
+import { SubmitMustDo } from "@/components/me/SubmitMustDo";
 import { EnableNotifications } from "@/components/push/EnableNotifications";
 import { KidTabBar } from "@/components/kid/KidTabBar";
 import { CountUp } from "@/components/me/CountUp";
@@ -180,17 +181,19 @@ export default async function MePage() {
             <>
               <ul className={styles.todoList}>
                 {coreTodo.map((c) => (
-                  <li key={c.id} className={styles.todoRow}>
-                    <span className={styles.todoIcon} aria-hidden="true">
-                      <IconByName name={c.emoji} size={20} />
-                    </span>
-                    <span className={styles.todoName}>{c.name}</span>
-                    <span className={styles.todoPts}>+{c.points}</span>
-                  </li>
+                  <SubmitMustDo
+                    key={c.id}
+                    chore={{
+                      id: c.id,
+                      name: c.name,
+                      emoji: c.emoji,
+                      points: c.points,
+                    }}
+                  />
                 ))}
               </ul>
               <Link href="/submit" className={styles.todoCta}>
-                Go do chores
+                See all chores
                 <ArrowRight size={18} aria-hidden="true" />
               </Link>
             </>

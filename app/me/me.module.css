@@ -206,7 +206,8 @@
   gap: var(--space-2);
 }
 
-.todoRow {
+.todoRow,
+.todoBtn {
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -214,6 +215,38 @@
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
+}
+
+/* Tappable variant — the kid taps to log it (a confirmation sheet follows). */
+.todoBtn {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.12s ease,
+    transform 0.08s ease;
+}
+
+.todoBtn:hover {
+  border-color: var(--color-primary);
+}
+
+.todoBtn:active {
+  transform: scale(0.99);
+}
+
+.todoCheck {
+  flex-shrink: 0;
+  color: var(--color-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .todoBtn {
+    transition: none;
+  }
+  .todoBtn:active {
+    transform: none;
+  }
 }
 
 .todoIcon {
