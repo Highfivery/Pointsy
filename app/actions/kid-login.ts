@@ -31,18 +31,25 @@ export async function forgetFamilyAction(): Promise<void> {
 
 export interface KidSignInState {
   error?: string;
+  /**
+   * Monotonic attempt counter. It bumps on every failed try — even when the
+   * message text is identical (e.g. a repeated "That PIN isn't right.") — so the
+   * PIN pad can reliably flash + clear on each wrong attempt.
+   */
+  attempt?: number;
 }
 
 export async function kidSignInAction(
-  _prev: KidSignInState,
+  prev: KidSignInState,
   formData: FormData,
 ): Promise<KidSignInState> {
+  const attempt = (prev.attempt ?? 0) + 1;
   const parsed = kidSignInSchema.safeParse({
     familyId: formData.get("familyId"),
     personId: formData.get("personId"),
     pin: formData.get("pin"),
   });
-  if (!parsed.success) return { error: "Enter your 4-digit PIN." };
+  if (!parsed.success) return { error: "Enter your 4-digit PIN.", attempt };
 
   const result = await verifyPin(
     getDb(),
@@ -52,7 +59,10 @@ export async function kidSignInAction(
   );
 
   if (result.status === "locked") {
-    return { error: "Too many wrong tries — try again in a minute." };
+    return {
+      error: "Too many wrong tries — try again in a minute.",
+      attempt,
+    };
   }
   if (result.status === "invalid") {
     const tries = result.remaining;
@@ -61,6 +71,7 @@ export async function kidSignInAction(
         tries > 0
           ? `That PIN isn't right. ${tries} ${tries === 1 ? "try" : "tries"} left.`
           : "That PIN isn't right.",
+      attempt,
     };
   }
 

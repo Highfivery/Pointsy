@@ -142,11 +142,11 @@ export function KidLogin({
             <input type="hidden" name="familyId" value={family.familyId} />
             <input type="hidden" name="personId" value={selected.id} />
             <PinPad
-              key={pinState.error ?? "pin"}
               name="pin"
               label="Enter your PIN"
               autoSubmit
               disabled={pinPending}
+              errorNonce={pinState.attempt ?? 0}
             />
             {pinState.error ? (
               <p role="alert" className={form.formError}>

@@ -52,7 +52,7 @@
   --color-success: #4ade80;
   --color-success-weak: rgba(74, 222, 128, 0.14);
   --color-danger: #fb7185; /* rose — text on dark */
-  --color-danger-strong: #e11d48; /* fill, with white text */
+  --color-danger-strong: #cf1840; /* fill — 4.96:1 with --color-on-danger (AA) */
   --color-on-danger: #fff1f3;
   --color-danger-weak: rgba(251, 113, 133, 0.14);
   --color-warning: #fbbf24;

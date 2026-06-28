@@ -208,24 +208,19 @@ export const challengeSchema = z
 
 /* ---------------------------------------------------- points & redemptions */
 
-export const customAwardSchema = z.object({
+/**
+ * Award or deduct a custom amount. `direction` decides the sign — the amount
+ * itself is always entered as a positive number, so the UI never asks a parent
+ * to type a minus sign.
+ */
+export const changePointsSchema = z.object({
   kidId: z.string().uuid(),
+  direction: z.enum(["award", "deduct"]),
   amount: z.coerce
     .number()
     .int("Use a whole number.")
     .min(1, "Enter a positive amount.")
     .max(100000),
-  reason: z.string().trim().min(1, "Add a reason.").max(140),
-});
-
-export const adjustSchema = z.object({
-  kidId: z.string().uuid(),
-  amount: z.coerce
-    .number()
-    .int("Use a whole number.")
-    .min(-100000)
-    .max(100000)
-    .refine((n) => n !== 0, "Amount can't be zero."),
   reason: z.string().trim().min(1, "Add a reason.").max(140),
 });
 
