@@ -1,5 +1,14 @@
 # pointsy
 
+## 0.33.1
+
+### Patch Changes
+
+- 870d2ff: Make the PIN-pad dots unmistakable. The empty slots are now filled circles with a
+  bright (7:1) ring instead of a faint hairline, so all four positions always read
+  clearly — including the moment right after a wrong PIN clears the pad. Verified on
+  a production build.
+
 ## 0.33.0
 
 ### Minor Changes
