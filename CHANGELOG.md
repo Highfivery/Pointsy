@@ -1,5 +1,15 @@
 # pointsy
 
+## 0.32.0
+
+### Minor Changes
+
+- 486410b: Add ~100 more icons to choose from. Every icon picker in the app (kid & parent
+  avatars, chores, rewards, categories) now offers a much larger library —
+  weather, food, school & science, household, sports, vehicles, tech, and fun
+  symbols — roughly 300 icons in total. Existing keys are unchanged, so all current
+  selections keep rendering.
+
 ## 0.31.2
 
 ### Patch Changes
