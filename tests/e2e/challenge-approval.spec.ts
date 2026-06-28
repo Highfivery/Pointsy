@@ -37,11 +37,8 @@ test("a parent-confirm challenge waits for approval, then pays the bonus", async
 
   // Award Robin enough to complete it — the bonus is held, not paid.
   await page.goto("/dashboard");
-  await page.getByRole("link", { name: /robin/i }).click();
-  const custom = page.locator("details", {
-    has: page.getByText("Award or deduct points"),
-  });
-  await page.getByText("Award or deduct points").click();
+  await page.getByRole("link", { name: /manage robin/i }).click();
+  const custom = page.getByRole("region", { name: "Award or deduct points" });
   await custom.getByLabel("Points").fill("10");
   await custom.getByLabel("Reason").fill("Allowance");
   await custom.getByRole("button", { name: /^award points$/i }).click();

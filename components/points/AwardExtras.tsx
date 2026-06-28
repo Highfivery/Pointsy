@@ -16,9 +16,15 @@ const initial: FormState = {};
  * positive number — no minus-sign guesswork — and the submit button restates
  * exactly what will happen.
  */
-export function AwardExtras({ kidId }: { kidId: string }) {
+export function AwardExtras({
+  kidId,
+  initialMode = "award",
+}: {
+  kidId: string;
+  initialMode?: "award" | "deduct";
+}) {
   const [state, action, pending] = useActionState(changePointsAction, initial);
-  const [mode, setMode] = useState<"award" | "deduct">("award");
+  const [mode, setMode] = useState<"award" | "deduct">(initialMode);
   const ref = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -28,8 +34,13 @@ export function AwardExtras({ kidId }: { kidId: string }) {
   const isDeduct = mode === "deduct";
 
   return (
-    <details className={styles.extra}>
-      <summary className={styles.extraSummary}>Award or deduct points</summary>
+    <section
+      className={styles.manualCard}
+      aria-labelledby="manual-points-title"
+    >
+      <h2 id="manual-points-title" className={styles.sectionTitle}>
+        Award or deduct points
+      </h2>
       <form ref={ref} action={action} className={form.form} noValidate>
         <input type="hidden" name="kidId" value={kidId} />
         <input type="hidden" name="direction" value={mode} />
@@ -96,6 +107,6 @@ export function AwardExtras({ kidId }: { kidId: string }) {
           </p>
         ) : null}
       </form>
-    </details>
+    </section>
   );
 }

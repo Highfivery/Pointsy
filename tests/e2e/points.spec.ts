@@ -44,7 +44,7 @@ test.describe("points engine", () => {
     await expect(page.getByText("0 pts")).toBeVisible();
 
     // Open the kid's award screen.
-    await page.getByRole("link", { name: /kiddo/i }).click();
+    await page.getByRole("link", { name: /manage kiddo/i }).click();
     await expect(page).toHaveURL(/\/award\//);
     await expect(page).toHaveTitle(/\S/); // let the soft-nav <title> settle
     await expectNoA11yViolations(page, "/award");
@@ -54,10 +54,7 @@ test.describe("points engine", () => {
     await expect(page.getByText("5 pts")).toBeVisible();
 
     // Custom award (Award is the default direction).
-    const custom = page.locator("details", {
-      has: page.getByText("Award or deduct points"),
-    });
-    await page.getByText("Award or deduct points").click();
+    const custom = page.getByRole("region", { name: "Award or deduct points" });
     await custom.getByLabel("Points").fill("3");
     await custom.getByLabel("Reason").fill("Helped out");
     await custom.getByRole("button", { name: /^award points$/i }).click();
@@ -69,13 +66,10 @@ test.describe("points engine", () => {
     await addKid(page, "Kiddo");
 
     await page.goto("/dashboard");
-    await page.getByRole("link", { name: /kiddo/i }).click();
+    await page.getByRole("link", { name: /manage kiddo/i }).click();
     await expect(page).toHaveURL(/\/award\//);
 
-    const panel = page.locator("details", {
-      has: page.getByText("Award or deduct points"),
-    });
-    await page.getByText("Award or deduct points").click();
+    const panel = page.getByRole("region", { name: "Award or deduct points" });
     // Switch to the Deduct direction, then enter a plain positive amount.
     await panel.getByRole("button", { name: /^deduct$/i }).click();
     await panel.getByLabel("Points").fill("4");
