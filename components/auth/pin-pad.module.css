@@ -11,45 +11,34 @@
   color: var(--color-text);
 }
 
+/* The dots are an <svg> of <circle>s (see PinPad) — bulletproof on real iOS,
+   where empty CSS-sized HTML elements could collapse to nothing. */
 .dots {
-  display: flex;
-  justify-content: center;
-  gap: var(--space-3);
-  /* Reserve the row's height so the area never collapses to nothing. */
-  min-height: 20px;
+  display: block;
+  width: 8rem;
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
 }
 
-/*
- * Bulletproof on real iOS: SOLID filled circles (no border / box-sizing), and
- * `flex: 0 0 20px` so empty flex items can never shrink to nothing — the fragile
- * empty-span-with-border construct rendered fine in desktop WebKit but vanished
- * on-device.
- */
 .dot,
 .dotFilled,
 .dotError {
-  flex: 0 0 20px;
-  width: 20px;
-  height: 20px;
-  border-radius: 999px;
-  transition:
-    background-color 0.12s ease,
-    transform 0.12s ease;
+  transition: fill 0.12s ease;
 }
 
-/* Empty slot: a clearly visible muted-sage dot. */
+/* Empty slot: a clearly visible muted-sage circle. */
 .dot {
-  background: var(--color-text-faint);
+  fill: var(--color-text-faint);
 }
 
-/* Entered: solid emerald, slightly larger so filling is obvious. */
+/* Entered: solid emerald. */
 .dotFilled {
-  background: var(--color-primary);
-  transform: scale(1.1);
+  fill: var(--color-primary);
 }
 
 .dotError {
-  background: var(--color-danger);
+  fill: var(--color-danger);
 }
 
 /* Wrong-attempt flash: shake the dot row so the rejection is unmissable. */
