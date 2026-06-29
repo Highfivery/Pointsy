@@ -35,6 +35,10 @@ export interface ChoreInput {
   subtasks?: string[];
   limitPeriod?: "none" | "day" | "week";
   limitCount?: number;
+  /** Logging window — when a kid may self-log it. null = no restriction. */
+  logWindowDays?: number | null;
+  logWindowStart?: string | null;
+  logWindowEnd?: string | null;
 }
 
 /** Keep only ids that are active kids in this family (tenant isolation). */
@@ -161,6 +165,9 @@ export async function createChore(
       currentTurnPersonId,
       limitPeriod: input.limitPeriod ?? "none",
       limitCount: input.limitCount ?? 1,
+      logWindowDays: input.logWindowDays ?? null,
+      logWindowStart: input.logWindowStart ?? null,
+      logWindowEnd: input.logWindowEnd ?? null,
       sortOrder: existing.length,
     })
     .returning();
@@ -206,6 +213,9 @@ export async function updateChore(
       currentTurnPersonId,
       limitPeriod: input.limitPeriod ?? "none",
       limitCount: input.limitCount ?? 1,
+      logWindowDays: input.logWindowDays ?? null,
+      logWindowStart: input.logWindowStart ?? null,
+      logWindowEnd: input.logWindowEnd ?? null,
     })
     .where(and(eq(chores.familyId, familyId), eq(chores.id, id)));
   await replaceAssignees(db, id, kidIds);

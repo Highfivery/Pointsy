@@ -40,6 +40,9 @@ function parseChore(formData: FormData) {
     subtasks: formData.getAll("subtasks"),
     limitPeriod: formData.get("limitPeriod") ?? "none",
     limitCount: formData.get("limitCount") ?? 1,
+    logWindowDays: formData.getAll("logWindowDays"),
+    logWindowStart: formData.get("logWindowStart") ?? "",
+    logWindowEnd: formData.get("logWindowEnd") ?? "",
   });
 }
 

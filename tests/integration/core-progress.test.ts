@@ -84,7 +84,10 @@ describe("core-chore progress + streak", () => {
       limitPeriod: "day",
       limitCount: 1,
     });
-    const coreIds = [a.id, b.id];
+    const coreIds = [
+      { id: a.id, days: null },
+      { id: b.id, days: null },
+    ];
 
     expect(await getCoreStreak(db, fam.familyId, kid.id, "UTC", coreIds)).toBe(
       0,

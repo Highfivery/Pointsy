@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Plus, X } from "lucide-react";
 import { Field } from "@/components/auth/Field";
 import { IconPicker } from "@/components/icons/IconPicker";
+import { LogWindowFields } from "@/components/catalog/LogWindowFields";
 import { IconByName } from "@/components/icons/registry";
 import { ICON_KEYS, DEFAULT_CHORE_ICON } from "@/lib/icons";
 import { saveChoreAction } from "@/app/actions/catalog";
@@ -39,6 +40,9 @@ export interface ChoreDefaults {
   subtasks?: string[];
   limitPeriod?: LimitPeriod;
   limitCount?: number;
+  logWindowDays?: number | null;
+  logWindowStart?: string | null;
+  logWindowEnd?: string | null;
 }
 
 const ASSIGN_OPTIONS: {
@@ -282,6 +286,14 @@ export function ChoreEditor({
           )}
         </div>
       </section>
+
+      <LogWindowFields
+        defaults={{
+          logWindowDays: defaults?.logWindowDays,
+          logWindowStart: defaults?.logWindowStart,
+          logWindowEnd: defaults?.logWindowEnd,
+        }}
+      />
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Description</h2>
