@@ -2,12 +2,7 @@ import type { ReactNode } from "react";
 import styles from "./ui.module.css";
 
 export type ChipVariant =
-  | "accent"
-  | "neutral"
-  | "muted"
-  | "warning"
-  | "danger"
-  | "success";
+  "accent" | "neutral" | "muted" | "warning" | "danger" | "success";
 
 const VARIANT: Record<ChipVariant, string> = {
   accent: styles.chipAccent,
