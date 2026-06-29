@@ -117,48 +117,50 @@ export function LogWindowFields({
 
       <fieldset className={styles.windowGroup}>
         <legend className={styles.windowLegend}>Which days?</legend>
-        <div className={styles.presetRow}>
-          {(
-            [
-              ["Every day", EVERY_DAY],
-              ["Weekdays", WEEKDAYS],
-              ["Weekends", WEEKENDS],
-            ] as const
-          ).map(([label, preset]) => (
-            <button
-              key={label}
-              type="button"
-              className={
-                sameDays(days, preset) || (label === "Every day" && everyDay)
-                  ? styles.presetActive
-                  : styles.preset
-              }
-              aria-pressed={
-                sameDays(days, preset) || (label === "Every day" && everyDay)
-              }
-              onClick={() => setDays([...preset])}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <div className={styles.dayRow}>
-          {DAYS.map((d, i) => (
-            <label key={i} className={styles.dayChip}>
-              <input
-                type="checkbox"
-                name="logWindowDays"
-                value={i}
-                checked={days[i]}
-                aria-label={d.name}
-                className={styles.dayInput}
-                onChange={() =>
-                  setDays((prev) => prev.map((v, j) => (j === i ? !v : v)))
+        <div className={styles.windowBody}>
+          <div className={styles.presetRow}>
+            {(
+              [
+                ["Every day", EVERY_DAY],
+                ["Weekdays", WEEKDAYS],
+                ["Weekends", WEEKENDS],
+              ] as const
+            ).map(([label, preset]) => (
+              <button
+                key={label}
+                type="button"
+                className={
+                  sameDays(days, preset) || (label === "Every day" && everyDay)
+                    ? styles.presetActive
+                    : styles.preset
                 }
-              />
-              <span aria-hidden="true">{d.letter}</span>
-            </label>
-          ))}
+                aria-pressed={
+                  sameDays(days, preset) || (label === "Every day" && everyDay)
+                }
+                onClick={() => setDays([...preset])}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className={styles.dayRow}>
+            {DAYS.map((d, i) => (
+              <label key={i} className={styles.dayChip}>
+                <input
+                  type="checkbox"
+                  name="logWindowDays"
+                  value={i}
+                  checked={days[i]}
+                  aria-label={d.name}
+                  className={styles.dayInput}
+                  onChange={() =>
+                    setDays((prev) => prev.map((v, j) => (j === i ? !v : v)))
+                  }
+                />
+                <span aria-hidden="true">{d.letter}</span>
+              </label>
+            ))}
+          </div>
         </div>
       </fieldset>
 
@@ -166,56 +168,58 @@ export function LogWindowFields({
         <label htmlFor={modeId} className={styles.windowLegend}>
           Time of day
         </label>
-        <select
-          id={modeId}
-          className={styles.select}
-          value={mode}
-          onChange={(e) => setMode(e.target.value as TimeMode)}
-        >
-          <option value="any">Any time</option>
-          <option value="after">Only after a time</option>
-          <option value="before">Only before a time</option>
-          <option value="between">Only between two times</option>
-        </select>
+        <div className={styles.windowBody}>
+          <select
+            id={modeId}
+            className={styles.select}
+            value={mode}
+            onChange={(e) => setMode(e.target.value as TimeMode)}
+          >
+            <option value="any">Any time</option>
+            <option value="after">Only from a set time</option>
+            <option value="before">Only until a set time</option>
+            <option value="between">Only between two times</option>
+          </select>
 
-        {showStart || showEnd ? (
-          <div className={styles.timeGrid}>
-            {showStart ? (
-              <div className={styles.timeField}>
-                <label htmlFor="logWindowStart" className={styles.timeLabel}>
-                  <Sun size={15} aria-hidden="true" /> Opens at
-                </label>
-                <input
-                  id="logWindowStart"
-                  type="time"
-                  name="logWindowStart"
-                  aria-label="Opens at"
-                  className={styles.timeInput}
-                  value={start}
-                  required
-                  onChange={(e) => setStart(e.target.value)}
-                />
-              </div>
-            ) : null}
-            {showEnd ? (
-              <div className={styles.timeField}>
-                <label htmlFor="logWindowEnd" className={styles.timeLabel}>
-                  <Moon size={15} aria-hidden="true" /> Closes at
-                </label>
-                <input
-                  id="logWindowEnd"
-                  type="time"
-                  name="logWindowEnd"
-                  aria-label="Closes at"
-                  className={styles.timeInput}
-                  value={end}
-                  required
-                  onChange={(e) => setEnd(e.target.value)}
-                />
-              </div>
-            ) : null}
-          </div>
-        ) : null}
+          {showStart || showEnd ? (
+            <div className={styles.timeGrid}>
+              {showStart ? (
+                <div className={styles.timeField}>
+                  <label htmlFor="logWindowStart" className={styles.timeLabel}>
+                    <Sun size={15} aria-hidden="true" /> Opens at
+                  </label>
+                  <input
+                    id="logWindowStart"
+                    type="time"
+                    name="logWindowStart"
+                    aria-label="Opens at"
+                    className={styles.timeInput}
+                    value={start}
+                    required
+                    onChange={(e) => setStart(e.target.value)}
+                  />
+                </div>
+              ) : null}
+              {showEnd ? (
+                <div className={styles.timeField}>
+                  <label htmlFor="logWindowEnd" className={styles.timeLabel}>
+                    <Moon size={15} aria-hidden="true" /> Closes at
+                  </label>
+                  <input
+                    id="logWindowEnd"
+                    type="time"
+                    name="logWindowEnd"
+                    aria-label="Closes at"
+                    className={styles.timeInput}
+                    value={end}
+                    required
+                    onChange={(e) => setEnd(e.target.value)}
+                  />
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
       </div>
 
       {timeError ? (

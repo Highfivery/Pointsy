@@ -195,15 +195,22 @@
 /* ----------------------------------------------- logging window controls */
 
 .windowGroup {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
   margin: 0;
   padding: 0;
   border: none;
 }
 
+/* A real flex child carries the controls — a <legend> is pulled out of the
+   fieldset's flex flow, so `gap` never spaces it; the legend margin does. */
+.windowBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
 .windowLegend {
+  display: block;
+  margin: 0 0 var(--space-2);
   padding: 0;
   font-size: 0.95rem;
   font-weight: 600;
