@@ -14,12 +14,7 @@ import type { LucideIcon } from "lucide-react";
 import { BottomNav, type BottomNavItem } from "@/components/ui/BottomNav";
 
 type Section =
-  | "rewards"
-  | "chores"
-  | "categories"
-  | "challenges"
-  | "kids"
-  | "parents";
+  "rewards" | "chores" | "categories" | "challenges" | "kids" | "parents";
 
 const SECTIONS: Record<
   Section,
