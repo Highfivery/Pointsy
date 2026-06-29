@@ -39,4 +39,33 @@ describe("coreStreak", () => {
   it("treats more-than-required as complete", () => {
     expect(coreStreak(days([today, 5]), 3, today)).toBe(1);
   });
+
+  describe("per-day expected counts (day-restricted core chores)", () => {
+    // today = 2026-06-24 is a Wednesday. A chore that's expected only on some
+    // days contributes a varying daily target.
+    it("doesn't break the streak across a day that expects nothing", () => {
+      // Expect 1 on Wed/Mon, 0 on Tue (a day the chore isn't loggable).
+      const expectedOn = (d: string) => (d === "2026-06-23" ? 0 : 1); // Tue expects nothing
+      const map = days(
+        [today, 1], // Wed done
+        // 2026-06-23 (Tue) skipped — nothing due
+        ["2026-06-22", 1], // Mon done
+      );
+      expect(coreStreak(map, expectedOn, today)).toBe(2);
+    });
+
+    it("a skipped day doesn't add to the streak count", () => {
+      const expectedOn = (d: string) => (d === today ? 0 : 1);
+      // Today expects nothing; yesterday + day before were done.
+      const map = days(["2026-06-23", 1], ["2026-06-22", 1]);
+      expect(coreStreak(map, expectedOn, today)).toBe(2);
+    });
+
+    it("still breaks on a genuine miss", () => {
+      const expectedOn = () => 1;
+      const map = days([today, 1], ["2026-06-23", 0], ["2026-06-22", 1]);
+      // Yesterday expected 1 but did 0 → miss → streak is just today.
+      expect(coreStreak(map, expectedOn, today)).toBe(1);
+    });
+  });
 });

@@ -219,6 +219,17 @@ export const chores = pgTable(
     /** Per-kid claim limit when a kid submits this chore. "none" = unlimited. */
     limitPeriod: choreLimitPeriodEnum("limit_period").notNull().default("none"),
     limitCount: integer("limit_count").notNull().default(1),
+    /**
+     * Logging window — when a kid may self-log this chore (parents can still
+     * award it manually any time). All null = no restriction.
+     *   logWindowDays  — 7-bit weekday mask, bit 0 = Mon … bit 6 = Sun
+     *                    (null = every day; evaluated in the family timezone).
+     *   logWindowStart — "HH:MM" 24h open time (null = no opening bound).
+     *   logWindowEnd   — "HH:MM" 24h close time (null = no closing bound).
+     */
+    logWindowDays: integer("log_window_days"),
+    logWindowStart: text("log_window_start"),
+    logWindowEnd: text("log_window_end"),
     isActive: boolean("is_active").notNull().default(true),
     sortOrder: integer("sort_order").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true })

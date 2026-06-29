@@ -33,6 +33,15 @@ export const colorSchema = z
   .string()
   .regex(/^#[0-9a-fA-F]{6}$/, "Use a hex color like #6366f1.");
 
+/** A "HH:MM" 24h time, or "" → null (an unset window bound). */
+export const hhmmSchema = z
+  .union([
+    z.literal(""),
+    z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Enter a valid time."),
+  ])
+  .default("")
+  .transform((v) => (v === "" ? null : v));
+
 /* ----------------------------------------------------------------- auth */
 
 export const signUpSchema = z.object({
@@ -102,33 +111,68 @@ export const categorySchema = z.object({
   icon: iconSchema,
 });
 
-export const choreSchema = z.object({
-  name: z.string().trim().min(1, "Name is required.").max(60),
-  emoji: iconSchema,
-  points: z.coerce
-    .number()
-    .int("Points must be a whole number.")
-    .min(0)
-    .max(100000),
-  /** The family category this chore belongs to; ownership re-checked server-side. */
-  categoryId: z.string().uuid("Pick a category.").optional(),
-  description: z.string().trim().max(280).optional(),
-  /** A "core" chore expected daily (drives challenges). */
-  isCore: z.coerce.boolean().default(false),
-  /** Who the chore is for; assignees/rotation order in `kidIds`. */
-  assignment: z.enum(["everyone", "specific", "rotating"]).default("everyone"),
-  kidIds: z.array(z.string().uuid()).default([]),
-  /** Ordered checklist; blanks are dropped server-side. */
-  subtasks: z.array(z.string().trim().max(80)).max(20).default([]),
-  /** How often a kid may claim it. "none" = unlimited; count applies otherwise. */
-  limitPeriod: z.enum(["none", "day", "week"]).default("none"),
-  limitCount: z.coerce
-    .number()
-    .int("Enter a whole number.")
-    .min(1, "Must be at least 1.")
-    .max(50, "That's a lot — keep it 50 or under.")
-    .default(1),
-});
+export const choreSchema = z
+  .object({
+    name: z.string().trim().min(1, "Name is required.").max(60),
+    emoji: iconSchema,
+    points: z.coerce
+      .number()
+      .int("Points must be a whole number.")
+      .min(0)
+      .max(100000),
+    /** The family category this chore belongs to; ownership re-checked server-side. */
+    categoryId: z.string().uuid("Pick a category.").optional(),
+    description: z.string().trim().max(280).optional(),
+    /** A "core" chore expected daily (drives challenges). */
+    isCore: z.coerce.boolean().default(false),
+    /** Who the chore is for; assignees/rotation order in `kidIds`. */
+    assignment: z
+      .enum(["everyone", "specific", "rotating"])
+      .default("everyone"),
+    kidIds: z.array(z.string().uuid()).default([]),
+    /** Ordered checklist; blanks are dropped server-side. */
+    subtasks: z.array(z.string().trim().max(80)).max(20).default([]),
+    /** How often a kid may claim it. "none" = unlimited; count applies otherwise. */
+    limitPeriod: z.enum(["none", "day", "week"]).default("none"),
+    limitCount: z.coerce
+      .number()
+      .int("Enter a whole number.")
+      .min(1, "Must be at least 1.")
+      .max(50, "That's a lot — keep it 50 or under.")
+      .default(1),
+    /**
+     * Logging window — when a kid may self-log this chore. Days come in as the
+     * selected weekday indices (Mon=0…Sun=6); 0 or all 7 means "every day" (null
+     * mask). Times are "HH:MM" or "" (no bound, → null).
+     */
+    logWindowDays: z
+      .array(z.coerce.number().int().min(0).max(6))
+      .default([])
+      .transform((days) => {
+        const set = new Set(days);
+        if (set.size === 0 || set.size === 7) return null;
+        let mask = 0;
+        for (const d of set) mask |= 1 << d;
+        return mask;
+      }),
+    logWindowStart: hhmmSchema,
+    logWindowEnd: hhmmSchema,
+  })
+  .superRefine((val, ctx) => {
+    if (val.logWindowStart && val.logWindowEnd) {
+      const toMin = (s: string) => {
+        const [h, m] = s.split(":").map(Number);
+        return h * 60 + m;
+      };
+      if (toMin(val.logWindowEnd) <= toMin(val.logWindowStart)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["logWindowEnd"],
+          message: "Close time must be after open time.",
+        });
+      }
+    }
+  });
 
 export const rewardSchema = z.object({
   name: z.string().trim().min(1, "Name is required.").max(60),
