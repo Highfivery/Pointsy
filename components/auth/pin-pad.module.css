@@ -13,41 +13,43 @@
 
 .dots {
   display: flex;
+  justify-content: center;
   gap: var(--space-3);
   /* Reserve the row's height so the area never collapses to nothing. */
-  min-height: 18px;
+  min-height: 20px;
 }
 
+/*
+ * Bulletproof on real iOS: SOLID filled circles (no border / box-sizing), and
+ * `flex: 0 0 20px` so empty flex items can never shrink to nothing — the fragile
+ * empty-span-with-border construct rendered fine in desktop WebKit but vanished
+ * on-device.
+ */
 .dot,
 .dotFilled,
 .dotError {
-  width: 18px;
-  height: 18px;
-  border-radius: var(--radius-full);
-  box-sizing: border-box;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
   transition:
     background-color 0.12s ease,
-    border-color 0.12s ease,
     transform 0.12s ease;
 }
 
-/* Empty slot: a filled grey dot with a bright ring — unmistakable on the dark
-   theme, so all four positions always read even before anything is typed. */
+/* Empty slot: a clearly visible muted-sage dot. */
 .dot {
-  background: var(--color-surface-strong);
-  border: 2px solid var(--color-text-muted);
+  background: var(--color-text-faint);
 }
 
 /* Entered: solid emerald, slightly larger so filling is obvious. */
 .dotFilled {
   background: var(--color-primary);
-  border: 2px solid var(--color-primary);
   transform: scale(1.1);
 }
 
 .dotError {
   background: var(--color-danger);
-  border: 2px solid var(--color-danger);
 }
 
 /* Wrong-attempt flash: shake the dot row so the rejection is unmissable. */
