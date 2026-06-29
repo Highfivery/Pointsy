@@ -81,13 +81,20 @@ export function PinPad({
     <div ref={padRef} className={styles.pad}>
       <input ref={hiddenRef} type="hidden" name={name} />
       <p className={styles.label}>{label}</p>
-      <output
+      {/* SVG circles, not styled HTML elements — they render identically on
+          every device (empty CSS-sized <span>s could collapse to nothing on
+          real iOS). */}
+      <svg
         className={errored ? `${styles.dots} ${styles.dotsError}` : styles.dots}
-        aria-label={`${pin.length} of ${length} digits entered`}
+        viewBox={`0 0 ${length * 32 - 14} 18`}
+        aria-hidden="true"
       >
         {Array.from({ length }).map((_, i) => (
-          <span
+          <circle
             key={i}
+            cx={9 + i * 32}
+            cy={9}
+            r={9}
             className={
               errored
                 ? styles.dotError
@@ -97,6 +104,9 @@ export function PinPad({
             }
           />
         ))}
+      </svg>
+      <output className="sr-only">
+        {pin.length} of {length} digits entered
       </output>
       <div className={styles.keys}>
         {KEYS.map((k) => (
