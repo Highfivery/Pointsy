@@ -134,6 +134,13 @@
       "when": 1782685489847,
       "tag": "0018_reward_assigned_kid",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1782737995476,
+      "tag": "0019_chore_logging_windows",
+      "breakpoints": true
     }
   ]
 }

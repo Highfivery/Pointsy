@@ -49,7 +49,7 @@ export default async function SubmitPage() {
               </h2>
               <ul className={styles.list}>
                 {core.map((c) => (
-                  <SubmitChoreCard key={c.id} chore={c} />
+                  <SubmitChoreCard key={c.id} chore={c} timezone={tz} />
                 ))}
               </ul>
             </section>
@@ -67,7 +67,7 @@ export default async function SubmitPage() {
               </h2>
               <ul className={styles.list}>
                 {items.map((c) => (
-                  <SubmitChoreCard key={c.id} chore={c} />
+                  <SubmitChoreCard key={c.id} chore={c} timezone={tz} />
                 ))}
               </ul>
             </section>

@@ -266,6 +266,37 @@
   color: var(--color-text-muted);
 }
 
+/* Time-locked must-do: not tappable, shows when it opens + a live countdown. */
+.todoLocked {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+}
+
+.todoLockedHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.todoLockedText {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.todoLockedReason {
+  margin-top: 2px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
 .todoCta {
   display: inline-flex;
   align-items: center;

@@ -1,7 +1,13 @@
 import { and, eq, gte, inArray, sql, desc } from "drizzle-orm";
 import type { Database } from "@/lib/db/types";
 import { chores, choreSubmissions, ledger, people } from "@/lib/db/schema";
-import { localDate, weekStart } from "@/lib/timezone";
+import {
+  localDate,
+  localParts,
+  weekStart,
+  weekdayOf,
+  zonedWallTimeToInstant,
+} from "@/lib/timezone";
 import type { LimitPeriod } from "@/lib/catalog/limit";
 import {
   advanceRotationIfDone,
@@ -11,6 +17,14 @@ import {
 import { getSubtasksByChore } from "@/lib/chores/subtasks";
 import { eligibleFor } from "@/lib/chores/eligibility";
 import { coreStreak } from "@/lib/chores/streak";
+import {
+  dayAllowed,
+  hasLogWindow,
+  hhmmToMinutes,
+  nextOpenInstant,
+  withinLogWindow,
+  type LogWindow,
+} from "@/lib/chores/window";
 
 export class LimitReachedError extends Error {
   constructor(message: string) {
@@ -77,6 +91,14 @@ export interface SubmittableChore {
   remaining: number | null;
   canSubmit: boolean;
   reason: string | null;
+  /** Time-of-day/day-of-week gate: "open" now, or "locked" until `opensAt`. */
+  windowState: "open" | "locked";
+  /** When a locked chore next opens (ISO instant), else null. */
+  opensAt: string | null;
+  /** When an open, time-bounded chore closes today (ISO instant), else null. */
+  closesAt: string | null;
+  /** This chore's logging-window weekday mask (Mon=0…Sun=6), for streak math. */
+  logWindowDays: number | null;
 }
 
 /** Chores the kid has an active (pending/approved) submission for today. */
@@ -109,6 +131,7 @@ export async function listSubmittableChores(
   now: Date = new Date(),
 ): Promise<SubmittableChore[]> {
   const today = localDate(timezone, now);
+  const { weekday, minutes } = localParts(timezone, now);
   const active = await db
     .select()
     .from(chores)
@@ -143,6 +166,10 @@ export async function listSubmittableChores(
     isCore: c.isCore,
     loggedToday: loggedToday.has(c.id),
     subtasks: subtasks.get(c.id) ?? [],
+    windowState: "open" as const,
+    opensAt: null,
+    closesAt: null,
+    logWindowDays: c.logWindowDays,
   });
 
   const out: SubmittableChore[] = [];
@@ -169,6 +196,33 @@ export async function listSubmittableChores(
       continue;
     }
 
+    // Logging window next: it's theirs, but the time-of-day/day-of-week gate may
+    // hold it shut. Locked beats any limit state — show the countdown instead.
+    const win: LogWindow = {
+      days: c.logWindowDays,
+      start: c.logWindowStart,
+      end: c.logWindowEnd,
+    };
+    if (hasLogWindow(win) && !withinLogWindow(win, weekday, minutes)) {
+      const next = nextOpenInstant(win, timezone, today, now);
+      out.push({
+        ...base(c),
+        eligible: true,
+        remaining: null,
+        canSubmit: false,
+        reason: null,
+        windowState: "locked",
+        opensAt: next?.toISOString() ?? null,
+      });
+      continue;
+    }
+    // Open and time-bounded → expose when it closes today (for a subtle hint).
+    const endMin = hhmmToMinutes(win.end);
+    const closesAt =
+      endMin !== null
+        ? zonedWallTimeToInstant(timezone, today, endMin).toISOString()
+        : null;
+
     if (c.limitPeriod === "none") {
       out.push({
         ...base(c),
@@ -176,6 +230,7 @@ export async function listSubmittableChores(
         remaining: null,
         canSubmit: true,
         reason: null,
+        closesAt,
       });
       continue;
     }
@@ -195,6 +250,7 @@ export async function listSubmittableChores(
       remaining,
       canSubmit: remaining > 0,
       reason: remaining > 0 ? null : `Done ${unit}`,
+      closesAt,
     });
   }
   return out;
@@ -202,18 +258,20 @@ export async function listSubmittableChores(
 
 /**
  * The kid's "all core chores done" streak — consecutive days every core chore
- * they're responsible for was logged. `coreChoreIds` are the core chores
- * currently eligible to this kid (derive from `listSubmittableChores`).
+ * they're responsible for was logged. `coreChores` are the core chores currently
+ * eligible to this kid (derive from `listSubmittableChores`); each carries its
+ * logging-window day mask so a weekday-only chore is only expected on the days
+ * it's actually loggable.
  */
 export async function getCoreStreak(
   db: Database,
   familyId: string,
   personId: string,
   timezone: string,
-  coreChoreIds: string[],
+  coreChores: { id: string; days: number | null }[],
   now: Date = new Date(),
 ): Promise<number> {
-  if (coreChoreIds.length === 0) return 0;
+  if (coreChores.length === 0) return 0;
   const rows = await db
     .selectDistinct({
       localDate: choreSubmissions.localDate,
@@ -225,14 +283,22 @@ export async function getCoreStreak(
         eq(choreSubmissions.familyId, familyId),
         eq(choreSubmissions.personId, personId),
         inArray(choreSubmissions.status, ACTIVE),
-        inArray(choreSubmissions.choreId, coreChoreIds),
+        inArray(
+          choreSubmissions.choreId,
+          coreChores.map((c) => c.id),
+        ),
       ),
     );
   const doneByDay = new Map<string, number>();
   for (const r of rows) {
     doneByDay.set(r.localDate, (doneByDay.get(r.localDate) ?? 0) + 1);
   }
-  return coreStreak(doneByDay, coreChoreIds.length, localDate(timezone, now));
+  // How many core chores are actually loggable on a given local date.
+  const expectedOn = (date: string) => {
+    const wd = weekdayOf(date);
+    return coreChores.filter((c) => dayAllowed(c.days, wd)).length;
+  };
+  return coreStreak(doneByDay, expectedOn, localDate(timezone, now));
 }
 
 /** Kid logs a completed chore (pending). Enforces the per-chore limit. */
@@ -273,6 +339,22 @@ export async function submitChore(
       throw new InvalidSubmissionError(
         "This chore isn't yours to log right now.",
       );
+    }
+
+    // Logging-window guard — server-authoritative, so a fast/skewed client clock
+    // can't log a chore before it opens.
+    const win: LogWindow = {
+      days: chore.logWindowDays,
+      start: chore.logWindowStart,
+      end: chore.logWindowEnd,
+    };
+    if (hasLogWindow(win)) {
+      const { weekday, minutes } = localParts(timezone, now);
+      if (!withinLogWindow(win, weekday, minutes)) {
+        throw new InvalidSubmissionError(
+          "That chore can't be logged right now.",
+        );
+      }
     }
 
     if (chore.limitPeriod !== "none") {

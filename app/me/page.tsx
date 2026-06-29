@@ -13,6 +13,8 @@ import {
   listKidAssignedRewards,
 } from "@/lib/redemptions/service";
 import { getFamilyTimezone } from "@/lib/family/settings";
+import { localDate, weekdayOf } from "@/lib/timezone";
+import { dayAllowed } from "@/lib/chores/window";
 import {
   getPendingPoints,
   listKidSubmissions,
@@ -74,11 +76,17 @@ export default async function MePage() {
   const waiting = submissions.filter((s) => s.status === "pending");
   const available = redeemable.available;
 
-  // Today's must-dos: core chores this kid is responsible for.
+  // Today's must-dos: core chores this kid is responsible for. A chore whose
+  // logging window excludes today's weekday isn't due today at all; one that's
+  // merely time-locked (opens later today) still counts — it shows a countdown.
+  const todayWeekday = weekdayOf(localDate(tz, new Date()));
   const coreChores = submittable.filter((c) => c.isCore && c.eligible);
-  const coreTotal = coreChores.length;
-  const coreDone = coreChores.filter((c) => c.loggedToday).length;
-  const coreTodo = coreChores.filter((c) => !c.loggedToday);
+  const coreDueToday = coreChores.filter((c) =>
+    dayAllowed(c.logWindowDays, todayWeekday),
+  );
+  const coreTotal = coreDueToday.length;
+  const coreDone = coreDueToday.filter((c) => c.loggedToday).length;
+  const coreTodo = coreDueToday.filter((c) => !c.loggedToday);
   const coreStreakDays =
     coreTotal > 0
       ? await getCoreStreak(
@@ -86,7 +94,7 @@ export default async function MePage() {
           session.familyId,
           session.personId,
           tz,
-          coreChores.map((c) => c.id),
+          coreChores.map((c) => ({ id: c.id, days: c.logWindowDays })),
         )
       : 0;
 
@@ -183,11 +191,14 @@ export default async function MePage() {
                 {coreTodo.map((c) => (
                   <SubmitMustDo
                     key={c.id}
+                    timezone={tz}
                     chore={{
                       id: c.id,
                       name: c.name,
                       emoji: c.emoji,
                       points: c.points,
+                      windowState: c.windowState,
+                      opensAt: c.opensAt,
                     }}
                   />
                 ))}
