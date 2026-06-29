@@ -63,6 +63,9 @@ export default async function ChoresPage() {
         limitPeriod: c.limitPeriod,
         limitCount: c.limitCount,
         whoLabel: whoLabel(c),
+        logWindowDays: c.logWindowDays,
+        logWindowStart: c.logWindowStart,
+        logWindowEnd: c.logWindowEnd,
       })),
     }),
   );

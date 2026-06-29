@@ -90,6 +90,12 @@ test.describe("chore logging windows", () => {
     await page.getByRole("button", { name: /save chore/i }).click();
     await page.waitForURL(/\/manage\/chores$/);
 
+    // The catalog card summarises the window with a clock chip (single day →
+    // its 3-letter abbreviation).
+    await expect(
+      page.getByText(tomorrowDay.slice(0, 3), { exact: false }).first(),
+    ).toBeVisible();
+
     // Round-trip: reopen the day-locked chore; only tomorrow stays checked.
     await page
       .getByRole("link", { name: /take out trash/i })

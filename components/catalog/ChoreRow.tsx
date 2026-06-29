@@ -1,10 +1,20 @@
 import Link from "next/link";
-import { ChevronRight, ChevronUp, ChevronDown, Star } from "lucide-react";
+import {
+  ChevronRight,
+  ChevronUp,
+  ChevronDown,
+  Star,
+  Clock,
+} from "lucide-react";
 import { IconByName } from "@/components/icons/registry";
 import { Card } from "@/components/ui/Card";
 import { IconButton } from "@/components/ui/IconButton";
 import { Chip } from "@/components/ui/Chip";
-import { formatChoreLimit, type LimitPeriod } from "@/lib/catalog/limit";
+import {
+  formatChoreLimit,
+  formatLogWindowSummary,
+  type LimitPeriod,
+} from "@/lib/catalog/limit";
 import {
   toggleChorePinnedAction,
   moveCatalogItemAction,
@@ -24,11 +34,20 @@ export interface ChoreRowItem {
   limitCount: number;
   /** "Robin's turn" / "Robin, Sky" / null for everyone. */
   whoLabel: string | null;
+  /** Logging-window day mask (Mon=0…Sun=6) + bounds, null when unrestricted. */
+  logWindowDays: number | null;
+  logWindowStart: string | null;
+  logWindowEnd: string | null;
 }
 
 /** A self-contained chore card — head taps through to the editor. */
 export function ChoreRow({ item }: { item: ChoreRowItem }) {
   const freq = formatChoreLimit(item.limitPeriod, item.limitCount);
+  const window = formatLogWindowSummary(
+    item.logWindowDays,
+    item.logWindowStart,
+    item.logWindowEnd,
+  );
   return (
     <Card>
       <Link href={`/manage/chores/${item.id}`} className={styles.rowLink}>
@@ -44,6 +63,12 @@ export function ChoreRow({ item }: { item: ChoreRowItem }) {
               <Chip variant="neutral">{item.whoLabel}</Chip>
             ) : null}
             {freq ? <Chip variant="muted">{freq}</Chip> : null}
+            {window ? (
+              <Chip variant="muted">
+                <Clock size={12} aria-hidden="true" />
+                {window}
+              </Chip>
+            ) : null}
             {!item.isActive ? <Chip variant="warning">Hidden</Chip> : null}
           </span>
         </span>
