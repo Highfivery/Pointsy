@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Sora, Geist_Mono } from "next/font/google";
 import { ServiceWorkerUpdater } from "@/components/pwa/ServiceWorkerUpdater";
+import { Footer } from "@/components/ui/Footer";
 import "./globals.css";
 
 const inter = Inter({
@@ -64,6 +65,7 @@ export default function RootLayout({
           Skip to content
         </a>
         {children}
+        <Footer />
         <ServiceWorkerUpdater />
       </body>
     </html>
