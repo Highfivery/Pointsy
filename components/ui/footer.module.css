@@ -24,7 +24,8 @@
   gap: var(--space-2) var(--space-4);
 }
 
-.links a {
+.links a,
+.link {
   display: inline-flex;
   align-items: center;
   min-height: 32px;
@@ -34,7 +35,15 @@
   text-decoration: none;
 }
 
-.links a:hover {
+.link {
+  font-family: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.links a:hover,
+.link:hover {
   color: var(--color-primary);
 }
 

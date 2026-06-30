@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { InstallLink } from "@/components/pwa/InstallLink";
 import styles from "./footer.module.css";
 
 const REPO = "https://github.com/Highfivery/Pointsy";
@@ -9,6 +10,7 @@ export function Footer() {
     <footer className={styles.footer}>
       <div className={styles.inner}>
         <nav className={styles.links} aria-label="Footer">
+          <InstallLink className={styles.link} />
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
           <a href={REPO} target="_blank" rel="noreferrer">

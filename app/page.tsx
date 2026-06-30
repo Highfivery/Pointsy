@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { getKnownFamily } from "@/lib/auth/device";
 import { PickerScreen } from "@/components/enter/PickerScreen";
+import { InstallBanner } from "@/components/pwa/InstallBanner";
 import styles from "./page.module.css";
 
 export default async function Home() {
@@ -41,6 +42,7 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <InstallBanner />
       <section className={styles.hero}>
         <p className={styles.badge}>
           <Sparkles size={18} aria-hidden="true" />

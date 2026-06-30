@@ -1,0 +1,163 @@
+/* --- Smart banner ------------------------------------------------------- */
+.banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 32rem;
+  margin: 0 auto var(--space-4);
+  padding: var(--space-3) var(--space-3);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+}
+
+.bannerIcon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  color: var(--color-primary);
+  background: var(--color-primary-weak);
+  border-radius: var(--radius-full);
+}
+
+.bannerText {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.bannerText b {
+  color: var(--color-text);
+}
+
+.bannerBtn {
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  font-weight: 700;
+  color: var(--color-on-accent);
+  background-image: var(--accent-gradient);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.bannerClose {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+/* --- iOS guide bottom sheet --------------------------------------------- */
+.sheet {
+  width: 100%;
+  max-width: 32rem;
+  margin: auto auto 0;
+  padding: var(--space-5) var(--space-5)
+    calc(var(--space-6) + env(safe-area-inset-bottom));
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.sheet::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  display: grid;
+  place-items: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.title {
+  margin: 0 0 var(--space-1);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.intro {
+  margin: 0 0 var(--space-3);
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.num {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  font-weight: 800;
+  color: var(--color-primary);
+  background: var(--color-primary-weak);
+  border-radius: var(--radius-full);
+}
+
+.stepText {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.tip {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.8rem;
+  color: var(--color-text-faint);
+}
+
+.glyph {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  color: var(--color-primary-cyan);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+}
+
+.glyphDone {
+  color: var(--color-success);
+  border-color: var(--color-success);
+}
