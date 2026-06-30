@@ -5,7 +5,14 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getDb } from "@/lib/db/client";
 import { requireParent } from "@/lib/auth/session";
-import { addKid, updateKid, setPin, setKidActive } from "@/lib/people/service";
+import {
+  addKid,
+  updateKid,
+  setPin,
+  setKidActive,
+  deleteKid,
+} from "@/lib/people/service";
+import { getPersonById } from "@/lib/db/queries";
 import {
   addKidSchema,
   updateKidSchema,
@@ -93,4 +100,31 @@ export async function toggleKidActiveAction(formData: FormData): Promise<void> {
   const isActive = formData.get("isActive") === "true";
   await setKidActive(getDb(), session.familyId, id.data, isActive);
   revalidatePath(MANAGE_PATH);
+}
+
+/**
+ * Permanently delete a kid and all their data. Requires typing the kid's exact
+ * name as a confirmation, so it can't fire by accident.
+ */
+export async function deleteKidAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const session = await requireParent();
+  const id = idSchema.safeParse(formData.get("kidId"));
+  if (!id.success) return { error: "Could not find that child." };
+
+  const db = getDb();
+  const kid = await getPersonById(db, session.familyId, id.data);
+  if (!kid || kid.role !== "kid") {
+    return { error: "Could not find that child." };
+  }
+  const confirm = (formData.get("confirm") ?? "").toString().trim();
+  if (confirm !== kid.name) {
+    return { fieldErrors: { confirm: `Type "${kid.name}" to confirm.` } };
+  }
+
+  await deleteKid(db, session.familyId, id.data);
+  revalidatePath(MANAGE_PATH);
+  redirect(MANAGE_PATH);
 }

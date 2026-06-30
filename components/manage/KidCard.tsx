@@ -1,12 +1,14 @@
 "use client";
 
 import { useActionState } from "react";
-import { Pencil, KeyRound, Power } from "lucide-react";
+import { Pencil, KeyRound, Power, Trash2 } from "lucide-react";
 import {
   updateKidAction,
   setKidPinAction,
   toggleKidActiveAction,
+  deleteKidAction,
 } from "@/app/actions/people";
+import { ConfirmDeleteDisclosure } from "@/components/account/ConfirmDeleteDisclosure";
 import { Field } from "@/components/auth/Field";
 import { IconPicker } from "@/components/icons/IconPicker";
 import { IconByName } from "@/components/icons/registry";
@@ -138,6 +140,20 @@ export function KidCard({ kid }: { kid: KidCardData }) {
             ) : null}
           </form>
         </details>
+
+        <ConfirmDeleteDisclosure
+          detailsClassName={ui.actionDisclosure}
+          summaryClassName={`${ui.iconBtn} ${ui.iconSummary}`}
+          summaryAriaLabel={`Delete ${kid.name} permanently`}
+          summaryTitle="Delete permanently"
+          summary={<Trash2 size={18} aria-hidden="true" />}
+          panelClassName={ui.actionPanel}
+          action={deleteKidAction}
+          confirmWord={kid.name}
+          buttonLabel="Delete permanently"
+          intro={`This permanently deletes ${kid.name} and all of their points history. This can’t be undone — to just hide them, use Deactivate instead.`}
+          hidden={[{ name: "kidId", value: kid.id }]}
+        />
 
         <form
           action={toggleKidActiveAction}

@@ -1,0 +1,51 @@
+.form {
+  gap: var(--space-3);
+}
+
+.warn {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.deleteBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  font-weight: 700;
+  color: var(--color-on-danger);
+  background: var(--color-danger-strong);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.deleteBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* The "Danger zone" card on the dashboard. */
+.zone {
+  border-color: var(--color-danger);
+}
+
+.zoneTitle {
+  color: var(--color-danger);
+}
+
+.exportLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  align-self: flex-start;
+  padding: 0 var(--space-4);
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-primary-weak);
+  border-radius: var(--radius-full);
+  text-decoration: none;
+}

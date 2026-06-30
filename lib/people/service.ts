@@ -104,6 +104,32 @@ export async function setKidActive(
     );
 }
 
+/**
+ * Permanently delete a kid and all their data. Scoped to a kid in this family
+ * (never a parent, never another family's person — tenant isolation). The
+ * kid's owned rows (ledger, submissions, redemptions, assignees, challenge and
+ * team data) cascade via the DB; rows where they were only an actor
+ * (decided/created/fulfilled by) keep the record and null the reference.
+ * Returns true when a kid was actually deleted.
+ */
+export async function deleteKid(
+  db: Database,
+  familyId: string,
+  id: string,
+): Promise<boolean> {
+  const deleted = await db
+    .delete(people)
+    .where(
+      and(
+        eq(people.familyId, familyId),
+        eq(people.id, id),
+        eq(people.role, "kid"),
+      ),
+    )
+    .returning({ id: people.id });
+  return deleted.length > 0;
+}
+
 export interface PickerMember {
   id: string;
   name: string;

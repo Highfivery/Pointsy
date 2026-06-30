@@ -10,6 +10,7 @@ import {
   Check,
   X,
   PackageCheck,
+  Download,
 } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
@@ -35,6 +36,9 @@ import { listChallengeApprovals } from "@/lib/challenges/service";
 import { decideChallengeAwardAction } from "@/app/actions/challenges";
 import { IconByName } from "@/components/icons/registry";
 import { Chip } from "@/components/ui/Chip";
+import { ConfirmDeleteDisclosure } from "@/components/account/ConfirmDeleteDisclosure";
+import { deleteFamilyAction } from "@/app/actions/family";
+import danger from "@/components/account/danger.module.css";
 import { SetPinForm } from "@/components/account/SetPinForm";
 import { EnableNotifications } from "@/components/push/EnableNotifications";
 import { FamilyTimezone } from "@/components/family/FamilyTimezone";
@@ -459,6 +463,34 @@ export default async function DashboardPage() {
           <summary className={styles.pinSummary}>Family time zone</summary>
           <FamilyTimezone current={family.timezone} />
         </details>
+      </section>
+
+      <section
+        className={`${styles.card} ${danger.zone}`}
+        aria-labelledby="data-heading"
+      >
+        <h2 id="data-heading" className={styles.cardTitle}>
+          Your data
+        </h2>
+        <p className={styles.muted}>
+          Download everything in your family as a JSON file, or permanently
+          delete it. Your export never includes passwords or PINs.
+        </p>
+        <a href="/api/family/export" className={danger.exportLink} download>
+          <Download size={16} aria-hidden="true" />
+          Export your data (JSON)
+        </a>
+        {family.ownerId === session.personId ? (
+          <ConfirmDeleteDisclosure
+            detailsClassName={styles.pinDetails}
+            summaryClassName={`${styles.pinSummary} ${danger.zoneTitle}`}
+            summary="Delete this family"
+            action={deleteFamilyAction}
+            confirmWord={family.name}
+            buttonLabel="Delete family forever"
+            intro={`This permanently deletes ${family.name} — every parent, child, chore, reward, and all points history. This can’t be undone.`}
+          />
+        ) : null}
       </section>
 
       <EnableNotifications audience="parent" />
