@@ -1,5 +1,13 @@
 # pointsy
 
+## 0.35.2
+
+### Patch Changes
+
+- 86c8167: Add a subtle "Coming up later" separator on the kid's Today must-dos, between
+  the chores they can do now and the time-locked ones waiting to unlock — so the
+  grouping reads clearly rather than looking like an arbitrary order.
+
 ## 0.35.1
 
 ### Patch Changes
