@@ -1,5 +1,13 @@
 # pointsy
 
+## 0.35.1
+
+### Patch Changes
+
+- 7d2a5d4: Sort time-locked chores (the ones showing an "Unlocks in" countdown) to the
+  bottom of the kid's Today must-dos and Chores screens, so the chores a kid can
+  do right now group together at the top (#123).
+
 ## 0.35.0
 
 ### Minor Changes
