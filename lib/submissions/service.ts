@@ -101,6 +101,20 @@ export interface SubmittableChore {
   logWindowDays: number | null;
 }
 
+/**
+ * Stable comparator that sinks time-locked chores (the ones showing an "Unlocks
+ * in" countdown) below the ones a kid can act on now, so the available chores
+ * group at the top of a list (#123).
+ */
+export function lockedLast<T extends { windowState: "open" | "locked" }>(
+  a: T,
+  b: T,
+): number {
+  return (
+    (a.windowState === "locked" ? 1 : 0) - (b.windowState === "locked" ? 1 : 0)
+  );
+}
+
 /** Chores the kid has an active (pending/approved) submission for today. */
 async function loggedTodaySet(
   db: Database,

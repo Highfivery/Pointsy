@@ -4,7 +4,7 @@ import { Star } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { getFamilyTimezone } from "@/lib/family/settings";
-import { listSubmittableChores } from "@/lib/submissions/service";
+import { listSubmittableChores, lockedLast } from "@/lib/submissions/service";
 import { listCategories } from "@/lib/categories/service";
 import { groupByCategory } from "@/lib/catalog/category";
 import { IconByName } from "@/components/icons/registry";
@@ -25,7 +25,9 @@ export default async function SubmitPage() {
     listSubmittableChores(db, session.familyId, session.personId, tz),
     listCategories(db, session.familyId),
   ]);
-  const core = chores.filter((c) => c.isCore);
+  // Within each section, time-locked chores (countdowns) sink to the bottom so
+  // the ones a kid can do now group at the top (#123).
+  const core = chores.filter((c) => c.isCore).sort(lockedLast);
   const others = chores.filter((c) => !c.isCore);
 
   return (
@@ -66,9 +68,12 @@ export default async function SubmitPage() {
                 {meta.name}
               </h2>
               <ul className={styles.list}>
-                {items.map((c) => (
-                  <SubmitChoreCard key={c.id} chore={c} timezone={tz} />
-                ))}
+                {items
+                  .slice()
+                  .sort(lockedLast)
+                  .map((c) => (
+                    <SubmitChoreCard key={c.id} chore={c} timezone={tz} />
+                  ))}
               </ul>
             </section>
           ))}

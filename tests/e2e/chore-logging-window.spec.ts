@@ -64,20 +64,9 @@ test.describe("chore logging windows", () => {
       "Sunday",
     ];
 
-    // 1) A "between" time window — open all day for the screenshot/preview.
-    await startNewChore(page, "Morning stretch", 4);
-    await page.getByLabel("Time of day").selectOption("between");
-    await page.getByLabel("Opens at").fill("00:00");
-    await page.getByLabel("Closes at").fill("23:59");
-    await expect(page.getByText(/Kids can log this/i)).toBeVisible();
-    await page.screenshot({
-      path: `${SCREENS}-editor-${testInfo.project.name}.png`,
-      fullPage: true,
-    });
-    await page.getByRole("button", { name: /save chore/i }).click();
-    await page.waitForURL(/\/manage\/chores$/);
-
-    // 2) A day-locked chore: only tomorrow's weekday → locked today.
+    // 1) A day-locked chore: only tomorrow's weekday → locked today. Created
+    // first (lower sort order) so that the later #123 ordering check proves the
+    // sort, not just creation order.
     await startNewChore(page, "Take out trash", 10);
     for (const day of allDays) {
       if (day !== tomorrowDay) {
@@ -87,6 +76,19 @@ test.describe("chore logging windows", () => {
           .uncheck({ force: true });
       }
     }
+    await page.getByRole("button", { name: /save chore/i }).click();
+    await page.waitForURL(/\/manage\/chores$/);
+
+    // 2) A "between" time window — open all day for the screenshot/preview.
+    await startNewChore(page, "Morning stretch", 4);
+    await page.getByLabel("Time of day").selectOption("between");
+    await page.getByLabel("Opens at").fill("00:00");
+    await page.getByLabel("Closes at").fill("23:59");
+    await expect(page.getByText(/Kids can log this/i)).toBeVisible();
+    await page.screenshot({
+      path: `${SCREENS}-editor-${testInfo.project.name}.png`,
+      fullPage: true,
+    });
     await page.getByRole("button", { name: /save chore/i }).click();
     await page.waitForURL(/\/manage\/chores$/);
 
@@ -132,6 +134,11 @@ test.describe("chore logging windows", () => {
     await expect(
       page.getByRole("button", { name: /take out trash/i }),
     ).toHaveCount(0);
+
+    // #123: available chores group above the time-locked ones.
+    const openY = (await page.getByText(/morning stretch/i).boundingBox())!.y;
+    const lockedY = (await page.getByText(/take out trash/i).boundingBox())!.y;
+    expect(openY).toBeLessThan(lockedY);
 
     await page.screenshot({
       path: `${SCREENS}-kid-${testInfo.project.name}.png`,

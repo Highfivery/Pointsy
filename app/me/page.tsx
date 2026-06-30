@@ -20,6 +20,7 @@ import {
   listKidSubmissions,
   listSubmittableChores,
   getCoreStreak,
+  lockedLast,
 } from "@/lib/submissions/service";
 import { listKidChallenges } from "@/lib/challenges/service";
 import { cancelSubmissionAction } from "@/app/actions/submissions";
@@ -86,7 +87,9 @@ export default async function MePage() {
   );
   const coreTotal = coreDueToday.length;
   const coreDone = coreDueToday.filter((c) => c.loggedToday).length;
-  const coreTodo = coreDueToday.filter((c) => !c.loggedToday);
+  // Available must-dos first; time-locked ones (with countdowns) sink to the
+  // bottom so the ones a kid can do now group together (#123).
+  const coreTodo = coreDueToday.filter((c) => !c.loggedToday).sort(lockedLast);
   const coreStreakDays =
     coreTotal > 0
       ? await getCoreStreak(
