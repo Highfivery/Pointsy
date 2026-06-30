@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Sora, Geist_Mono } from "next/font/google";
 import { ServiceWorkerUpdater } from "@/components/pwa/ServiceWorkerUpdater";
-import { Footer } from "@/components/ui/Footer";
 import "./globals.css";
 
 const inter = Inter({
@@ -76,6 +75,20 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+// Site-wide entity. A consistent Organization node (with `sameAs`) is the
+// highest-leverage signal for being recognised as a real entity by search and
+// AI assistants — see SPEC / launch strategy.
+const ORG_LD = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Pointsy",
+  legalName: "Highfivery LLC",
+  url: SITE_URL,
+  logo: `${SITE_URL}/icons/icon-512.png`,
+  description: DESCRIPTION,
+  sameAs: ["https://highfivery.com", "https://github.com/Highfivery/Pointsy"],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -87,11 +100,14 @@ export default function RootLayout({
       className={`${inter.variable} ${sora.variable} ${geistMono.variable}`}
     >
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_LD) }}
+        />
         <a className="skip-link" href="#main">
           Skip to content
         </a>
         {children}
-        <Footer />
         <ServiceWorkerUpdater />
       </body>
     </html>

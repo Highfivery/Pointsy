@@ -76,17 +76,19 @@ test("a brand-new device sees the marketing home with clear ways in", async ({
 }) => {
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: /points that make chores fun/i }),
+    page.getByRole("heading", {
+      name: /chores your kids actually want to do/i,
+    }),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: /create your family/i }),
+    page.getByRole("link", { name: /create your family/i }).first(),
   ).toBeVisible();
-  // Family code and co-parent invite are distinct, correctly-routed entries.
+  // Family code and co-parent invite remain reachable and correctly routed.
   await expect(
-    page.getByRole("link", { name: /kids & family/i }),
+    page.getByRole("link", { name: /family code/i }).first(),
   ).toHaveAttribute("href", "/enter");
   await expect(
-    page.getByRole("link", { name: /invited as a co-parent/i }),
+    page.getByRole("link", { name: /co-parent/i }).first(),
   ).toHaveAttribute("href", "/join");
 });
 
