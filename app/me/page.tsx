@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LogOut, ArrowRight, X } from "lucide-react";
+import { LogOut, ArrowRight, X, Hourglass } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
 import { getDb } from "@/lib/db/client";
@@ -20,7 +20,6 @@ import {
   listKidSubmissions,
   listSubmittableChores,
   getCoreStreak,
-  lockedLast,
 } from "@/lib/submissions/service";
 import { listKidChallenges } from "@/lib/challenges/service";
 import { cancelSubmissionAction } from "@/app/actions/submissions";
@@ -87,9 +86,11 @@ export default async function MePage() {
   );
   const coreTotal = coreDueToday.length;
   const coreDone = coreDueToday.filter((c) => c.loggedToday).length;
-  // Available must-dos first; time-locked ones (with countdowns) sink to the
-  // bottom so the ones a kid can do now group together (#123).
-  const coreTodo = coreDueToday.filter((c) => !c.loggedToday).sort(lockedLast);
+  // Available must-dos first, then a "Coming up later" group for the ones still
+  // time-locked (showing a countdown), so a kid sees what they can do now (#123).
+  const coreTodo = coreDueToday.filter((c) => !c.loggedToday);
+  const todoNow = coreTodo.filter((c) => c.windowState !== "locked");
+  const todoLater = coreTodo.filter((c) => c.windowState === "locked");
   const coreStreakDays =
     coreTotal > 0
       ? await getCoreStreak(
@@ -190,22 +191,48 @@ export default async function MePage() {
           />
           {coreTodo.length > 0 ? (
             <>
-              <ul className={styles.todoList}>
-                {coreTodo.map((c) => (
-                  <SubmitMustDo
-                    key={c.id}
-                    timezone={tz}
-                    chore={{
-                      id: c.id,
-                      name: c.name,
-                      emoji: c.emoji,
-                      points: c.points,
-                      windowState: c.windowState,
-                      opensAt: c.opensAt,
-                    }}
-                  />
-                ))}
-              </ul>
+              {todoNow.length > 0 ? (
+                <ul className={styles.todoList}>
+                  {todoNow.map((c) => (
+                    <SubmitMustDo
+                      key={c.id}
+                      timezone={tz}
+                      chore={{
+                        id: c.id,
+                        name: c.name,
+                        emoji: c.emoji,
+                        points: c.points,
+                        windowState: c.windowState,
+                        opensAt: c.opensAt,
+                      }}
+                    />
+                  ))}
+                </ul>
+              ) : null}
+              {todoLater.length > 0 ? (
+                <div className={styles.todoLaterGroup}>
+                  <p className={styles.todoLater}>
+                    <Hourglass size={14} aria-hidden="true" />
+                    Coming up later
+                  </p>
+                  <ul className={styles.todoList}>
+                    {todoLater.map((c) => (
+                      <SubmitMustDo
+                        key={c.id}
+                        timezone={tz}
+                        chore={{
+                          id: c.id,
+                          name: c.name,
+                          emoji: c.emoji,
+                          points: c.points,
+                          windowState: c.windowState,
+                          opensAt: c.opensAt,
+                        }}
+                      />
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
               <Link href="/submit" className={styles.todoCta}>
                 See all chores
                 <ArrowRight size={18} aria-hidden="true" />
