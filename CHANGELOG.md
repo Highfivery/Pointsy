@@ -1,5 +1,22 @@
 # pointsy
 
+## 0.38.0
+
+### Minor Changes
+
+- 41b6d3a: Add an app-wide footer with the "Pointsy — a Highfivery app" attribution, links
+  to the Privacy Policy and Terms, a link to the open-source GitHub repo, and a
+  "Report a bug or request a feature" link to GitHub issues. It clears the fixed
+  bottom navigation on app screens.
+
+### Patch Changes
+
+- 3430f18: Replace the placeholder Terms of Service and Privacy Policy with full,
+  customized documents for the hosted service — operated by Highfivery LLC
+  (Texas), effective 2026-06-30, with COPPA + GDPR-K children's-data coverage,
+  subprocessor disclosure (Vercel, Neon), security and retention details, and a
+  note that the app's code is separately MIT-licensed.
+
 ## 0.37.2
 
 ### Patch Changes
