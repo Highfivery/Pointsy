@@ -1,5 +1,6 @@
 import type { FamilyLookup } from "@/lib/people/service";
 import { KidLogin } from "./KidLogin";
+import { Logo } from "@/components/brand/Logo";
 import styles from "./enter.module.css";
 
 /**
@@ -15,6 +16,9 @@ export function PickerScreen({
   return (
     <main id="main" className={styles.main}>
       <section className={styles.shell} aria-labelledby="enter-title">
+        <div className={styles.brand}>
+          <Logo size={28} />
+        </div>
         <KidLogin initialFamily={initialFamily} />
       </section>
     </main>

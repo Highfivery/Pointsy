@@ -15,6 +15,11 @@
   max-width: 26rem;
 }
 
+.brand {
+  display: flex;
+  justify-content: center;
+}
+
 .title {
   font-size: clamp(1.6rem, 6vw, 2rem);
   letter-spacing: -0.02em;
