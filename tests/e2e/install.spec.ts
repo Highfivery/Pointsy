@@ -14,7 +14,10 @@ test("iOS visitors get an install banner and an Add-to-Home-Screen guide", async
 
   await install.click();
   await expect(page.getByText("Add Pointsy to your home screen")).toBeVisible();
-  await expect(page.getByText(/Add to Home Screen/i)).toBeVisible();
+  // Exact match: the marketing copy also contains "add to home screen".
+  await expect(
+    page.getByText("Add to Home Screen", { exact: true }),
+  ).toBeVisible();
   // The step that trips people up is called out.
   await expect(page.getByText(/Show More/i)).toBeVisible();
 });

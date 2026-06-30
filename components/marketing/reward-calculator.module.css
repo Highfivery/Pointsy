@@ -1,0 +1,287 @@
+/* Calculator card */
+.calc {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+.inputs {
+  padding: var(--space-8);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Fieldset reset for the frequency group (legend doesn't get flex gap, so it
+ * uses an explicit margin). */
+.fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-inline-size: 0;
+}
+
+.legend {
+  padding: 0;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-4);
+}
+
+.label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.val {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: var(--color-primary);
+}
+
+.range {
+  width: 100%;
+  accent-color: var(--color-primary);
+  height: 6px;
+  cursor: pointer;
+}
+
+.seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.segBtn {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface-raised);
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.segSub {
+  font-weight: 400;
+  font-size: 0.78rem;
+  color: var(--color-text-faint);
+}
+
+.segBtn[aria-pressed="true"] {
+  border-color: var(--color-primary);
+  background: var(--color-primary-weak);
+  color: var(--color-text);
+}
+
+.segBtn[aria-pressed="true"] .segSub {
+  color: var(--color-text-muted);
+}
+
+/* Result panel */
+.result {
+  padding: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--accent-gradient-soft);
+}
+
+.resultNum {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.6rem, 7vw, 3.4rem);
+  line-height: 1;
+  color: var(--color-text);
+}
+
+.approx {
+  font-size: 1.4rem;
+  color: var(--color-text-muted);
+  margin-right: 6px;
+}
+
+.unit {
+  font-size: 1.3rem;
+  color: var(--color-text-muted);
+  margin-left: 6px;
+}
+
+.resultCap {
+  color: var(--color-text-muted);
+  margin-top: var(--space-2);
+}
+
+.resultSentence {
+  margin-top: var(--space-4);
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: var(--color-text);
+}
+
+.resultSentence strong {
+  color: var(--color-primary);
+}
+
+/* Generated menu */
+.menuHead {
+  margin-top: var(--space-8);
+}
+
+.menuTitle {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.menuLead {
+  margin-top: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+}
+
+.menuLead strong {
+  color: var(--color-text);
+}
+
+.tiers {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+
+.tier {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+
+.tierHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.tierCost {
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.tierNote {
+  color: var(--color-text-faint);
+  font-size: 0.85rem;
+  margin: var(--space-1) 0 var(--space-4);
+}
+
+.tierIdeas {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.tierIdeas li {
+  display: flex;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 0.93rem;
+}
+
+.tierIdeas li::before {
+  content: "•";
+  color: var(--color-primary);
+}
+
+/* Method (how it works) */
+.method {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+
+.methodCard {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.025),
+    rgba(255, 255, 255, 0)
+  );
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+
+.methodNum {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--accent-gradient);
+  color: var(--color-on-accent);
+  font-family: var(--font-display);
+  font-weight: 800;
+  margin-bottom: var(--space-3);
+}
+
+.methodCard strong {
+  display: block;
+  color: var(--color-text);
+  font-size: 1.05rem;
+  margin-bottom: var(--space-2);
+}
+
+.methodCard p {
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 760px) {
+  .method {
+    grid-template-columns: 1fr;
+  }
+  .calc {
+    grid-template-columns: 1fr;
+  }
+  .inputs {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .seg {
+    grid-template-columns: 1fr;
+  }
+  .tiers {
+    grid-template-columns: 1fr;
+  }
+}
