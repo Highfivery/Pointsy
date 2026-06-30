@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search, Star } from "lucide-react";
+import { Search, Star, Users } from "lucide-react";
 import { IconByName } from "@/components/icons/registry";
+import { Chip } from "@/components/ui/Chip";
 import { awardChoreAction } from "@/app/actions/points";
 import { formatChoreLimit } from "@/lib/catalog/limit";
 import type { CategoryMeta } from "@/lib/catalog/category";
@@ -17,6 +18,8 @@ export interface AwardChore {
   pinned: boolean;
   limitPeriod: "none" | "day" | "week";
   limitCount: number;
+  limitScope: "per_kid" | "total";
+  isCore: boolean;
 }
 
 export interface AwardKid {
@@ -80,6 +83,14 @@ export function AwardBoard({
             <IconByName name={c.emoji} size={24} />
           </span>
           <span className={styles.choreName}>{c.name}</span>
+          {c.limitScope === "total" ? (
+            <Chip variant="accent">
+              <Users size={12} aria-hidden="true" />
+              Shared
+            </Chip>
+          ) : c.isCore ? (
+            <Chip variant="neutral">Core</Chip>
+          ) : null}
           <span className={styles.chorePoints}>+{c.points}</span>
           <span className={styles.choreBadge}>{limit ?? "Anytime"}</span>
         </button>

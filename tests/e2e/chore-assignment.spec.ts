@@ -32,7 +32,9 @@ async function addKid(page: Page, name: string) {
   await expect(page.getByText(name, { exact: true })).toBeVisible();
 }
 
-test("a rotating chore is locked for whoever isn't up", async ({ page }) => {
+test("a rotating chore only appears for whoever's turn it is", async ({
+  page,
+}) => {
   await signUp(page);
   await addKid(page, "Robin");
   await addKid(page, "Sky");
@@ -55,7 +57,7 @@ test("a rotating chore is locked for whoever isn't up", async ({ page }) => {
   await expect(page).toHaveTitle(/chores/i); // let the soft-nav title settle
   await expectNoA11yViolations(page, "/manage/chores");
 
-  // Sign in as Sky — Dishes shows but is locked ("Robin's turn").
+  // Sign in as Sky — it isn't her turn, so Dishes isn't on her chores at all.
   await page.goto("/dashboard");
   await page.getByRole("button", { name: /sign out/i }).click();
   await expect(page).toHaveURL(/\/$/);
@@ -65,8 +67,7 @@ test("a rotating chore is locked for whoever isn't up", async ({ page }) => {
   await expect(page).toHaveURL(/\/me$/);
 
   await page.goto("/submit");
-  // The chore is shown as a locked card (not a tappable button) with the reason.
-  await expect(page.getByText("Dishes", { exact: true })).toBeVisible();
-  await expect(page.getByText("Robin's turn")).toBeVisible();
-  await expect(page.getByRole("button", { name: /dishes/i })).toHaveCount(0);
+  // Not Sky's turn → the chore is hidden entirely (only her chores show).
+  await expect(page.getByText("Dishes", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Robin's turn")).toHaveCount(0);
 });

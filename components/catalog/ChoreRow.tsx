@@ -5,6 +5,7 @@ import {
   ChevronDown,
   Star,
   Clock,
+  Users,
 } from "lucide-react";
 import { IconByName } from "@/components/icons/registry";
 import { Card } from "@/components/ui/Card";
@@ -44,11 +45,7 @@ export interface ChoreRowItem {
 
 /** A self-contained chore card — head taps through to the editor. */
 export function ChoreRow({ item }: { item: ChoreRowItem }) {
-  const freq = formatChoreLimit(
-    item.limitPeriod,
-    item.limitCount,
-    item.limitScope,
-  );
+  const freq = formatChoreLimit(item.limitPeriod, item.limitCount);
   const window = formatLogWindowSummary(
     item.logWindowDays,
     item.logWindowStart,
@@ -65,6 +62,12 @@ export function ChoreRow({ item }: { item: ChoreRowItem }) {
           <span className={styles.metaRow}>
             <Chip variant="accent">{item.points} pts</Chip>
             {item.isCore ? <Chip variant="neutral">Core</Chip> : null}
+            {item.limitScope === "total" ? (
+              <Chip variant="accent">
+                <Users size={12} aria-hidden="true" />
+                Shared
+              </Chip>
+            ) : null}
             {item.whoLabel ? (
               <Chip variant="neutral">{item.whoLabel}</Chip>
             ) : null}

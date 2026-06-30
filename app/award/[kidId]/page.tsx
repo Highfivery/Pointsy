@@ -60,6 +60,8 @@ export default async function AwardPage({
       pinned: c.pinned,
       limitPeriod: c.limitPeriod,
       limitCount: c.limitCount,
+      limitScope: c.limitScope,
+      isCore: c.isCore,
     }));
   const otherKids = kidBalances
     .filter((k) => k.id !== kidId)

@@ -55,8 +55,9 @@ test("a shared chore is first come, first served across kids", async ({
   await page.getByRole("radio", { name: "Shared by everyone" }).check();
   await page.getByRole("button", { name: /save chore/i }).click();
   await page.waitForURL(/\/manage\/chores$/);
-  // Card clarifies the scope.
-  await expect(page.getByText(/Once a day · shared/i)).toBeVisible();
+  // The card carries a distinct "Shared" chip and the plain frequency.
+  await expect(page.getByText("Shared", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText(/Once a day/i).first()).toBeVisible();
 
   // Ava claims it.
   await signInKid(page, "Ava", "1234");

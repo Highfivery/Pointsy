@@ -564,6 +564,9 @@ export interface PendingSubmission {
   choreName: string;
   points: number;
   createdAt: Date;
+  /** The chore's limit scope ("total" = shared); null if the chore is gone. */
+  limitScope: "per_kid" | "total" | null;
+  isCore: boolean;
 }
 
 /** Pending submissions across the family (the parent approval queue). */
@@ -571,7 +574,7 @@ export async function listPendingSubmissions(
   db: Database,
   familyId: string,
 ): Promise<PendingSubmission[]> {
-  return db
+  const rows = await db
     .select({
       id: choreSubmissions.id,
       kidName: people.name,
@@ -580,9 +583,12 @@ export async function listPendingSubmissions(
       choreName: choreSubmissions.choreName,
       points: choreSubmissions.points,
       createdAt: choreSubmissions.createdAt,
+      limitScope: chores.limitScope,
+      isCore: chores.isCore,
     })
     .from(choreSubmissions)
     .innerJoin(people, eq(people.id, choreSubmissions.personId))
+    .leftJoin(chores, eq(chores.id, choreSubmissions.choreId))
     .where(
       and(
         eq(choreSubmissions.familyId, familyId),
@@ -590,6 +596,7 @@ export async function listPendingSubmissions(
       ),
     )
     .orderBy(choreSubmissions.createdAt);
+  return rows.map((r) => ({ ...r, isCore: r.isCore ?? false }));
 }
 
 export interface KidSubmission {

@@ -34,6 +34,7 @@ import { decideTeamAction, fulfillTeamAction } from "@/app/actions/team";
 import { listChallengeApprovals } from "@/lib/challenges/service";
 import { decideChallengeAwardAction } from "@/app/actions/challenges";
 import { IconByName } from "@/components/icons/registry";
+import { Chip } from "@/components/ui/Chip";
 import { SetPinForm } from "@/components/account/SetPinForm";
 import { EnableNotifications } from "@/components/push/EnableNotifications";
 import { FamilyTimezone } from "@/components/family/FamilyTimezone";
@@ -210,7 +211,17 @@ export default async function DashboardPage() {
                   <span className={styles.queueTitle}>
                     {s.kidName} did {s.choreName}
                   </span>
-                  <span className={styles.queueMeta}>+{s.points} pts</span>
+                  <span className={styles.queueMeta}>
+                    +{s.points} pts
+                    {s.limitScope === "total" ? (
+                      <Chip variant="accent">
+                        <Users size={12} aria-hidden="true" />
+                        Shared
+                      </Chip>
+                    ) : s.isCore ? (
+                      <Chip variant="neutral">Core</Chip>
+                    ) : null}
+                  </span>
                 </span>
                 <form
                   action={decideSubmissionAction}

@@ -21,10 +21,13 @@ export default async function SubmitPage() {
 
   const db = getDb();
   const tz = await getFamilyTimezone(db, session.familyId);
-  const [chores, categories] = await Promise.all([
+  const [allChores, categories] = await Promise.all([
     listSubmittableChores(db, session.familyId, session.personId, tz),
     listCategories(db, session.familyId),
   ]);
+  // Only this kid's chores — a chore assigned to someone else (or on another
+  // kid's turn) isn't theirs to see here.
+  const chores = allChores.filter((c) => c.eligible);
   // Within each section, time-locked chores (countdowns) sink to the bottom so
   // the ones a kid can do now group at the top (#123).
   const core = chores.filter((c) => c.isCore).sort(lockedLast);
