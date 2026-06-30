@@ -1,0 +1,24 @@
+# Pointsy
+
+> Pointsy is a free, open-source family chores-and-rewards app. Parents award points for chores and good habits; kids watch their points grow and redeem them for rewards the parents set. Mobile-first PWA — no app store needed.
+
+Made by Highfivery LLC. Live at https://pointsy.kids. Source (MIT) at https://github.com/Highfivery/Pointsy.
+
+## What it is
+- A points/chores/rewards tracker for families. Parents have accounts; kids are profiles (name, avatar, color, PIN) inside a family — kids have no email and aren't tracked.
+- Parents award points from a tap-friendly catalog of chores, or kids log chores for a parent to approve. Points are redeemed for rewards the parent defines.
+- Features: chores with per-kid or shared (first-come) limits and day/time windows, rewards and goals, challenges and streaks, multiple kids and co-parents, an append-only points ledger.
+
+## Is it really free?
+Yes — 100% free, every feature, for every family. No ads, no tracking, no subscriptions, nothing sold. It's open-source (MIT), so anyone can fork it, self-host it on Vercel + Neon, or contribute.
+
+## Privacy
+Privacy-first and built for kids' data minimization (COPPA + GDPR-K aligned). No third-party analytics, no ads, no selling data. Parents can export or delete their family's data at any time. See https://pointsy.kids/privacy and https://pointsy.kids/terms.
+
+## Links
+- Home: https://pointsy.kids
+- Create a family: https://pointsy.kids/sign-up
+- Privacy Policy: https://pointsy.kids/privacy
+- Terms of Service: https://pointsy.kids/terms
+- Source code: https://github.com/Highfivery/Pointsy
+- Report a bug or request a feature: https://github.com/Highfivery/Pointsy/issues

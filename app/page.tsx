@@ -16,8 +16,31 @@ export default async function Home() {
   if (family) return <PickerScreen initialFamily={family} />;
 
   // Brand-new visitor: marketing + the ways in.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "Pointsy",
+    url: "https://pointsy.kids",
+    description:
+      "A free, open-source family chores app. Parents reward good habits with points; kids redeem them for rewards.",
+    applicationCategory: "LifestyleApplication",
+    operatingSystem: "Web, iOS, Android (PWA)",
+    isAccessibleForFree: true,
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    author: {
+      "@type": "Organization",
+      name: "Highfivery LLC",
+      url: "https://highfivery.com",
+    },
+    license: "https://opensource.org/licenses/MIT",
+  };
+
   return (
     <main id="main" className={styles.main}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <section className={styles.hero}>
         <p className={styles.badge}>
           <Sparkles size={18} aria-hidden="true" />

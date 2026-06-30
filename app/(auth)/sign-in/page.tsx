@@ -3,7 +3,11 @@ import Link from "next/link";
 import { SignInForm } from "@/components/auth/SignInForm";
 import styles from "../auth.module.css";
 
-export const metadata: Metadata = { title: "Sign in" };
+export const metadata: Metadata = {
+  title: "Sign in",
+  description: "Sign in to your Pointsy parent account.",
+  alternates: { canonical: "/sign-in" },
+};
 
 export default function SignInPage() {
   return (

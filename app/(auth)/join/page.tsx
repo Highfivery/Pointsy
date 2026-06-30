@@ -5,7 +5,12 @@ import { getSession } from "@/lib/auth/session";
 import { JoinForm } from "@/components/parents/JoinForm";
 import styles from "../auth.module.css";
 
-export const metadata: Metadata = { title: "Join a family" };
+export const metadata: Metadata = {
+  title: "Join a family",
+  description:
+    "Have an invite code from another parent? Join their family on Pointsy and share the dashboard.",
+  alternates: { canonical: "/join" },
+};
 
 export default async function JoinPage() {
   // Already signed in? You're already in a family.

@@ -20,14 +20,40 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const SITE_URL = "https://pointsy.kids";
+const TAGLINE = "Pointsy — points that make chores fun";
+const DESCRIPTION =
+  "Pointsy is a free, open-source family chores app. Parents reward good habits with points; kids watch their points grow and redeem them for rewards you set. No ads, no tracking, no cost.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   applicationName: "Pointsy",
   title: {
-    default: "Pointsy — points that make chores fun",
+    default: TAGLINE,
     template: "%s · Pointsy",
   },
-  description:
-    "A simple, friendly way for families to earn and redeem points. Parents reward good habits; kids watch their points grow.",
+  description: DESCRIPTION,
+  keywords: [
+    "family chores app",
+    "kids reward chart",
+    "chore points for kids",
+    "allowance app",
+    "reward chart app",
+    "free chore app",
+  ],
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: "Pointsy",
+    url: SITE_URL,
+    title: TAGLINE,
+    description: DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TAGLINE,
+    description: DESCRIPTION,
+  },
   // iOS uses apple-touch-icon (not the manifest) for the Home Screen icon.
   icons: {
     icon: [

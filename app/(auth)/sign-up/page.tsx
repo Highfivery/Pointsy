@@ -3,7 +3,12 @@ import Link from "next/link";
 import { SignUpForm } from "@/components/auth/SignUpForm";
 import styles from "../auth.module.css";
 
-export const metadata: Metadata = { title: "Create your family" };
+export const metadata: Metadata = {
+  title: "Create your family",
+  description:
+    "Set up Pointsy for your household in under a minute — it's free, with no ads. Reward chores and good habits with points kids can redeem.",
+  alternates: { canonical: "/sign-up" },
+};
 
 export default function SignUpPage() {
   return (

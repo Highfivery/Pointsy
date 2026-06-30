@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Terms of Service",
   description:
     "The terms for using Pointsy, the free family points app operated by Highfivery LLC.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {
@@ -40,9 +41,9 @@ export default function TermsPage() {
           so there is no email-based password reset — if you lose access,
           contact us at{" "}
           <a href="mailto:info@highfivery.com">info@highfivery.com</a>. You can
-          manage your family&rsquo;s profiles in the app, and you can request an
-          export or deletion of your family&rsquo;s data — including closing
-          your account — by emailing us.
+          manage your family&rsquo;s profiles, export your data, and delete your
+          family — closing your account — from within the app, or by emailing
+          us.
         </p>
 
         <h2>Acceptable use</h2>
@@ -108,8 +109,8 @@ export default function TermsPage() {
 
         <h2>Termination</h2>
         <p>
-          You can stop using Pointsy at any time, and you can ask us to delete
-          your family and its data. We may suspend or terminate access if you
+          You can stop using Pointsy at any time and delete your family and its
+          data from your dashboard. We may suspend or terminate access if you
           violate these Terms or to protect the Service or its users.
         </p>
 

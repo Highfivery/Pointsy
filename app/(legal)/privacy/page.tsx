@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
     "How Pointsy handles your family's data — privacy-first, child-data-minimizing, no ads, no tracking, no selling. COPPA and GDPR-K aligned.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {
@@ -88,10 +89,10 @@ export default function PrivacyPage() {
             display name, avatar, color, and PIN that you choose.
           </li>
           <li>
-            You can review and edit any child profile in the app at any time. To
-            export or permanently delete a child profile — or your whole family
-            — and its associated records, email us and we&rsquo;ll take care of
-            it promptly.
+            You can review and edit any child profile in the app, permanently
+            delete a child profile from Manage kids, and export your family or
+            delete it entirely from your dashboard — all yourself, at any time.
+            You can also email us and we&rsquo;ll take care of it.
           </li>
         </ul>
 
@@ -125,9 +126,10 @@ export default function PrivacyPage() {
         <h2>Data retention</h2>
         <p>
           We keep your family&rsquo;s data for as long as your account exists.
-          When a child profile is deleted, or when we delete your family at your
-          request, the associated records are removed from our live systems, and
-          any residual copies in routine backups are overwritten within 30 days.
+          When you delete a child profile or your family — in the app or by
+          request — the associated records are removed from our live systems,
+          and any residual copies in routine backups are overwritten within 30
+          days.
         </p>
 
         <h2>Security</h2>
@@ -141,15 +143,17 @@ export default function PrivacyPage() {
 
         <h2>Your rights</h2>
         <p>
-          You can view and update your family&rsquo;s profiles in the app at any
-          time. To access, export, correct, or permanently delete your
-          family&rsquo;s data — including deleting your entire family — email{" "}
-          <a href="mailto:info@highfivery.com">info@highfivery.com</a> and
-          we&rsquo;ll action your request promptly. Depending on where you live,
-          you may also have rights under the GDPR (EU/UK), the CCPA
-          (California), or similar laws — including the rights to access,
-          delete, and port your data. Because we don&rsquo;t sell data or serve
-          ads, there is nothing to opt out of on that front.
+          You can do most of this yourself, right in the app: export your whole
+          family as a JSON file and permanently delete your family from your
+          dashboard, and permanently delete a child&rsquo;s profile from Manage
+          kids. You can also email{" "}
+          <a href="mailto:info@highfivery.com">info@highfivery.com</a> to
+          access, export, correct, or delete your data and we&rsquo;ll action it
+          promptly. Depending on where you live, you may also have rights under
+          the GDPR (EU/UK), the CCPA (California), or similar laws — including
+          the rights to access, delete, and port your data. Because we
+          don&rsquo;t sell data or serve ads, there is nothing to opt out of on
+          that front.
         </p>
 
         <h2>International users</h2>

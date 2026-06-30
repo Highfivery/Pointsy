@@ -8,7 +8,7 @@
 
 Multi-family · self-onboarding · privacy-first · open-source.
 
-[**🚀 Try the live app**](https://pointsy-six.vercel.app) · [**🌐 Landing page**](https://highfivery.github.io/Pointsy) · [Spec](SPEC.md) · [Contributing](CONTRIBUTING.md)
+[**🚀 Try the live app**](https://pointsy.kids) · [Spec](SPEC.md) · [Contributing](CONTRIBUTING.md)
 
 > **Status:** active development, pre-1.0 (v0.x). The core experience is feature-complete
 > and live; APIs and data shapes may still evolve before 1.0.
@@ -67,7 +67,7 @@ redemption, and adjustment is auditable.
 - ♿ **Accessible** — targets **WCAG 2.1 AA**; axe runs on every key screen in E2E.
 - 🔒 **Privacy-first** — only parents have accounts/PII; kids are just a name, avatar,
   and PIN. Data export and family deletion are built in. See the
-  [Privacy Policy](https://pointsy-six.vercel.app/privacy).
+  [Privacy Policy](https://pointsy.kids/privacy).
 
 ## Tech stack
 
