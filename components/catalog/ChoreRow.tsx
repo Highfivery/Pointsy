@@ -14,6 +14,7 @@ import {
   formatChoreLimit,
   formatLogWindowSummary,
   type LimitPeriod,
+  type LimitScope,
 } from "@/lib/catalog/limit";
 import {
   toggleChorePinnedAction,
@@ -32,6 +33,7 @@ export interface ChoreRowItem {
   isCore: boolean;
   limitPeriod: LimitPeriod;
   limitCount: number;
+  limitScope: LimitScope;
   /** "Robin's turn" / "Robin, Sky" / null for everyone. */
   whoLabel: string | null;
   /** Logging-window day mask (Mon=0…Sun=6) + bounds, null when unrestricted. */
@@ -42,7 +44,11 @@ export interface ChoreRowItem {
 
 /** A self-contained chore card — head taps through to the editor. */
 export function ChoreRow({ item }: { item: ChoreRowItem }) {
-  const freq = formatChoreLimit(item.limitPeriod, item.limitCount);
+  const freq = formatChoreLimit(
+    item.limitPeriod,
+    item.limitCount,
+    item.limitScope,
+  );
   const window = formatLogWindowSummary(
     item.logWindowDays,
     item.logWindowStart,

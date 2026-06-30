@@ -40,6 +40,7 @@ function parseChore(formData: FormData) {
     subtasks: formData.getAll("subtasks"),
     limitPeriod: formData.get("limitPeriod") ?? "none",
     limitCount: formData.get("limitCount") ?? 1,
+    limitScope: formData.get("limitScope") ?? "per_kid",
     logWindowDays: formData.getAll("logWindowDays"),
     logWindowStart: formData.get("logWindowStart") ?? "",
     logWindowEnd: formData.get("logWindowEnd") ?? "",

@@ -1,15 +1,24 @@
 /** Pure helpers for chore claim limits (no I/O — safe in client components). */
 
 export type LimitPeriod = "none" | "day" | "week";
+export type LimitScope = "per_kid" | "total";
 
-/** Human label for a chore's claim limit, or null when unlimited. */
+/**
+ * Human label for a chore's claim limit, or null when unlimited. Pass `scope`
+ * (parent catalog view) to clarify whether the count is per kid ("… each") or a
+ * shared family-wide total ("… · shared"); omit it for the kid's own view.
+ */
 export function formatChoreLimit(
   period: LimitPeriod,
   count: number,
+  scope?: LimitScope,
 ): string | null {
   if (period === "none") return null;
   const unit = period === "day" ? "day" : "week";
-  return count === 1 ? `Once a ${unit}` : `${count}× per ${unit}`;
+  const base = count === 1 ? `Once a ${unit}` : `${count}× per ${unit}`;
+  if (scope === "per_kid") return `${base} each`;
+  if (scope === "total") return `${base} · shared`;
+  return base;
 }
 
 const DAY_ABBR = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];

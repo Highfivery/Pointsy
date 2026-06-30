@@ -35,6 +35,8 @@ export interface ChoreInput {
   subtasks?: string[];
   limitPeriod?: "none" | "day" | "week";
   limitCount?: number;
+  /** Whether the limit is per kid or a shared family-wide total. */
+  limitScope?: "per_kid" | "total";
   /** Logging window — when a kid may self-log it. null = no restriction. */
   logWindowDays?: number | null;
   logWindowStart?: string | null;
@@ -110,6 +112,23 @@ async function resolveCategoryId(
   return cats[0].id;
 }
 
+/**
+ * Normalise the claim-limit fields. Scope only matters with a real period, and
+ * a shared (total) chore can't be a per-kid "core" daily must-do — the two are
+ * mutually exclusive, so a shared chore is forced non-core.
+ */
+function normalizeLimit(input: ChoreInput): {
+  limitPeriod: "none" | "day" | "week";
+  limitScope: "per_kid" | "total";
+  isCore: boolean;
+} {
+  const limitPeriod = input.limitPeriod ?? "none";
+  const limitScope =
+    limitPeriod === "none" ? "per_kid" : (input.limitScope ?? "per_kid");
+  const isCore = limitScope === "total" ? false : (input.isCore ?? false);
+  return { limitPeriod, limitScope, isCore };
+}
+
 /* --------------------------------------------------------------- chores */
 
 export async function listChores(
@@ -150,6 +169,7 @@ export async function createChore(
   const currentTurnPersonId =
     assignment === "rotating" ? initialTurn(kidIds, null) : null;
   const categoryId = await resolveCategoryId(db, familyId, input.categoryId);
+  const { limitPeriod, limitScope, isCore } = normalizeLimit(input);
 
   const [row] = await db
     .insert(chores)
@@ -160,11 +180,12 @@ export async function createChore(
       points: input.points,
       categoryId,
       description: input.description?.trim() || null,
-      isCore: input.isCore ?? false,
+      isCore,
       assignment,
       currentTurnPersonId,
-      limitPeriod: input.limitPeriod ?? "none",
+      limitPeriod,
       limitCount: input.limitCount ?? 1,
+      limitScope,
       logWindowDays: input.logWindowDays ?? null,
       logWindowStart: input.logWindowStart ?? null,
       logWindowEnd: input.logWindowEnd ?? null,
@@ -199,6 +220,7 @@ export async function updateChore(
     currentTurnPersonId = initialTurn(kidIds, prev?.turn ?? null);
   }
   const categoryId = await resolveCategoryId(db, familyId, input.categoryId);
+  const { limitPeriod, limitScope, isCore } = normalizeLimit(input);
 
   await db
     .update(chores)
@@ -208,11 +230,12 @@ export async function updateChore(
       points: input.points,
       categoryId,
       description: input.description?.trim() || null,
-      isCore: input.isCore ?? false,
+      isCore,
       assignment,
       currentTurnPersonId,
-      limitPeriod: input.limitPeriod ?? "none",
+      limitPeriod,
       limitCount: input.limitCount ?? 1,
+      limitScope,
       logWindowDays: input.logWindowDays ?? null,
       logWindowStart: input.logWindowStart ?? null,
       logWindowEnd: input.logWindowEnd ?? null,

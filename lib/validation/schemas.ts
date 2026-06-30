@@ -140,6 +140,8 @@ export const choreSchema = z
       .min(1, "Must be at least 1.")
       .max(50, "That's a lot — keep it 50 or under.")
       .default(1),
+    /** Whether the limit is per kid or a shared family-wide total. */
+    limitScope: z.enum(["per_kid", "total"]).default("per_kid"),
     /**
      * Logging window — when a kid may self-log this chore. Days come in as the
      * selected weekday indices (Mon=0…Sun=6); 0 or all 7 means "every day" (null

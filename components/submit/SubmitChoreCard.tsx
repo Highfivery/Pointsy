@@ -8,6 +8,8 @@ import {
   Lock,
   Check,
   Clock,
+  Users,
+  Flame,
 } from "lucide-react";
 import { IconByName } from "@/components/icons/registry";
 import { submitChoreAction } from "@/app/actions/submissions";
@@ -33,6 +35,13 @@ export function SubmitChoreCard({
   timezone: string;
 }) {
   const freq = formatChoreLimit(chore.limitPeriod, chore.limitCount);
+  // Shared (total) chores show how many slots are left, to create the race.
+  const sharedHint =
+    chore.limitScope === "total" && chore.remaining !== null
+      ? `First come · ${chore.remaining} left ${
+          chore.limitPeriod === "week" ? "this week" : "today"
+        }`
+      : null;
   const hasChecklist = chore.subtasks.length > 0;
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState<boolean[]>(() =>
@@ -83,6 +92,27 @@ export function SubmitChoreCard({
     );
   }
 
+  // Shared chore another kid already claimed — neutral, not the green "Done"
+  // (the viewing kid didn't do it).
+  if (chore.sharedTaken) {
+    return (
+      <li>
+        <div className={styles.choreLocked}>
+          <span className={styles.lockIcon} aria-hidden="true">
+            <Users size={20} />
+          </span>
+          <span className={styles.choreText}>
+            <span className={styles.choreName}>{chore.name}</span>
+            <span className={styles.lockReason}>
+              {chore.reason ?? "Already done"}
+            </span>
+          </span>
+          <span className={styles.chorePtsMuted}>+{chore.points}</span>
+        </div>
+      </li>
+    );
+  }
+
   // Eligible but already done for now — celebrate it, don't grey it out.
   if (!chore.canSubmit) {
     return (
@@ -116,7 +146,12 @@ export function SubmitChoreCard({
               {chore.description ? (
                 <span className={styles.choreDesc}>{chore.description}</span>
               ) : null}
-              {chore.closesAt ? (
+              {sharedHint ? (
+                <span className={styles.choreShared}>
+                  <Flame size={12} aria-hidden="true" />
+                  {sharedHint}
+                </span>
+              ) : chore.closesAt ? (
                 <span className={styles.choreOpen}>
                   <Clock size={12} aria-hidden="true" />
                   {openNowLabel(new Date(chore.closesAt), timezone)}

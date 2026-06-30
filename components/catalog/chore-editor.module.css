@@ -85,6 +85,12 @@
   box-shadow: inset 0 0 0 1px var(--color-primary);
 }
 
+/* Core can't combine with a shared/total limit — dim it when unavailable. */
+.coreRow[data-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .radioText {
   display: flex;
   flex-direction: column;

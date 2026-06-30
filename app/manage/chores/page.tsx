@@ -62,6 +62,7 @@ export default async function ChoresPage() {
         isCore: c.isCore,
         limitPeriod: c.limitPeriod,
         limitCount: c.limitCount,
+        limitScope: c.limitScope,
         whoLabel: whoLabel(c),
         logWindowDays: c.logWindowDays,
         logWindowStart: c.logWindowStart,

@@ -43,7 +43,9 @@ export class InvalidSubmissionError extends Error {
 /** Pending + approved both hold a slot toward a chore's limit. */
 const ACTIVE = ["pending", "approved"] as const;
 
-/** A kid's pending+approved claims for a chore within its limit window. */
+/** Pending+approved claims for a chore within its limit window. For "per_kid"
+ * scope this counts only `personId`'s claims; for "total" it counts the whole
+ * family's (shared, first-come). */
 async function usedInWindow(
   db: Database,
   familyId: string,
@@ -51,13 +53,16 @@ async function usedInWindow(
   choreId: string,
   period: LimitPeriod,
   today: string,
+  scope: "per_kid" | "total" = "per_kid",
 ): Promise<number> {
   const conds = [
     eq(choreSubmissions.familyId, familyId),
-    eq(choreSubmissions.personId, personId),
     eq(choreSubmissions.choreId, choreId),
     inArray(choreSubmissions.status, ACTIVE),
   ];
+  if (scope === "per_kid") {
+    conds.push(eq(choreSubmissions.personId, personId));
+  }
   if (period === "day") {
     conds.push(eq(choreSubmissions.localDate, today));
   } else if (period === "week") {
@@ -70,6 +75,35 @@ async function usedInWindow(
   return row?.n ?? 0;
 }
 
+/** The kid who first claimed a shared chore in the current window (for "Robin
+ * got it first"), or null. */
+async function firstClaimantName(
+  db: Database,
+  familyId: string,
+  choreId: string,
+  period: LimitPeriod,
+  today: string,
+): Promise<string | null> {
+  const conds = [
+    eq(choreSubmissions.familyId, familyId),
+    eq(choreSubmissions.choreId, choreId),
+    inArray(choreSubmissions.status, ACTIVE),
+  ];
+  if (period === "day") {
+    conds.push(eq(choreSubmissions.localDate, today));
+  } else if (period === "week") {
+    conds.push(gte(choreSubmissions.localDate, weekStart(today)));
+  }
+  const [row] = await db
+    .select({ name: people.name })
+    .from(choreSubmissions)
+    .innerJoin(people, eq(people.id, choreSubmissions.personId))
+    .where(and(...conds))
+    .orderBy(choreSubmissions.createdAt)
+    .limit(1);
+  return row?.name ?? null;
+}
+
 export interface SubmittableChore {
   id: string;
   name: string;
@@ -79,6 +113,8 @@ export interface SubmittableChore {
   points: number;
   limitPeriod: LimitPeriod;
   limitCount: number;
+  /** Per-kid limit, or a shared family-wide total (first come, first served). */
+  limitScope: "per_kid" | "total";
   /** A daily "must-do" that counts toward the kid's core progress + streak. */
   isCore: boolean;
   /** This chore is the kid's to do (assignment/rotation allows it). */
@@ -99,6 +135,8 @@ export interface SubmittableChore {
   closesAt: string | null;
   /** This chore's logging-window weekday mask (Mon=0…Sun=6), for streak math. */
   logWindowDays: number | null;
+  /** A shared chore another kid already claimed all slots of (first-come). */
+  sharedTaken: boolean;
 }
 
 /**
@@ -177,6 +215,7 @@ export async function listSubmittableChores(
     points: c.points,
     limitPeriod: c.limitPeriod,
     limitCount: c.limitCount,
+    limitScope: c.limitScope,
     isCore: c.isCore,
     loggedToday: loggedToday.has(c.id),
     subtasks: subtasks.get(c.id) ?? [],
@@ -184,6 +223,7 @@ export async function listSubmittableChores(
     opensAt: null,
     closesAt: null,
     logWindowDays: c.logWindowDays,
+    sharedTaken: false,
   });
 
   const out: SubmittableChore[] = [];
@@ -255,9 +295,44 @@ export async function listSubmittableChores(
       c.id,
       c.limitPeriod,
       today,
+      c.limitScope,
     );
     const remaining = Math.max(0, c.limitCount - used);
     const unit = c.limitPeriod === "day" ? "today" : "this week";
+
+    // Shared (total) cap reached by someone else → a distinct "Robin got it
+    // first" state, separate from the kid's own celebratory "Done".
+    if (c.limitScope === "total" && remaining === 0) {
+      const mine = await usedInWindow(
+        db,
+        familyId,
+        personId,
+        c.id,
+        c.limitPeriod,
+        today,
+        "per_kid",
+      );
+      if (mine === 0) {
+        const who = await firstClaimantName(
+          db,
+          familyId,
+          c.id,
+          c.limitPeriod,
+          today,
+        );
+        out.push({
+          ...base(c),
+          eligible: true,
+          remaining: 0,
+          canSubmit: false,
+          reason: who ? `${who} got it first` : `All done ${unit}`,
+          closesAt,
+          sharedTaken: true,
+        });
+        continue;
+      }
+    }
+
     out.push({
       ...base(c),
       eligible: true,
@@ -336,7 +411,10 @@ export async function submitChore(
           eq(chores.isActive, true),
         ),
       )
-      .limit(1);
+      .limit(1)
+      // Lock the chore row so concurrent submits (esp. two kids racing for a
+      // shared/total slot) serialise — keeping it truly first-come.
+      .for("update");
     if (!chore) throw new InvalidSubmissionError();
 
     // Assignment guard — a kid can't log a chore that isn't theirs / their turn.
@@ -379,12 +457,16 @@ export async function submitChore(
         choreId,
         chore.limitPeriod,
         today,
+        chore.limitScope,
       );
       if (used >= chore.limitCount) {
+        const shared = chore.limitScope === "total";
         throw new LimitReachedError(
-          chore.limitPeriod === "day"
-            ? "You've already logged this today."
-            : "You've already logged this this week.",
+          shared
+            ? "Someone already claimed this one."
+            : chore.limitPeriod === "day"
+              ? "You've already logged this today."
+              : "You've already logged this this week.",
         );
       }
     }

@@ -15,6 +15,14 @@ describe("formatChoreLimit", () => {
     expect(formatChoreLimit("week", 1)).toBe("Once a week");
     expect(formatChoreLimit("week", 2)).toBe("2× per week");
   });
+
+  it("clarifies scope when given (parent catalog view)", () => {
+    expect(formatChoreLimit("day", 1, "per_kid")).toBe("Once a day each");
+    expect(formatChoreLimit("day", 3, "per_kid")).toBe("3× per day each");
+    expect(formatChoreLimit("day", 1, "total")).toBe("Once a day · shared");
+    expect(formatChoreLimit("week", 2, "total")).toBe("2× per week · shared");
+    expect(formatChoreLimit("none", 1, "total")).toBeNull();
+  });
 });
 
 describe("formatLogWindowSummary", () => {

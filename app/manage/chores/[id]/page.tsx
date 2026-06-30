@@ -60,6 +60,7 @@ export default async function EditChorePage({
           subtasks,
           limitPeriod: chore.limitPeriod,
           limitCount: chore.limitCount,
+          limitScope: chore.limitScope,
           logWindowDays: chore.logWindowDays,
           logWindowStart: chore.logWindowStart,
           logWindowEnd: chore.logWindowEnd,

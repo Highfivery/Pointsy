@@ -2,7 +2,7 @@
 
 import { useActionState, useId, useState } from "react";
 import Link from "next/link";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Eye } from "lucide-react";
 import { Field } from "@/components/auth/Field";
 import { IconPicker } from "@/components/icons/IconPicker";
 import { LogWindowFields } from "@/components/catalog/LogWindowFields";
@@ -11,7 +11,7 @@ import { ICON_KEYS, DEFAULT_CHORE_ICON } from "@/lib/icons";
 import { saveChoreAction } from "@/app/actions/catalog";
 import type { FormState } from "@/lib/validation/form";
 import type { ChoreAssignment } from "@/lib/db/schema";
-import type { LimitPeriod } from "@/lib/catalog/limit";
+import type { LimitPeriod, LimitScope } from "@/lib/catalog/limit";
 import form from "@/components/auth/auth-form.module.css";
 import styles from "./chore-editor.module.css";
 
@@ -40,6 +40,7 @@ export interface ChoreDefaults {
   subtasks?: string[];
   limitPeriod?: LimitPeriod;
   limitCount?: number;
+  limitScope?: LimitScope;
   logWindowDays?: number | null;
   logWindowStart?: string | null;
   logWindowEnd?: string | null;
@@ -61,6 +62,20 @@ const ASSIGN_OPTIONS: {
 
 const initialState: FormState = {};
 
+/** Plain-English summary of the claim limit, clarifying per-kid vs shared. */
+function limitPreview(
+  period: LimitPeriod,
+  count: string,
+  scope: LimitScope,
+): string {
+  const unit = period === "day" ? "day" : "week";
+  const n = Math.max(1, Number(count) || 1);
+  const times = n === 1 ? `once a ${unit}` : `${n} times a ${unit}`;
+  return scope === "total"
+    ? `Up to ${times}, shared by everyone — first come, first served.`
+    : `Each kid can log this ${times}.`;
+}
+
 export function ChoreEditor({
   kids,
   categories,
@@ -81,6 +96,13 @@ export function ChoreEditor({
   const [period, setPeriod] = useState<LimitPeriod>(
     defaults?.limitPeriod ?? "none",
   );
+  const [scope, setScope] = useState<LimitScope>(
+    defaults?.limitScope ?? "per_kid",
+  );
+  // Core (per-kid daily must-do) and a shared/total limit are mutually exclusive.
+  const [core, setCore] = useState<boolean>(defaults?.isCore ?? false);
+  const [count, setCount] = useState<string>(String(defaults?.limitCount ?? 1));
+  const shared = period !== "none" && scope === "total";
   const [subtasks, setSubtasks] = useState<string[]>(defaults?.subtasks ?? []);
   const categoryId = useId();
   const periodId = useId();
@@ -196,16 +218,20 @@ export function ChoreEditor({
           </fieldset>
         ) : null}
 
-        <label className={styles.coreRow}>
+        <label className={styles.coreRow} data-disabled={shared}>
           <input
             type="checkbox"
             name="isCore"
-            defaultChecked={defaults?.isCore}
+            checked={core && !shared}
+            disabled={shared}
+            onChange={(e) => setCore(e.target.checked)}
             aria-label="Core chore"
           />
           <span className={styles.radioLabel}>Core chore</span>
           <span className={styles.radioHint}>
-            Expected every day — counts toward challenges
+            {shared
+              ? "Not available for shared chores"
+              : "Expected every day — counts toward challenges"}
           </span>
         </label>
       </section>
@@ -255,7 +281,7 @@ export function ChoreEditor({
         <h2 className={styles.sectionTitle}>Limits</h2>
         <div className={form.field}>
           <label htmlFor={periodId} className={form.label}>
-            How often can a kid claim this?
+            How often can it be claimed?
           </label>
           <select
             id={periodId}
@@ -268,23 +294,64 @@ export function ChoreEditor({
             <option value="day">A set number per day</option>
             <option value="week">A set number per week</option>
           </select>
-          {period === "none" ? (
-            <input type="hidden" name="limitCount" value="1" />
-          ) : (
+        </div>
+
+        {period === "none" ? (
+          <input type="hidden" name="limitCount" value="1" />
+        ) : (
+          <>
             <div className={styles.limitCount}>
               <Field
                 label={period === "day" ? "Times per day" : "Times per week"}
                 name="limitCount"
                 type="text"
                 inputMode="numeric"
-                defaultValue={defaults?.limitCount ?? 1}
+                value={count}
+                onChange={(e) => setCount(e.target.value)}
                 error={errors?.limitCount}
                 autoComplete="off"
                 required
               />
             </div>
-          )}
-        </div>
+
+            <fieldset className={styles.choice}>
+              <legend className={form.label}>Who shares this limit?</legend>
+              {[
+                {
+                  value: "per_kid" as const,
+                  label: "Each kid",
+                  hint: "Every kid can claim it this many times",
+                },
+                {
+                  value: "total" as const,
+                  label: "Shared by everyone",
+                  hint: "First come, first served — once it's claimed this many times, it's gone for all",
+                },
+              ].map((o) => (
+                <label key={o.value} className={styles.radioRow}>
+                  <input
+                    type="radio"
+                    name="limitScope"
+                    value={o.value}
+                    checked={scope === o.value}
+                    onChange={() => {
+                      setScope(o.value);
+                      if (o.value === "total") setCore(false);
+                    }}
+                    aria-label={o.label}
+                  />
+                  <span className={styles.radioLabel}>{o.label}</span>
+                  <span className={styles.radioHint}>{o.hint}</span>
+                </label>
+              ))}
+            </fieldset>
+
+            <p className={styles.preview}>
+              <Eye size={16} aria-hidden="true" />
+              <span>{limitPreview(period, count, scope)}</span>
+            </p>
+          </>
+        )}
       </section>
 
       <LogWindowFields

@@ -59,6 +59,11 @@ export const choreLimitPeriodEnum = pgEnum("chore_limit_period", [
   "day",
   "week",
 ]);
+/** Whether a claim limit applies to each kid or is a shared family-wide total. */
+export const choreLimitScopeEnum = pgEnum("chore_limit_scope", [
+  "per_kid",
+  "total",
+]);
 export const submissionStatusEnum = pgEnum("submission_status", [
   "pending",
   "approved",
@@ -216,9 +221,14 @@ export const chores = pgTable(
       (): AnyPgColumn => people.id,
       { onDelete: "set null" },
     ),
-    /** Per-kid claim limit when a kid submits this chore. "none" = unlimited. */
+    /** Claim limit when a kid submits this chore. "none" = unlimited. */
     limitPeriod: choreLimitPeriodEnum("limit_period").notNull().default("none"),
     limitCount: integer("limit_count").notNull().default(1),
+    /**
+     * Whether `limitCount` is per kid (each kid gets that many) or a shared
+     * family-wide total (first come, first served across all kids).
+     */
+    limitScope: choreLimitScopeEnum("limit_scope").notNull().default("per_kid"),
     /**
      * Logging window — when a kid may self-log this chore (parents can still
      * award it manually any time). All null = no restriction.
