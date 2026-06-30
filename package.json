@@ -1,6 +1,6 @@
 {
   "name": "pointsy",
-  "version": "0.35.2",
+  "version": "0.36.0",
   "private": true,
   "engines": {
     "node": "22.x"
