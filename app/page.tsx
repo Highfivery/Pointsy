@@ -21,11 +21,17 @@ import { PickerScreen } from "@/components/enter/PickerScreen";
 import { InstallBanner } from "@/components/pwa/InstallBanner";
 import { SiteHeader } from "@/components/ui/SiteHeader";
 import { SiteFooter } from "@/components/ui/SiteFooter";
-import parentDash from "@/public/screens/parent-dashboard.png";
-import kidHome from "@/public/screens/kid-home.png";
-import challengesShot from "@/public/screens/challenges.png";
-import kidRedeem from "@/public/screens/kid-redeem.png";
 import styles from "./page.module.css";
+
+// Product screenshots live in /public and are referenced by path (the standard
+// for public assets — avoids a build-time static image import).
+const parentDash = "/screens/parent-dashboard.png";
+const kidHome = "/screens/kid-home.png";
+const challengesShot = "/screens/challenges.png";
+const kidRedeem = "/screens/kid-redeem.png";
+// Intrinsic size of the phone captures (used for aspect ratio on non-fill images).
+const PHONE_W = 1170;
+const PHONE_H = 2532;
 
 const STEPS = [
   {
@@ -239,19 +245,21 @@ export default async function Home() {
               <Image
                 src={parentDash}
                 alt=""
+                width={PHONE_W}
+                height={PHONE_H}
                 className={styles.phoneImg}
                 sizes="260px"
-                placeholder="blur"
               />
             </div>
             <div className={`${styles.phone} ${styles.phoneFront}`}>
               <Image
                 src={kidHome}
                 alt=""
+                width={PHONE_W}
+                height={PHONE_H}
                 className={styles.phoneImg}
                 sizes="260px"
                 priority
-                placeholder="blur"
               />
             </div>
           </div>
@@ -444,6 +452,8 @@ export default async function Home() {
                 <Image
                   src={challengesShot}
                   alt="Pointsy challenge list showing point goals and a weekly reading streak"
+                  width={PHONE_W}
+                  height={PHONE_H}
                   className={styles.phoneImg}
                   sizes="240px"
                 />
@@ -482,6 +492,8 @@ export default async function Home() {
                 <Image
                   src={kidRedeem}
                   alt="Kid rewards screen with a shared team reward and a team-up button"
+                  width={PHONE_W}
+                  height={PHONE_H}
                   className={styles.phoneImg}
                   sizes="240px"
                 />
