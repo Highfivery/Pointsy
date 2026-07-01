@@ -1,5 +1,121 @@
 # pointsy
 
+## 0.43.0
+
+### Minor Changes
+
+- e72ad42: feat(marketing): add an About page + enrich Organization schema
+
+  A brand-level `/about` page (mission, values, how it stays free, who's behind
+  it, and a plain-language privacy promise) that serves as the entity/E-E-A-T
+  "home" for search and AI assistants. Also enriches the site-wide `Organization`
+  JSON-LD with `email`, `address`, and `mainEntityOfPage`, and links About from
+  the footer Company column and the sitemap.
+
+- a1cefbc: feat(marketing): add an allowance-by-age calculator
+
+  A free `/tools/allowance-calculator` that suggests a weekly allowance by age
+  (the "$1 per year of age" rule plus typical ranges), with a dollars ↔ Pointsy
+  points toggle and a by-age reference table. It captures the high-intent
+  "how much allowance by age" search cluster and pivots parents toward Pointsy's
+  cash-free points model. Linked from the footer Resources column and the reward
+  calculator; includes `BreadcrumbList` + `FAQPage` JSON-LD and a sitemap entry.
+
+- b7b6380: feat(marketing): add an age-appropriate chores guide
+
+  A new `/guides/age-appropriate-chores` page with the complete chores-by-age
+  chart on the page (competitors gate theirs behind a PDF): a summary table plus
+  detailed age-band cards from toddlers to teens, each with suggested points, a
+  tie-in to the reward/allowance calculators, and answer-first copy for search
+  and AI citation. Includes `BreadcrumbList` + `FAQPage` JSON-LD, a sitemap
+  entry, and a footer Resources link.
+
+- 751b5b2: feat(marketing): redesigned homepage, global site header & footer
+
+  Launch-ready marketing polish:
+
+  - **Homepage redesign** — product screenshots in a phone-mockup hero, a trust
+    strip, a "Why Pointsy vs debit-card apps" comparison table, a focused
+    6-feature grid, a screenshot showcase, challenge/team-up splits, a privacy
+    section, accessible FAQ accordions, and a strong closing CTA. Leads with the
+    free / points-not-money / no-app-store / privacy-first positioning.
+  - **Global `SiteHeader`** — a sticky, glassy header shared by the marketing,
+    legal, and auth pages, so `/privacy` and `/terms` finally have a way home.
+  - **Redesigned `SiteFooter`** — a modern multi-column footer (Product · Get
+    started · Company) with brand, trust pills, and links. Scoped to the public
+    surfaces; the authenticated app screens keep their bottom-nav chrome.
+  - **Entity SEO** — site-wide `Organization` JSON-LD (with `legalName` and
+    `sameAs`) to establish Pointsy/Highfivery as a recognised entity for search
+    and AI assistants.
+  - **GitHub Pages** — `docs/index.html` now redirects to pointsy.kids
+    (instant meta-refresh + canonical) instead of serving a stale mirror.
+  - **Content / SEO pages** — a free interactive **points-to-reward calculator**
+    (`/tools/reward-calculator`), a **comparison hub** (`/compare`), and
+    per-competitor comparison pages (`/compare/greenlight`, `/compare/busykid`,
+    `/compare/famzoo`) built from a shared data model, each with answer-first
+    copy, a comparison table, an honest "when a card app is better" balance,
+    `BreadcrumbList` + `FAQPage` JSON-LD, and sitemap entries. Linked from a new
+    header "Compare" item and a footer "Resources" column.
+
+- 653ee9a: feat(marketing): add a "token economy for kids" explainer
+
+  A new `/guides/token-economy-for-kids` guide that defines the concept, shows how
+  to set one up in five steps, explains why it works, compares points/stars/cash,
+  and lists common mistakes — positioning Pointsy as the canonical token-economy
+  example. The definition + how-to format is strong for AI citation. Includes
+  `BreadcrumbList` + `FAQPage` JSON-LD, a sitemap entry, and a footer Resources
+  link, with cross-links to the calculators and the chores guide.
+
+### Patch Changes
+
+- e25714f: fix(auth): consistent top spacing across the sign-in / sign-up / join forms
+
+  The auth form card was vertically centred, so a short form (sign-in, two
+  fields) dropped lower than a tall one (sign-up / join), making the gap between
+  the header and the page title look different on each page. The card is now
+  anchored to a consistent top offset, so that gap is identical on every form.
+
+- 550944e: fix(marketing): re-capture app screenshots without the dev-mode indicator
+
+  The homepage/README product screenshots were captured under `next dev`, so the
+  Next.js dev-mode "N" indicator was baked into the phone mockups. Re-captured all
+  four (parent dashboard, kid home, challenges, kid rewards) from a fresh demo
+  family at the correct 1170×2532 size, with reduced motion so the count-up
+  numbers render at their final value.
+
+- 5fcddce: fix(marketing): mobile polish, one responsive table pattern, consistent widths & forms
+
+  - Homepage on phones: the hero CTAs now stack full-width (no awkward wrapping),
+    the phone mockups are centred, and the decorative Challenges/Team-up
+    screenshots are hidden (the copy carries those sections).
+  - Every table across the public site (homepage compare, the /compare hub and
+    each vs-provider page, the token-economy and age-by-chore guides, and the
+    allowance calculator) now collapses to one card per row on phones — the row
+    label is a header and each column becomes a labelled line, so nothing is
+    cramped or horizontally scrolled.
+  - The content/SEO pages (comparisons, guides, tools, about) now use the same
+    70rem column as the homepage; only the hero intro paragraph is capped for
+    readability.
+  - The "Find your family" (/enter) screen drops its bespoke bordered card and
+    glow to match the plain, centred sign-in / create-family / join forms.
+
+- 98e2a95: fix(marketing): UI/UX polish across the marketing surfaces
+
+  - **Header** collapses to the menu earlier (960px) and never wraps — nav links
+    and "Parent sign in" are `nowrap`.
+  - **Consistent content width** on the content pages (compare, guides, about):
+    every block aligns to one column so the right edges are no longer ragged.
+  - **Homepage gutters** — filled cards (privacy, final CTA) now keep a guaranteed
+    side gutter and align with the content above, so nothing runs to the edge.
+  - **FAQ sections are centered** across all pages.
+  - **"debit card" → "credit card"** throughout the copy.
+  - **Removed the redundant logo** above the sign-up / sign-in / join forms (the
+    global header already shows it).
+  - **Redesigned the `/enter` screen** with a proper branded card, logo lockup,
+    and trust footnote.
+  - **Added a horizontal-overflow layout guardrail** (Playwright) that checks every
+    marketing page at six widths, so edge-to-edge regressions are caught in CI.
+
 ## 0.42.0
 
 ### Minor Changes
