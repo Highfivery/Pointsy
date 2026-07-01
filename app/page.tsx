@@ -346,8 +346,12 @@ export default async function Home() {
                 {COMPARE.map((row) => (
                   <tr key={row.label}>
                     <th scope="row">{row.label}</th>
-                    <td className={styles.colHi}>{row.pointsy}</td>
-                    <td className={styles.muted}>{row.others}</td>
+                    <td className={styles.colHi} data-label="Pointsy">
+                      {row.pointsy}
+                    </td>
+                    <td className={styles.muted} data-label="Credit-card apps">
+                      {row.others}
+                    </td>
                   </tr>
                 ))}
               </tbody>

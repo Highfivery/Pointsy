@@ -213,8 +213,10 @@ export default function ChoresByAgePage() {
                   {SUMMARY.map((r) => (
                     <tr key={r.age}>
                       <th scope="row">{r.age}</th>
-                      <td>{r.unlocks}</td>
-                      <td className={g.ptsCol}>{r.pts}</td>
+                      <td data-label="New this stage">{r.unlocks}</td>
+                      <td className={g.ptsCol} data-label="Suggested points">
+                        {r.pts}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

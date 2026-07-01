@@ -4,9 +4,10 @@
 
 .inner {
   width: 100%;
-  /* Single content column — every block aligns to this width so the right
-   * edges never go ragged. Side padding guarantees a comfortable gutter. */
-  max-width: 52rem;
+  /* Same content width as the homepage (70rem) so the public pages feel like one
+   * site. Structured blocks (table, card grids, FAQ) fill this width; long-form
+   * intro copy is capped separately below for readability. */
+  max-width: 70rem;
   margin: 0 auto;
   padding: var(--space-6) clamp(1rem, 4vw, 2rem) var(--space-8);
 }
@@ -69,6 +70,9 @@
   line-height: 1.65;
   color: var(--color-text-muted);
   text-wrap: pretty;
+  /* Cap the intro paragraph so it stays a readable measure instead of stretching
+   * the full 70rem hero width. */
+  max-width: 46rem;
 }
 
 /* TL;DR card */
@@ -160,6 +164,85 @@
 .table tr:last-child td {
   border-bottom: none;
 }
+
+/* Phones: one card per row (row label as header, each provider a labelled line)
+ * instead of a horizontally-scrolling multi-column table. */
+@media (max-width: 640px) {
+  .tableScroll {
+    border: none;
+    border-radius: 0;
+    background: none;
+    overflow: visible;
+  }
+  .table {
+    display: block;
+    min-width: 0;
+    font-size: 0.95rem;
+  }
+  .table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .table tbody {
+    display: block;
+  }
+  .table tbody tr {
+    display: block;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: var(--space-3);
+  }
+  .table tbody tr:last-child {
+    margin-bottom: 0;
+  }
+  .table tbody th {
+    display: block;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+    white-space: normal;
+  }
+  .table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    text-align: right;
+  }
+  .table tbody tr td:last-child {
+    border-bottom: none;
+  }
+  .table td::before {
+    content: attr(data-label);
+    text-align: left;
+    color: var(--color-text-muted);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .table td.colHi {
+    background: rgba(52, 211, 153, 0.06);
+  }
+  .table td.colHi::before {
+    color: var(--color-primary);
+  }
+}
+
 .sourceNote {
   margin-top: var(--space-3);
   font-size: 0.8rem;

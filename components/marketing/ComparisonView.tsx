@@ -72,9 +72,15 @@ export function ComparisonView({ data }: { data: Comparison }) {
                 {ROWS.map((row) => (
                   <tr key={row.key}>
                     <th scope="row">{row.label}</th>
-                    <td className={styles.colHi}>{row.pointsy}</td>
+                    <td className={styles.colHi} data-label="Pointsy">
+                      {row.pointsy}
+                    </td>
                     {cols.map((c) => (
-                      <td key={c.name} className={styles.colOther}>
+                      <td
+                        key={c.name}
+                        className={styles.colOther}
+                        data-label={c.name}
+                      >
                         {c.values[row.key]}
                       </td>
                     ))}

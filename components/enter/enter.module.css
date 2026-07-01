@@ -1,5 +1,7 @@
+/* Matches the auth form pages (sign-in / sign-up / join): a plain, centred
+ * column on the page background — no bordered "contained" card, no glow. The
+ * brand logo stands in for the site header this screen doesn't have. */
 .main {
-  position: relative;
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -7,53 +9,22 @@
   justify-content: center;
   gap: var(--space-5);
   padding: var(--space-8) var(--space-4);
-  overflow: hidden;
-}
-
-/* Soft brand glow behind the card. */
-.glow {
-  position: absolute;
-  top: 8%;
-  left: 50%;
-  width: min(30rem, 90vw);
-  height: 22rem;
-  transform: translateX(-50%);
-  background: radial-gradient(
-    circle,
-    rgba(34, 211, 238, 0.14),
-    transparent 68%
-  );
-  filter: blur(24px);
-  pointer-events: none;
-  z-index: 0;
 }
 
 .brand {
-  position: relative;
-  z-index: 1;
   display: flex;
   justify-content: center;
 }
 
-/* The picker/PIN flow lives in a proper card, so the screen looks designed. */
 .card {
-  position: relative;
-  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
   width: 100%;
-  max-width: 24rem;
-  padding: var(--space-6);
-  background: var(--color-surface-raised);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
+  max-width: 26rem;
 }
 
 .footNote {
-  position: relative;
-  z-index: 1;
   font-size: 0.85rem;
   color: var(--color-text-faint);
   text-align: center;
