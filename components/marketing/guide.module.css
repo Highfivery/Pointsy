@@ -71,6 +71,80 @@
   border-bottom: none;
 }
 
+/* Phones: one card per row (age as header, each column a labelled line). */
+@media (max-width: 640px) {
+  .summaryWrap {
+    border: none;
+    border-radius: 0;
+    background: none;
+    overflow: visible;
+  }
+  .summary {
+    display: block;
+    min-width: 0;
+    font-size: 0.95rem;
+  }
+  .summary thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .summary tbody {
+    display: block;
+  }
+  .summary tbody tr {
+    display: block;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: var(--space-3);
+  }
+  .summary tbody tr:last-child {
+    margin-bottom: 0;
+  }
+  .summary tbody th {
+    display: block;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-text);
+    white-space: normal;
+  }
+  .summary td {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    text-align: right;
+  }
+  .summary tbody tr td:last-child {
+    border-bottom: none;
+  }
+  .summary td::before {
+    content: attr(data-label);
+    text-align: left;
+    color: var(--color-text-muted);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  /* The points column keeps its emphasis but drops the full-cell background
+   * (which would look like a stripe in the stacked layout). */
+  .summary td.ptsCol {
+    background: none;
+  }
+}
+
 /* Age band cards */
 .bands {
   list-style: none;

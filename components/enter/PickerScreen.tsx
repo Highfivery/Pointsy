@@ -5,8 +5,9 @@ import styles from "./enter.module.css";
 
 /**
  * The profile-picker screen shared by the home page (for a device that already
- * knows its family) and /enter. A branded card centres the flow; KidLogin
- * renders the step-appropriate heading, which the section is labelled by.
+ * knows its family) and /enter. A plain centred column (matching the auth form
+ * pages) holds the flow; KidLogin renders the step-appropriate heading, which
+ * the section is labelled by.
  */
 export function PickerScreen({
   initialFamily,
@@ -15,7 +16,6 @@ export function PickerScreen({
 }) {
   return (
     <main id="main" className={styles.main}>
-      <div className={styles.glow} aria-hidden="true" />
       <div className={styles.brand}>
         <Logo size={34} />
       </div>

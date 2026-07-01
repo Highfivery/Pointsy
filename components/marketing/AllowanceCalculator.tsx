@@ -129,10 +129,10 @@ export function AllowanceCalculator() {
             {BANDS.map((b) => (
               <tr key={b.label}>
                 <th scope="row">{b.label}</th>
-                <td>
+                <td data-label="Typical / week">
                   {money(b.low)}–{money(b.high)}
                 </td>
-                <td className={a.pointsCol}>
+                <td className={a.pointsCol} data-label="As points">
                   {b.low * POINTS_PER_DOLLAR}–{b.high * POINTS_PER_DOLLAR} pts
                 </td>
               </tr>

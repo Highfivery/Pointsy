@@ -259,8 +259,8 @@ export default function TokenEconomyPage() {
                           <span className={t.tag}>{row.tag}</span>
                         ) : null}
                       </th>
-                      <td>{row.bestFor}</td>
-                      <td>{row.catch}</td>
+                      <td data-label="Best for">{row.bestFor}</td>
+                      <td data-label="The catch">{row.catch}</td>
                     </tr>
                   ))}
                 </tbody>

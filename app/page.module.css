@@ -357,6 +357,84 @@
   border-bottom: none;
 }
 
+/* On phones the multi-column table becomes one card per row: the row label is a
+ * small header and each column is a labelled line — no cramped columns, no
+ * horizontal scroll. (Shared pattern used by every table across the site.) */
+@media (max-width: 640px) {
+  .compareWrap {
+    max-width: none;
+    border: none;
+    border-radius: 0;
+    background: none;
+    overflow: visible;
+  }
+  .compare {
+    display: block;
+    font-size: 0.95rem;
+  }
+  .compare thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .compare tbody {
+    display: block;
+  }
+  .compare tbody tr {
+    display: block;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: var(--space-3);
+  }
+  .compare tbody tr:last-child {
+    margin-bottom: 0;
+  }
+  .compare tbody th {
+    display: block;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+  }
+  .compare td {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    text-align: right;
+  }
+  .compare tbody tr td:last-child {
+    border-bottom: none;
+  }
+  .compare td::before {
+    content: attr(data-label);
+    text-align: left;
+    color: var(--color-text-muted);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .compare td.colHi {
+    background: rgba(52, 211, 153, 0.06);
+  }
+  .compare td.colHi::before {
+    color: var(--color-primary);
+  }
+}
+
 /* ----------------------------------------------------------- features --- */
 .features {
   list-style: none;
@@ -674,23 +752,38 @@
   }
 }
 
+/* Phone-width: stack the hero CTAs full-width (no awkward wrapping), centre the
+ * phone cluster, and hide the decorative split screenshots (they read as
+ * out-of-place floating images on a narrow screen — the copy carries it). */
+@media (max-width: 600px) {
+  .actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .primary,
+  .secondary {
+    width: 100%;
+  }
+  .phones {
+    min-height: 460px;
+  }
+  .phoneBack {
+    left: 50%;
+    transform: translateX(-50%) rotate(-7deg) scale(0.9);
+  }
+  .splitMedia {
+    display: none;
+  }
+}
+
 @media (max-width: 480px) {
   .phone {
     width: 212px;
-  }
-  .phoneBack {
-    left: 0;
   }
   .showcase {
     grid-template-columns: 1fr;
     max-width: 22rem;
     margin: 0 auto;
-  }
-  .actions {
-    width: 100%;
-  }
-  .primary,
-  .secondary {
-    flex: 1;
   }
 }
