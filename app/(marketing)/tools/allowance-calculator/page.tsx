@@ -125,7 +125,10 @@ export default function AllowanceCalculatorPage() {
             </ul>
           </section>
 
-          <section className={cmp.section} aria-labelledby="allowance-faq-h">
+          <section
+            className={`${cmp.section} ${cmp.faqBlock}`}
+            aria-labelledby="allowance-faq-h"
+          >
             <h2 className={cmp.h2} id="allowance-faq-h">
               Common questions
             </h2>

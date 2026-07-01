@@ -11,8 +11,10 @@
   width: 100%;
   max-width: 70rem;
   margin: 0 auto;
-  padding-left: var(--space-4);
-  padding-right: var(--space-4);
+  /* Guaranteed side gutter that scales up on wider screens, so content never
+   * runs to the edge at in-between viewport widths. */
+  padding-left: clamp(1rem, 4vw, 2rem);
+  padding-right: clamp(1rem, 4vw, 2rem);
 }
 
 .block {
@@ -504,9 +506,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  /* Override shared .block side padding with a roomier card padding. */
   padding: var(--space-8);
-  max-width: 64rem;
+  /* A filled card draws to its own edge, so guarantee a gutter and align the
+   * card edge with the inset content in the transparent blocks above (~66rem). */
+  max-width: none;
+  width: min(66rem, 100% - clamp(2rem, 8vw, 4rem));
 }
 
 .privacyGrid {
@@ -602,6 +606,9 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-4);
+  /* Filled card — guarantee a gutter and align with the content above. */
+  max-width: none;
+  width: min(66rem, 100% - clamp(2rem, 8vw, 4rem));
 }
 
 .ctaFinal .actions {

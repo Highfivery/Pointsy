@@ -23,7 +23,7 @@ export const ROWS: { key: RowKey; label: string; pointsy: string }[] = [
   { key: "price", label: "Monthly price", pointsy: "Free" },
   { key: "freeTier", label: "Free tier", pointsy: "Yes — everything" },
   { key: "earn", label: "What kids earn", pointsy: "Points & rewards you set" },
-  { key: "card", label: "Debit card", pointsy: "None" },
+  { key: "card", label: "Credit card", pointsy: "None" },
   { key: "bank", label: "Bank account / ID", pointsy: "Never needed" },
   { key: "age", label: "Minimum age", pointsy: "Any age" },
   {
@@ -128,16 +128,16 @@ export const COMPARISONS: Record<string, Comparison> = {
     slug: "greenlight",
     providers: ["greenlight", "acornsEarly"],
     shortName: "Greenlight & Acorns Early",
-    metaTitle: "Free Greenlight & Acorns Early Alternative (No Debit Card)",
+    metaTitle: "Free Greenlight & Acorns Early Alternative (No Credit Card)",
     metaDescription:
-      "Pointsy is a free, points-based alternative to Greenlight and Acorns Early — no debit card, no bank account, no monthly fee. Compare features for 2026.",
+      "Pointsy is a free, points-based alternative to Greenlight and Acorns Early — no credit card, no bank account, no monthly fee. Compare features for 2026.",
     h1: {
       lead: "A free",
       highlight: "Greenlight & Acorns Early",
-      tail: "alternative — with no debit card",
+      tail: "alternative — with no credit card",
     },
-    lede: "Want to reward chores without a monthly fee or a kids' debit card? Pointsy is a free, points-based alternative to Greenlight and Acorns Early (formerly GoHenry). Kids earn points and redeem them for rewards you choose — no real money, no bank account, no app-store download.",
-    tldr: "Greenlight (from $5.99/mo) and Acorns Early (from $8/mo) are paid debit-card apps that teach kids about real money. Pointsy is free and uses points instead — best if you just want a chore-and-reward system without a card, a bank account, or a subscription.",
+    lede: "Want to reward chores without a monthly fee or a kids' credit card? Pointsy is a free, points-based alternative to Greenlight and Acorns Early (formerly GoHenry). Kids earn points and redeem them for rewards you choose — no real money, no bank account, no app-store download.",
+    tldr: "Greenlight (from $5.99/mo) and Acorns Early (from $8/mo) are paid credit-card apps that teach kids about real money. Pointsy is free and uses points instead — best if you just want a chore-and-reward system without a card, a bank account, or a subscription.",
     painPoints: [
       {
         title: "The monthly fee adds up",
@@ -145,7 +145,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       },
       {
         title: "You may not want a card for a young kid",
-        text: "Debit-card apps require a bank link and ID checks, and usually start at age 6. Points work at any age.",
+        text: "Credit-card apps require a bank link and ID checks, and usually start at age 6. Points work at any age.",
       },
       {
         title: "Money isn't the only reward",
@@ -166,7 +166,7 @@ export const COMPARISONS: Record<string, Comparison> = {
         a: "Yes — every feature, for every family, with no subscription and no ads. It's open-source, which is also why it stays free.",
       },
       {
-        q: "Does Pointsy give kids a debit card?",
+        q: "Does Pointsy give kids a credit card?",
         a: "No. There's no card and no real money — kids earn points and redeem them for rewards you set. There's no bank account or ID to provide.",
       },
       {

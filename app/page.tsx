@@ -135,7 +135,7 @@ const FAQ = [
     a: "Yes — 100% free, every feature, for every family. No ads, no subscriptions, nothing to buy. Pointsy is open-source, so it always will be.",
   },
   {
-    q: "Does it use real money or a debit card?",
+    q: "Does it use real money or a credit card?",
     a: "No. Pointsy uses points, not dollars — there’s no card, no bank link, and no money moving anywhere. You decide what points are worth and which rewards they buy.",
   },
   {
@@ -221,7 +221,7 @@ export default async function Home() {
             </h1>
             <p className={styles.lede}>
               Pointsy turns everyday chores into points your kids earn and spend
-              on rewards <em>you</em> choose. No allowance to fund, no debit
+              on rewards <em>you</em> choose. No allowance to fund, no credit
               card, no app to download — just good habits, made fun.
             </p>
             <div className={styles.actions}>
@@ -273,7 +273,7 @@ export default async function Home() {
           </li>
           <li>
             <CreditCard size={18} aria-hidden="true" />
-            No debit card or real money
+            No credit card or real money
           </li>
           <li>
             <ShieldCheck size={18} aria-hidden="true" />
@@ -325,7 +325,7 @@ export default async function Home() {
             </h2>
             <p className={styles.lead}>
               Most “kids money” apps charge a monthly fee and hand your child a
-              debit card. Pointsy uses points — so there’s nothing to fund,
+              credit card. Pointsy uses points — so there’s nothing to fund,
               nothing to lose, and nothing to sell.
             </p>
           </div>
@@ -339,7 +339,7 @@ export default async function Home() {
                   <th scope="col" className={styles.colHi}>
                     Pointsy
                   </th>
-                  <th scope="col">Debit-card apps</th>
+                  <th scope="col">Credit-card apps</th>
                 </tr>
               </thead>
               <tbody>

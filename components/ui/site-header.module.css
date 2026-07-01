@@ -31,7 +31,7 @@
 .nav {
   display: flex;
   align-items: center;
-  gap: var(--space-6);
+  gap: var(--space-5);
 }
 
 .navLink {
@@ -39,6 +39,7 @@
   font-weight: 500;
   font-size: 0.95rem;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .navLink:hover {
@@ -57,6 +58,7 @@
   font-size: 0.95rem;
   text-decoration: none;
   padding: var(--space-2);
+  white-space: nowrap;
 }
 
 .signIn:hover {
@@ -137,7 +139,7 @@
   text-decoration: none;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 960px) {
   .nav,
   .actions {
     display: none;

@@ -1,7 +1,4 @@
 /* Mission */
-.mission {
-  max-width: 46rem;
-}
 .mission p {
   color: var(--color-text-muted);
   font-size: 1.06rem;
@@ -110,7 +107,6 @@
 }
 .promiseText {
   color: var(--color-text-muted);
-  max-width: 44rem;
   margin-top: var(--space-2);
 }
 .plist {

@@ -17,7 +17,7 @@ const REPO = "https://github.com/Highfivery/Pointsy";
 export const metadata: Metadata = {
   title: "About Pointsy — free, private chore rewards for families",
   description:
-    "Pointsy is a free, open-source, privacy-first app that turns chores into points kids redeem for rewards — no subscription, no debit card, no data selling. Made by Highfivery LLC.",
+    "Pointsy is a free, open-source, privacy-first app that turns chores into points kids redeem for rewards — no subscription, no credit card, no data selling. Made by Highfivery LLC.",
   alternates: { canonical: "/about" },
 };
 
@@ -92,7 +92,7 @@ export default function AboutPage() {
             <p className={cmp.lede}>
               Pointsy is a small, independent app with one job: help families
               turn chores into points kids actually want to earn — without a
-              subscription, a debit card, or your data.
+              subscription, a credit card, or your data.
             </p>
           </header>
 
@@ -104,7 +104,7 @@ export default function AboutPage() {
               </h2>
               <p>
                 We kept running into the same thing: every “kids money” app
-                wanted a monthly fee, a bank link, and a debit card — just to
+                wanted a monthly fee, a bank link, and a credit card — just to
                 reward a few chores around the house. For a lot of families,
                 that’s far more than they need, and more of their kids’ data
                 than they’re comfortable handing over.
