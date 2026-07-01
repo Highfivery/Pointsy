@@ -56,6 +56,11 @@ export function SiteFooter() {
                 <Link href="/tools/reward-calculator">Reward calculator</Link>
               </li>
               <li>
+                <Link href="/tools/allowance-calculator">
+                  Allowance calculator
+                </Link>
+              </li>
+              <li>
                 <Link href="/compare">Compare apps</Link>
               </li>
               <li>
