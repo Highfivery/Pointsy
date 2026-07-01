@@ -344,7 +344,10 @@ export default function TokenEconomyPage() {
           </section>
 
           {/* FAQ */}
-          <section className={cmp.section} aria-labelledby="token-faq-h">
+          <section
+            className={`${cmp.section} ${cmp.faqBlock}`}
+            aria-labelledby="token-faq-h"
+          >
             <h2 className={cmp.h2} id="token-faq-h">
               Common questions
             </h2>

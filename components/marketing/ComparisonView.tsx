@@ -117,7 +117,7 @@ export function ComparisonView({ data }: { data: Comparison }) {
           <Scale size={22} aria-hidden="true" className={styles.balanceIcon} />
           <div>
             <h2 className={styles.balanceTitle} id="balance-h">
-              When a debit-card app is the better choice
+              When a credit-card app is the better choice
             </h2>
             {data.balance.map((para, i) => (
               <p key={i}>{para}</p>
@@ -126,7 +126,10 @@ export function ComparisonView({ data }: { data: Comparison }) {
         </section>
 
         {/* FAQ */}
-        <section className={styles.section} aria-labelledby="faq-h">
+        <section
+          className={`${styles.section} ${styles.faqBlock}`}
+          aria-labelledby="faq-h"
+        >
           <h2 className={styles.h2} id="faq-h">
             Frequently asked
           </h2>

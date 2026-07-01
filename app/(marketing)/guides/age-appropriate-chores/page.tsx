@@ -283,7 +283,10 @@ export default function ChoresByAgePage() {
           </section>
 
           {/* FAQ */}
-          <section className={cmp.section} aria-labelledby="guide-faq-h">
+          <section
+            className={`${cmp.section} ${cmp.faqBlock}`}
+            aria-labelledby="guide-faq-h"
+          >
             <h2 className={cmp.h2} id="guide-faq-h">
               Common questions
             </h2>

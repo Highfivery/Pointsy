@@ -12,9 +12,9 @@ import styles from "@/components/marketing/comparison.module.css";
 const SITE_URL = "https://pointsy.kids";
 
 export const metadata: Metadata = {
-  title: "Best Free Chore & Reward Apps With No Debit Card (2026)",
+  title: "Best Free Chore & Reward Apps With No Credit Card (2026)",
   description:
-    "Compare Pointsy with Greenlight, Acorns Early, BusyKid and FamZoo. The free, points-based, no-debit-card way to reward kids for chores — side by side.",
+    "Compare Pointsy with Greenlight, Acorns Early, BusyKid and FamZoo. The free, points-based, no-credit-card way to reward kids for chores — side by side.",
   alternates: { canonical: "/compare" },
 };
 
@@ -31,8 +31,8 @@ const HUB_PROVIDERS = ["greenlight", "acornsEarly", "busykid", "famzoo"];
 
 const HUB_FAQ = [
   {
-    q: "What's the best free chore app with no debit card?",
-    a: "Pointsy is a free, points-based chore and reward app with no debit card, no bank account and no subscription. Kids earn points for chores and redeem them for rewards you set. Most alternatives (Greenlight, Acorns Early, BusyKid, FamZoo) are paid apps built around a real-money card.",
+    q: "What's the best free chore app with no credit card?",
+    a: "Pointsy is a free, points-based chore and reward app with no credit card, no bank account and no subscription. Kids earn points for chores and redeem them for rewards you set. Most alternatives (Greenlight, Acorns Early, BusyKid, FamZoo) are paid apps built around a real-money card.",
   },
   {
     q: "Why use points instead of real money?",
@@ -94,14 +94,14 @@ export default function CompareHub() {
             <p className={styles.eyebrow}>Compare · 2026</p>
             <h1 className={styles.h1}>
               The best free chore &amp; reward apps with{" "}
-              <span className={styles.grad}>no debit card</span>
+              <span className={styles.grad}>no credit card</span>
             </h1>
             <p className={styles.lede}>
               Most popular kids&rsquo; chore apps are paid services built around
-              a real-money debit card. Pointsy is the free, points-based option:
-              kids earn points for chores and redeem them for rewards you set —
-              with no card, no bank account, and no app-store download.
-              Here&rsquo;s how it compares.
+              a real-money credit card. Pointsy is the free, points-based
+              option: kids earn points for chores and redeem them for rewards
+              you set — with no card, no bank account, and no app-store
+              download. Here&rsquo;s how it compares.
             </p>
           </header>
 
@@ -170,7 +170,10 @@ export default function CompareHub() {
             </ul>
           </section>
 
-          <section className={styles.section} aria-labelledby="hub-faq-h">
+          <section
+            className={`${styles.section} ${styles.faqBlock}`}
+            aria-labelledby="hub-faq-h"
+          >
             <h2 className={styles.h2} id="hub-faq-h">
               Frequently asked
             </h2>

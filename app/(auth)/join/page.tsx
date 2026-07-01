@@ -3,7 +3,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { JoinForm } from "@/components/parents/JoinForm";
-import { Logo } from "@/components/brand/Logo";
 import styles from "../auth.module.css";
 
 export const metadata: Metadata = {
@@ -22,7 +21,6 @@ export default async function JoinPage() {
     <main id="main" className={styles.main}>
       <section className={styles.card} aria-labelledby="join-title">
         <div className={styles.intro}>
-          <Logo size={28} />
           <h1 id="join-title" className={styles.title}>
             Join a family
           </h1>

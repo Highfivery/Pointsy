@@ -126,7 +126,10 @@ export default function RewardCalculatorPage() {
             </ul>
           </section>
 
-          <section className={cmp.section} aria-labelledby="calc-faq-h">
+          <section
+            className={`${cmp.section} ${cmp.faqBlock}`}
+            aria-labelledby="calc-faq-h"
+          >
             <h2 className={cmp.h2} id="calc-faq-h">
               Common questions
             </h2>

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SignUpForm } from "@/components/auth/SignUpForm";
-import { Logo } from "@/components/brand/Logo";
 import styles from "../auth.module.css";
 
 export const metadata: Metadata = {
@@ -16,7 +15,6 @@ export default function SignUpPage() {
     <main id="main" className={styles.main}>
       <section className={styles.card} aria-labelledby="signup-title">
         <div className={styles.intro}>
-          <Logo size={28} />
           <h1 id="signup-title" className={styles.title}>
             Create your family
           </h1>
