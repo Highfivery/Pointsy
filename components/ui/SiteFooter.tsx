@@ -106,6 +106,9 @@ export function SiteFooter() {
             <h2 className={styles.colHead}>Company</h2>
             <ul>
               <li>
+                <Link href="/about">About</Link>
+              </li>
+              <li>
                 <Link href="/privacy">Privacy Policy</Link>
               </li>
               <li>
