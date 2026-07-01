@@ -1,0 +1,214 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+/* Section lead under an h2 */
+.sectionLead {
+  margin-top: calc(-1 * var(--space-3));
+  margin-bottom: var(--space-5);
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+  max-width: 46rem;
+}
+
+/* Summary table */
+.summaryWrap {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--color-surface);
+}
+
+.summary {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  font-size: 0.96rem;
+}
+
+.summary th,
+.summary td {
+  padding: var(--space-4);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.summary thead th {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.summary thead th.ptsCol {
+  color: var(--color-primary);
+}
+
+.summary tbody th {
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.summary td {
+  color: var(--color-text-muted);
+}
+
+.summary td.ptsCol {
+  color: var(--color-primary);
+  font-weight: 600;
+  background: rgba(52, 211, 153, 0.06);
+  white-space: nowrap;
+}
+
+.summary tr:last-child th,
+.summary tr:last-child td {
+  border-bottom: none;
+}
+
+/* Age band cards */
+.bands {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+.band {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+
+.bandTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-1);
+}
+
+.bandAge {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: var(--color-text);
+}
+
+.bandPts {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-primary-weak);
+  border: 1px solid rgba(52, 211, 153, 0.22);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.bandNote {
+  color: var(--color-text-faint);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-4);
+}
+
+.bandList {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2) var(--space-4);
+}
+
+.bandList li {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  color: var(--color-text-muted);
+  font-size: 0.93rem;
+}
+
+.bandList li svg {
+  color: var(--color-primary);
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+/* Tie-in block */
+.tiein {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: var(--space-8);
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+}
+
+.tieinTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.tieinText {
+  margin-top: var(--space-3);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.tieinLinks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.tieinLink {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.tieinLink svg {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tieinLink:hover {
+    border-color: var(--color-primary);
+  }
+}
+
+@media (max-width: 820px) {
+  .bands {
+    grid-template-columns: 1fr;
+  }
+  .bandList {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .tiein {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+    padding: var(--space-6);
+  }
+}

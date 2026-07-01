@@ -61,6 +61,9 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
+                <Link href="/guides/age-appropriate-chores">Chores by age</Link>
+              </li>
+              <li>
                 <Link href="/compare">Compare apps</Link>
               </li>
               <li>
