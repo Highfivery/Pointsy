@@ -1,0 +1,80 @@
+.byAgeHead {
+  margin-top: var(--space-8);
+}
+
+.byAgeTitle {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.byAgeLead {
+  margin-top: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+  max-width: 44rem;
+}
+
+.tableScroll {
+  margin-top: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--color-surface);
+}
+
+.table {
+  width: 100%;
+  min-width: 420px;
+  border-collapse: collapse;
+  font-size: 0.98rem;
+}
+
+.table th,
+.table td {
+  padding: var(--space-4);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.table thead th {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.table tbody th {
+  font-weight: 600;
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+.table td {
+  color: var(--color-text-muted);
+}
+
+.pointsCol {
+  background: rgba(52, 211, 153, 0.06);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.table tbody td.pointsCol {
+  color: var(--color-primary);
+}
+
+.table tr:last-child th,
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.note {
+  margin-top: var(--space-3);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--color-text-faint);
+  max-width: 46rem;
+}

@@ -10,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const marketing = [
     "/compare",
     "/tools/reward-calculator",
+    "/tools/allowance-calculator",
     ...COMPARISON_SLUGS.map((slug) => `/compare/${slug}`),
   ];
 
