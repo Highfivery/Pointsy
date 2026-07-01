@@ -86,6 +86,15 @@ const ORG_LD = {
   url: SITE_URL,
   logo: `${SITE_URL}/icons/icon-512.png`,
   description: DESCRIPTION,
+  email: "info@highfivery.com",
+  address: {
+    "@type": "PostalAddress",
+    addressRegion: "TX",
+    addressCountry: "US",
+  },
+  // The canonical "about" page for this entity.
+  mainEntityOfPage: `${SITE_URL}/about`,
+  // Add LinkedIn / Crunchbase / Product Hunt / Wikidata here once those exist.
   sameAs: ["https://highfivery.com", "https://github.com/Highfivery/Pointsy"],
 };
 

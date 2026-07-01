@@ -6,7 +6,15 @@ const SITE_URL = "https://pointsy.kids";
 /** The public, indexable pages. Authenticated app routes are intentionally
  * excluded (see robots.ts). */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const core = ["", "/sign-up", "/sign-in", "/join", "/privacy", "/terms"];
+  const core = [
+    "",
+    "/about",
+    "/sign-up",
+    "/sign-in",
+    "/join",
+    "/privacy",
+    "/terms",
+  ];
   const marketing = [
     "/compare",
     "/tools/reward-calculator",
