@@ -12,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/tools/reward-calculator",
     "/tools/allowance-calculator",
     "/guides/age-appropriate-chores",
+    "/guides/token-economy-for-kids",
     ...COMPARISON_SLUGS.map((slug) => `/compare/${slug}`),
   ];
 
