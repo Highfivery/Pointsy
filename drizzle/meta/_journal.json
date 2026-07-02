@@ -148,6 +148,13 @@
       "when": 1782840815054,
       "tag": "0020_chore_limit_scope",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1782961372134,
+      "tag": "0021_put_back_chore",
+      "breakpoints": true
     }
   ]
 }

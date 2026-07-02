@@ -1,6 +1,20 @@
-import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  getTableColumns,
+  isNotNull,
+  isNull,
+  sql,
+} from "drizzle-orm";
 import type { Database } from "@/lib/db/types";
-import { ledger, chores, people, type LedgerEntry } from "@/lib/db/schema";
+import {
+  ledger,
+  chores,
+  choreSubmissions,
+  people,
+  type LedgerEntry,
+} from "@/lib/db/schema";
 import { getPersonById } from "@/lib/db/queries";
 import { addDays, localDate } from "@/lib/timezone";
 import { advanceRotationIfDone } from "@/lib/chores/assignment";
@@ -12,7 +26,28 @@ import { advanceRotationIfDone } from "@/lib/chores/assignment";
  * are scoped by `familyId`.
  */
 
-class NotFoundError extends Error {}
+export class NotFoundError extends Error {}
+
+/** A parent tried to put back an entry that was already put back. */
+export class AlreadyReversedError extends Error {
+  constructor() {
+    super("That entry was already put back.");
+    this.name = "AlreadyReversedError";
+  }
+}
+
+/**
+ * SQL predicate: this ledger row has not been put back (no `adjust` row points
+ * at it via `reverses_id`). Earned rows that fail this are excluded from
+ * streaks and challenge progress — the reversal is what "un-counts" them
+ * without ever touching the original row.
+ */
+export function notReversed() {
+  // `${ledger}.id` (not `${ledger.id}`) — in a join-free query drizzle renders
+  // column refs unqualified, and inside the subquery a bare "id" would resolve
+  // to `r` instead of the outer row.
+  return sql`not exists (select 1 from ${ledger} r where r.reverses_id = ${ledger}.id)`;
+}
 
 async function assertKid(db: Database, familyId: string, kidId: string) {
   const kid = await getPersonById(db, familyId, kidId);
@@ -106,6 +141,85 @@ export async function adjustPoints(
   return row;
 }
 
+export interface UndoneEarn {
+  kidId: string;
+  /** The original earn amount that was taken back. */
+  amount: number;
+  reason: string;
+  choreId: string | null;
+}
+
+/**
+ * Put back an earned entry (issue #145). The ledger stays append-only: the
+ * earn row is untouched and a linked negative `adjust` row reverses it. If the
+ * earn paid out a kid's submission, that submission flips to `reversed`, so the
+ * chore shows as not complete and stops counting toward daily goals, claim
+ * limits, and challenges until it's completed and approved again.
+ */
+export async function undoEarn(
+  db: Database,
+  familyId: string,
+  entryId: string,
+  undoneBy: string,
+  now: Date = new Date(),
+): Promise<UndoneEarn> {
+  return db.transaction(async (tx) => {
+    const [entry] = await tx
+      .select()
+      .from(ledger)
+      .where(
+        and(
+          eq(ledger.familyId, familyId),
+          eq(ledger.id, entryId),
+          eq(ledger.type, "earn"),
+        ),
+      )
+      .limit(1)
+      // Serialise concurrent undos of the same entry (two parents racing).
+      .for("update");
+    if (!entry) throw new NotFoundError("Entry not found");
+
+    const [existing] = await tx
+      .select({ id: ledger.id })
+      .from(ledger)
+      .where(eq(ledger.reversesId, entry.id))
+      .limit(1);
+    if (existing) throw new AlreadyReversedError();
+
+    await tx.insert(ledger).values({
+      familyId,
+      personId: entry.personId,
+      amount: -entry.amount,
+      type: "adjust",
+      reason: `Put back: ${entry.reason}`,
+      choreId: entry.choreId,
+      submissionId: entry.submissionId,
+      reversesId: entry.id,
+      createdBy: undoneBy,
+    });
+
+    if (entry.submissionId) {
+      await tx
+        .update(choreSubmissions)
+        .set({ status: "reversed", decidedBy: undoneBy, decidedAt: now })
+        .where(
+          and(
+            eq(choreSubmissions.id, entry.submissionId),
+            eq(choreSubmissions.familyId, familyId),
+            eq(choreSubmissions.status, "approved"),
+          ),
+        );
+    }
+
+    return {
+      kidId: entry.personId,
+      amount: entry.amount,
+      reason: entry.reason,
+      choreId: entry.choreId,
+    };
+  });
+}
+
 export type PointsDirection = "award" | "deduct";
 
 /**
@@ -184,9 +298,18 @@ export interface ActivityEntry {
   reason: string;
   createdAt: Date;
   kidName: string;
+  /** A put-back earn — shown struck through, its reversal row is hidden. */
+  reversed: boolean;
 }
 
-/** Family-wide recent activity (most recent first). */
+/** True when an `adjust` row has put this entry back. Qualified the same way
+ *  as {@link notReversed} so it's correct with or without a join. */
+function reversedFlag() {
+  return sql<boolean>`exists (select 1 from ${ledger} r where r.reverses_id = ${ledger}.id)`;
+}
+
+/** Family-wide recent activity (most recent first). Reversal rows are hidden —
+ *  the put-back earn itself carries the `reversed` flag instead. */
 export async function listFamilyActivity(
   db: Database,
   familyId: string,
@@ -200,10 +323,11 @@ export async function listFamilyActivity(
       reason: ledger.reason,
       createdAt: ledger.createdAt,
       kidName: people.name,
+      reversed: reversedFlag(),
     })
     .from(ledger)
     .innerJoin(people, eq(people.id, ledger.personId))
-    .where(eq(ledger.familyId, familyId))
+    .where(and(eq(ledger.familyId, familyId), isNull(ledger.reversesId)))
     .orderBy(desc(ledger.createdAt))
     .limit(limit);
 }
@@ -227,6 +351,7 @@ export async function mostUsedChoreIds(
         eq(ledger.personId, kidId),
         eq(ledger.type, "earn"),
         isNotNull(ledger.choreId),
+        notReversed(),
       ),
     )
     .groupBy(ledger.choreId)
@@ -254,6 +379,7 @@ export async function getStreak(
         eq(ledger.familyId, familyId),
         eq(ledger.personId, kidId),
         eq(ledger.type, "earn"),
+        notReversed(),
       ),
     );
   if (rows.length === 0) return 0;
@@ -271,17 +397,29 @@ export async function getStreak(
   return streak;
 }
 
-/** One kid's recent activity (most recent first). */
+export type KidActivityEntry = LedgerEntry & {
+  /** A put-back earn — shown struck through, its reversal row is hidden. */
+  reversed: boolean;
+};
+
+/** One kid's recent activity (most recent first). Reversal rows are hidden —
+ *  the put-back earn itself carries the `reversed` flag instead. */
 export async function listKidActivity(
   db: Database,
   familyId: string,
   kidId: string,
   limit = 30,
-): Promise<LedgerEntry[]> {
+): Promise<KidActivityEntry[]> {
   return db
-    .select()
+    .select({ ...getTableColumns(ledger), reversed: reversedFlag() })
     .from(ledger)
-    .where(and(eq(ledger.familyId, familyId), eq(ledger.personId, kidId)))
+    .where(
+      and(
+        eq(ledger.familyId, familyId),
+        eq(ledger.personId, kidId),
+        isNull(ledger.reversesId),
+      ),
+    )
     .orderBy(desc(ledger.createdAt))
     .limit(limit);
 }

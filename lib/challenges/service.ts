@@ -14,6 +14,7 @@ import {
 } from "@/lib/db/schema";
 import { localDate, weekStart, addDays } from "@/lib/timezone";
 import { listSubmittableChores } from "@/lib/submissions/service";
+import { notReversed } from "@/lib/points/service";
 
 /**
  * Challenges: time-boxed goals a parent sets. Progress is derived (never stored)
@@ -200,6 +201,7 @@ async function earnedPoints(
         inArray(ledger.personId, kidIds),
         eq(ledger.type, "earn"),
         gt(ledger.amount, 0),
+        notReversed(),
       ),
     );
   let sum = 0;

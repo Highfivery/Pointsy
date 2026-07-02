@@ -288,6 +288,11 @@ export const decideRedemptionSchema = z.object({
   note: z.string().trim().max(280).optional(),
 });
 
+/** Put back an earned ledger entry from the activity feed. */
+export const undoEarnSchema = z.object({
+  entryId: z.string().uuid(),
+});
+
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type SignInInput = z.infer<typeof signInSchema>;
 export type AddKidInput = z.infer<typeof addKidSchema>;

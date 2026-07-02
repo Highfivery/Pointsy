@@ -288,6 +288,8 @@ export default async function MePage() {
             amount: e.amount,
             reason: e.reason,
             createdAt: e.createdAt,
+            type: e.type,
+            reversed: e.reversed,
           }))}
         />
       </section>
