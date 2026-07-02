@@ -121,7 +121,10 @@ export default async function AwardPage({
             amount: e.amount,
             reason: e.reason,
             createdAt: e.createdAt,
+            type: e.type,
+            reversed: e.reversed,
           }))}
+          undoKidName={kid.name}
         />
       </section>
 

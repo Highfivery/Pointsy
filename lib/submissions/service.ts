@@ -541,6 +541,7 @@ export async function decideSubmission(
         type: "earn",
         reason: s.choreName,
         choreId: s.choreId,
+        submissionId: s.id,
         createdBy: decidedBy,
       });
       if (s.choreId) {
@@ -603,7 +604,7 @@ export interface KidSubmission {
   id: string;
   choreName: string;
   points: number;
-  status: "pending" | "approved" | "rejected" | "cancelled";
+  status: "pending" | "approved" | "rejected" | "cancelled" | "reversed";
   createdAt: Date;
 }
 

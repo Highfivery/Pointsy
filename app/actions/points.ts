@@ -4,8 +4,14 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getDb } from "@/lib/db/client";
 import { requireParent } from "@/lib/auth/session";
-import { awardChore, changePoints } from "@/lib/points/service";
-import { changePointsSchema } from "@/lib/validation/schemas";
+import {
+  awardChore,
+  changePoints,
+  undoEarn,
+  AlreadyReversedError,
+  NotFoundError,
+} from "@/lib/points/service";
+import { changePointsSchema, undoEarnSchema } from "@/lib/validation/schemas";
 import { toFieldErrors, type FormState } from "@/lib/validation/form";
 import { notifyPerson } from "@/lib/push/send";
 import { getFamilyTimezone } from "@/lib/family/settings";
@@ -112,4 +118,41 @@ export async function changePointsAction(
   }
   revalidateFor(kidId);
   return { ok: true, direction };
+}
+
+/**
+ * Put back an earned entry from the activity feed (issue #145). Reverses the
+ * points with a linked `adjust` row and flips the originating submission, so
+ * the chore reads as not complete until it's done and approved again.
+ */
+export async function undoEarnAction(formData: FormData): Promise<void> {
+  const session = await requireParent();
+  const parsed = undoEarnSchema.safeParse({ entryId: formData.get("entryId") });
+  if (!parsed.success) return;
+
+  let undone;
+  try {
+    undone = await undoEarn(
+      getDb(),
+      session.familyId,
+      parsed.data.entryId,
+      session.personId,
+    );
+  } catch (err) {
+    // Already put back (or gone): the screen is just stale — refresh it.
+    if (err instanceof AlreadyReversedError || err instanceof NotFoundError) {
+      revalidatePath("/dashboard");
+      return;
+    }
+    throw err;
+  }
+
+  await notifyPerson(getDb(), session.familyId, undone.kidId, {
+    title: undone.choreId ? "A chore was put back" : "Points were put back",
+    body: undone.choreId
+      ? `−${undone.amount} · ${undone.reason} needs doing again`
+      : `−${undone.amount} · ${undone.reason}`,
+    url: "/me",
+  });
+  revalidateFor(undone.kidId);
 }

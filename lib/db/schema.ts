@@ -8,6 +8,7 @@
  *    `adjust` rows — ledger rows are never updated or deleted.
  *  - Points are integers and may be negative (balances are not floored).
  */
+import { sql } from "drizzle-orm";
 import {
   pgEnum,
   pgTable,
@@ -69,6 +70,8 @@ export const submissionStatusEnum = pgEnum("submission_status", [
   "approved",
   "rejected",
   "cancelled",
+  /** Approved, then put back by a parent — the earn was reversed. */
+  "reversed",
 ]);
 /** Who a chore is for. "rotating" takes turns among its assignees. */
 export const choreAssignmentEnum = pgEnum("chore_assignment", [
@@ -454,6 +457,16 @@ export const ledger = pgTable(
     redemptionId: uuid("redemption_id").references(() => redemptions.id, {
       onDelete: "set null",
     }),
+    /** The approved submission this earn paid out (undo flips it back). */
+    submissionId: uuid("submission_id").references(
+      (): AnyPgColumn => choreSubmissions.id,
+      { onDelete: "set null" },
+    ),
+    /** Set on the `adjust` row that puts back an earn: the row it reverses.
+        The earn row itself is never touched (ledger stays append-only). */
+    reversesId: uuid("reverses_id").references((): AnyPgColumn => ledger.id, {
+      onDelete: "set null",
+    }),
     /** The parent who awarded/approved this entry. */
     createdBy: uuid("created_by").references(() => people.id, {
       onDelete: "set null",
@@ -465,6 +478,10 @@ export const ledger = pgTable(
   (t) => [
     index("ledger_family_idx").on(t.familyId),
     index("ledger_person_idx").on(t.personId),
+    /** An earn can be reversed at most once, even under a race. */
+    uniqueIndex("ledger_reverses_unique")
+      .on(t.reversesId)
+      .where(sql`${t.reversesId} is not null`),
   ],
 );
 

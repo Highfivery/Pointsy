@@ -195,12 +195,21 @@
 .activityText {
   display: flex;
   flex-direction: column;
+  flex: 1;
   min-width: 0;
 }
 
 .activityReason {
   font-weight: 600;
   color: var(--color-text);
+}
+
+/* A put-back earn: struck through and muted — the meta line carries a visible
+   "Put back" label so the state never relies on decoration alone. */
+.activityReasonReversed {
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-decoration: line-through;
 }
 
 .activityMeta {
@@ -220,6 +229,40 @@
   font-size: 1.05rem;
   color: var(--color-danger);
   white-space: nowrap;
+}
+
+.amountReversed {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+  white-space: nowrap;
+}
+
+.undoBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.undoBtn:hover {
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+}
+
+/* Invisible stand-in for the put-back button on rows that don't get one, so
+   the amounts stay column-aligned down the feed. */
+.undoSpacer {
+  width: var(--tap-target);
+  flex-shrink: 0;
 }
 
 .empty {
