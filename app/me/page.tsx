@@ -11,6 +11,7 @@ import {
   listRedeemableRewards,
   getKidGoal,
   listKidAssignedRewards,
+  listKidRedemptions,
 } from "@/lib/redemptions/service";
 import { getFamilyTimezone } from "@/lib/family/settings";
 import { localDate, weekdayOf } from "@/lib/timezone";
@@ -23,6 +24,7 @@ import {
 } from "@/lib/submissions/service";
 import { listKidChallenges } from "@/lib/challenges/service";
 import { cancelSubmissionAction } from "@/app/actions/submissions";
+import { cancelRedemptionAction } from "@/app/actions/redemptions";
 import { IconByName } from "@/components/icons/registry";
 import { ActivityList } from "@/components/points/ActivityList";
 import { Celebration } from "@/components/me/Celebration";
@@ -61,6 +63,7 @@ export default async function MePage() {
     assignedRewards,
     submittable,
     challenges,
+    redemptions,
   ] = await Promise.all([
     getBalance(db, session.familyId, session.personId),
     getPendingPoints(db, session.familyId, session.personId),
@@ -72,9 +75,15 @@ export default async function MePage() {
     listKidAssignedRewards(db, session.familyId, session.personId),
     listSubmittableChores(db, session.familyId, session.personId, tz),
     listKidChallenges(db, session.familyId, session.personId, tz),
+    listKidRedemptions(db, session.familyId, session.personId, 20),
   ]);
   const waiting = submissions.filter((s) => s.status === "pending");
+  const pendingRewards = redemptions.filter((r) => r.status === "requested");
   const available = redeemable.available;
+  // Points earned but spoken for by pending reward requests (held until a parent
+  // approves or the request is cancelled). Explained in the balance card so the
+  // gap between total points and "to spend" is never a mystery.
+  const reserved = Math.max(0, balance - available);
 
   // Today's must-dos: core chores this kid is responsible for. A chore whose
   // logging window excludes today's weekday isn't due today at all; one that's
@@ -109,7 +118,9 @@ export default async function MePage() {
     (r) => !assignedIds.has(r.id),
   );
   const affordable = generalRewards
-    .filter((r) => r.affordable)
+    // A reward that's already requested lives in "Waiting for a grown-up", not
+    // the "get it now" shelf — otherwise it reads as still up for grabs.
+    .filter((r) => r.affordable && !r.pending)
     .map((r) => ({
       id: r.id,
       name: r.name,
@@ -162,8 +173,8 @@ export default async function MePage() {
         <p className={styles.muted}>
           {balance < 0
             ? `Earn ${-balance} to get back to zero!`
-            : available !== balance
-              ? `${available} available to spend`
+            : reserved > 0
+              ? `${available} to spend · ${reserved} on hold`
               : balance === 0
                 ? "Earn points for chores and good habits!"
                 : "Keep up the great work!"}
@@ -251,6 +262,36 @@ export default async function MePage() {
         affordable={affordable}
         nextUp={nextUp}
       />
+
+      {pendingRewards.length > 0 ? (
+        <section aria-labelledby="reward-waiting-heading">
+          <h2 id="reward-waiting-heading" className={styles.activityTitle}>
+            Waiting for a grown-up
+          </h2>
+          <ul className={styles.waitList}>
+            {pendingRewards.map((r) => (
+              <li key={r.id} className={styles.waitRow}>
+                <span className={styles.waitText}>
+                  <span className={styles.rewardWaitName}>{r.rewardName}</span>
+                  <span className={styles.rewardWaitMeta}>
+                    {r.cost} pts · on hold
+                  </span>
+                </span>
+                <form action={cancelRedemptionAction}>
+                  <input type="hidden" name="redemptionId" value={r.id} />
+                  <button
+                    type="submit"
+                    className={styles.cancelBtn}
+                    aria-label={`Cancel ${r.rewardName}`}
+                  >
+                    <X size={16} aria-hidden="true" />
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {waiting.length > 0 ? (
         <section aria-labelledby="waiting-heading">

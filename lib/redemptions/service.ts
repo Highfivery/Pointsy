@@ -27,6 +27,13 @@ export class InsufficientPointsError extends Error {
     this.name = "InsufficientPointsError";
   }
 }
+/** The kid already has this exact reward waiting for a parent's decision. */
+export class DuplicateRequestError extends Error {
+  constructor() {
+    super("You already asked for this — it's waiting for a grown-up.");
+    this.name = "DuplicateRequestError";
+  }
+}
 class NotFoundError extends Error {}
 class InvalidStateError extends Error {}
 
@@ -75,6 +82,36 @@ export async function getReserved(
   return (row?.reserved ?? 0) + (teamRow?.reserved ?? 0);
 }
 
+/**
+ * How many points the kid has reserved *per reward*, from their own still-pending
+ * (`requested`) solo redemptions. Used to reason about a specific goal reward:
+ * the points a kid has committed to reward R shouldn't count against their
+ * progress toward R (they've saved enough — it's just waiting for approval).
+ */
+async function reservedByReward(
+  db: Database,
+  familyId: string,
+  kidId: string,
+): Promise<Map<string, number>> {
+  const rows = await db
+    .select({
+      rewardId: redemptions.rewardId,
+      reserved: sql<number>`coalesce(sum(${redemptions.cost}), 0)::int`,
+    })
+    .from(redemptions)
+    .where(
+      and(
+        eq(redemptions.familyId, familyId),
+        eq(redemptions.personId, kidId),
+        eq(redemptions.status, "requested"),
+      ),
+    )
+    .groupBy(redemptions.rewardId);
+  const map = new Map<string, number>();
+  for (const r of rows) if (r.rewardId) map.set(r.rewardId, r.reserved);
+  return map;
+}
+
 /** Spendable points right now = balance − reserved. */
 export async function getAvailable(
   db: Database,
@@ -95,6 +132,13 @@ export async function requestRedemption(
 ): Promise<Redemption> {
   return db.transaction(async (tx) => {
     await assertKid(tx, familyId, kidId);
+    // Serialise all of this kid's redemption requests: two fast taps (or two
+    // devices) would otherwise each read the balance before the other's reserve
+    // landed and both pass the affordability check, over-reserving below zero.
+    // Locking the kid's row makes the read-then-insert atomic per kid.
+    await tx.execute(
+      sql`select 1 from ${people} where ${people.id} = ${kidId} and ${people.familyId} = ${familyId} for update`,
+    );
     const [reward] = await tx
       .select()
       .from(rewards)
@@ -109,6 +153,22 @@ export async function requestRedemption(
     if (!reward) throw new NotFoundError("Reward not found");
     // A team-only reward can't be grabbed solo (the kid UI hides this anyway).
     if (reward.isTeam && !reward.allowSolo) throw new InsufficientPointsError();
+
+    // One pending request per reward: a reward already waiting for a parent
+    // can't be requested again (it stays reserved and shows as pending).
+    const [dupe] = await tx
+      .select({ id: redemptions.id })
+      .from(redemptions)
+      .where(
+        and(
+          eq(redemptions.familyId, familyId),
+          eq(redemptions.personId, kidId),
+          eq(redemptions.rewardId, reward.id),
+          eq(redemptions.status, "requested"),
+        ),
+      )
+      .limit(1);
+    if (dupe) throw new DuplicateRequestError();
 
     const available = await getAvailable(tx, familyId, kidId);
     // A kid in the red can't redeem anything until they're back to zero.
@@ -228,6 +288,8 @@ export interface RedeemableReward {
   isTeam: boolean;
   minKids: number;
   allowSolo: boolean;
+  /** The kid already has a pending request for this reward. */
+  pending: boolean;
 }
 
 /** Active rewards with affordability, plus the kid's available points. */
@@ -236,7 +298,10 @@ export async function listRedeemableRewards(
   familyId: string,
   kidId: string,
 ): Promise<{ available: number; rewards: RedeemableReward[] }> {
-  const available = await getAvailable(db, familyId, kidId);
+  const [available, pendingByReward] = await Promise.all([
+    getAvailable(db, familyId, kidId),
+    reservedByReward(db, familyId, kidId),
+  ]);
   const rows = await db
     .select()
     .from(rewards)
@@ -263,16 +328,49 @@ export async function listRedeemableRewards(
       isTeam: r.isTeam,
       minKids: r.minKids,
       allowSolo: r.allowSolo,
+      pending: pendingByReward.has(r.id),
     })),
   };
 }
 
 export interface GoalProgress {
   reward: { id: string; name: string; emoji: string; cost: number };
-  available: number;
+  /** Points saved toward *this* reward = balance − points reserved for others. */
+  saved: number;
   moreNeeded: number;
   /** 0–100, clamped. */
   pct: number;
+  /** This reward is already requested and waiting for a parent's decision. */
+  pending: boolean;
+}
+
+/**
+ * Progress toward one reward. Points the kid has reserved for *other* pending
+ * rewards are subtracted (they're spoken for); points reserved for *this* reward
+ * are not (they've saved enough — the request is just waiting), so requesting a
+ * reward never makes its own bar collapse.
+ */
+function goalProgress(
+  reward: { id: string; name: string; emoji: string; cost: number },
+  balance: number,
+  totalReserved: number,
+  reservedForThis: number,
+): GoalProgress {
+  const reservedForOthers = totalReserved - reservedForThis;
+  // Capped at the cost: progress past 100% is meaningless, and it keeps the
+  // "saved / cost" readout sane when the kid has more than the reward costs.
+  const saved = Math.min(reward.cost, Math.max(0, balance - reservedForOthers));
+  const pct =
+    reward.cost > 0
+      ? Math.min(100, Math.max(0, Math.round((saved / reward.cost) * 100)))
+      : 100;
+  return {
+    reward,
+    saved,
+    moreNeeded: Math.max(0, reward.cost - saved),
+    pct,
+    pending: reservedForThis > 0,
+  };
 }
 
 /** The kid's chosen savings-goal reward and progress toward it (null if none). */
@@ -296,22 +394,22 @@ export async function getKidGoal(
     .limit(1);
   if (!reward) return null;
 
-  const available = await getAvailable(db, familyId, kidId);
-  const pct =
-    reward.cost > 0
-      ? Math.min(100, Math.max(0, Math.round((available / reward.cost) * 100)))
-      : 100;
-  return {
-    reward: {
+  const [balance, totalReserved, pendingByReward] = await Promise.all([
+    getBalance(db, familyId, kidId),
+    getReserved(db, familyId, kidId),
+    reservedByReward(db, familyId, kidId),
+  ]);
+  return goalProgress(
+    {
       id: reward.id,
       name: reward.name,
       emoji: reward.emoji,
       cost: reward.cost,
     },
-    available,
-    moreNeeded: Math.max(0, reward.cost - available),
-    pct,
-  };
+    balance,
+    totalReserved,
+    pendingByReward.get(reward.id) ?? 0,
+  );
 }
 
 /**
@@ -337,29 +435,33 @@ export async function listKidAssignedRewards(
     .orderBy(rewards.sortOrder, rewards.createdAt);
   if (rows.length === 0) return [];
 
-  const available = await getAvailable(db, familyId, kidId);
-  return rows
-    .map((reward) => {
-      const pct =
-        reward.cost > 0
-          ? Math.min(
-              100,
-              Math.max(0, Math.round((available / reward.cost) * 100)),
-            )
-          : 100;
-      return {
-        reward: {
-          id: reward.id,
-          name: reward.name,
-          emoji: reward.emoji,
-          cost: reward.cost,
-        },
-        available,
-        moreNeeded: Math.max(0, reward.cost - available),
-        pct,
-      };
-    })
-    .sort((a, b) => b.pct - a.pct);
+  const [balance, totalReserved, pendingByReward] = await Promise.all([
+    getBalance(db, familyId, kidId),
+    getReserved(db, familyId, kidId),
+    reservedByReward(db, familyId, kidId),
+  ]);
+  return (
+    rows
+      .map((reward) =>
+        goalProgress(
+          {
+            id: reward.id,
+            name: reward.name,
+            emoji: reward.emoji,
+            cost: reward.cost,
+          },
+          balance,
+          totalReserved,
+          pendingByReward.get(reward.id) ?? 0,
+        ),
+      )
+      // Ready-to-claim and in-progress first; anything already pending sinks below
+      // them (it needs no action from the kid), but stays visible as a reminder.
+      .sort((a, b) => {
+        if (a.pending !== b.pending) return a.pending ? 1 : -1;
+        return b.pct - a.pct;
+      })
+  );
 }
 
 /** Set (or clear, with null) the kid's savings-goal reward. */

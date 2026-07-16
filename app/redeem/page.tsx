@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { Lock } from "lucide-react";
+import { Lock, Hourglass } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { getPersonById } from "@/lib/db/queries";
@@ -100,7 +100,8 @@ export default async function RedeemPage() {
           </h2>
           <div className={styles.grid}>
             {teamRewards.map((r) => {
-              const canSolo = r.allowSolo && r.affordable && available >= 0;
+              const canSolo =
+                r.allowSolo && r.affordable && available >= 0 && !r.pending;
               return (
                 <div key={r.id} className={styles.teamCard}>
                   <span className={styles.rewardIcon}>
@@ -147,7 +148,19 @@ export default async function RedeemPage() {
         {soloRewards.length > 0 ? (
           <div className={styles.grid}>
             {soloRewards.map((r) =>
-              r.affordable && available >= 0 ? (
+              r.pending ? (
+                <div key={r.id} className={styles.rewardLocked}>
+                  <span className={styles.rewardIconLocked}>
+                    <IconByName name={r.emoji} size={26} />
+                  </span>
+                  <span className={styles.rewardName}>{r.name}</span>
+                  <span className={styles.rewardCost}>{r.cost} pts</span>
+                  <span className={styles.pendingPill}>
+                    <Hourglass size={14} aria-hidden="true" />
+                    Pending
+                  </span>
+                </div>
+              ) : r.affordable && available >= 0 ? (
                 <RedeemButton
                   key={r.id}
                   rewardId={r.id}
