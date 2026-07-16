@@ -62,7 +62,9 @@ test("a reward request asks for confirmation (no accidental redeem)", async ({
   // Confirm this time.
   await page.getByRole("button", { name: /ice cream/i }).click();
   await page.getByRole("button", { name: /yes, request it/i }).click();
-  await expect(page.getByText(/pending/i)).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /waiting for a parent/i }),
+  ).toBeVisible();
 });
 
 test("a kid in the red can't redeem and sees a clear message", async ({

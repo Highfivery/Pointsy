@@ -171,6 +171,20 @@
   color: var(--color-text);
 }
 
+.rewardWaitName {
+  display: block;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.rewardWaitMeta {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-warning);
+}
+
 .waitPts {
   font-weight: 700;
   color: var(--color-warning);

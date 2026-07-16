@@ -29,13 +29,19 @@ export function KidGoal({
       </h2>
       {goal ? (
         <div className={styles.goalRow}>
-          <GoalRing pct={goal.pct} emoji={goal.reward.emoji} />
+          <GoalRing
+            pct={goal.pct}
+            emoji={goal.reward.emoji}
+            pending={goal.pending}
+          />
           <div className={styles.goalText}>
             <span className={styles.shelfName}>{goal.reward.name}</span>
             <span className={styles.almostNeed}>
-              {goal.moreNeeded === 0
-                ? "You have enough — go get it! 🎉"
-                : `${goal.moreNeeded} to go · ${goal.available}/${goal.reward.cost}`}
+              {goal.pending
+                ? "Requested — waiting for a grown-up ⏳"
+                : goal.moreNeeded === 0
+                  ? "You have enough — go get it! 🎉"
+                  : `${goal.moreNeeded} to go · ${goal.saved}/${goal.reward.cost}`}
             </span>
             <form action={setGoalAction}>
               <input type="hidden" name="rewardId" value="" />
@@ -72,7 +78,15 @@ export function KidGoal({
   );
 }
 
-function GoalRing({ pct, emoji }: { pct: number; emoji: string }) {
+function GoalRing({
+  pct,
+  emoji,
+  pending,
+}: {
+  pct: number;
+  emoji: string;
+  pending: boolean;
+}) {
   const r = 30;
   const circumference = 2 * Math.PI * r;
   const clamped = Math.min(100, Math.max(0, pct));
@@ -85,7 +99,7 @@ function GoalRing({ pct, emoji }: { pct: number; emoji: string }) {
           cx="36"
           cy="36"
           r={r}
-          className={styles.ringFill}
+          className={pending ? styles.ringFillPending : styles.ringFill}
           strokeDasharray={`${dash} ${circumference}`}
           transform="rotate(-90 36 36)"
           strokeLinecap="round"

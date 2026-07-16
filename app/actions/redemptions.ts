@@ -11,6 +11,7 @@ import {
   fulfillRedemption,
   setKidGoal,
   InsufficientPointsError,
+  DuplicateRequestError,
 } from "@/lib/redemptions/service";
 import { getPersonById } from "@/lib/db/queries";
 import { notifyParents, notifyPerson } from "@/lib/push/send";
@@ -36,9 +37,15 @@ export async function requestRedemptionAction(
       rewardId.data,
     );
   } catch (err) {
-    // Affordability can change between render and submit; the page revalidates
-    // and reflects the new state. Re-throw anything unexpected.
-    if (!(err instanceof InsufficientPointsError)) throw err;
+    // Affordability can change between render and submit, and a double-submit can
+    // race an existing pending request; either way the page revalidates and
+    // reflects the true state. Re-throw anything unexpected.
+    if (
+      !(err instanceof InsufficientPointsError) &&
+      !(err instanceof DuplicateRequestError)
+    ) {
+      throw err;
+    }
   }
 
   if (redemption) {

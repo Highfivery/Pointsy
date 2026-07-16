@@ -30,6 +30,17 @@
   border-color: var(--color-success);
 }
 
+/* Requested — calm "waiting" treatment, not the celebratory green. */
+.pendingCard {
+  background: var(--color-warning-weak);
+  border-color: var(--color-border-strong);
+  box-shadow: none;
+}
+
+.pendingCard .cheer {
+  color: var(--color-warning);
+}
+
 .top {
   display: flex;
   align-items: center;
@@ -77,6 +88,18 @@
   font-size: 0.95rem;
   font-weight: 800;
   color: var(--color-primary);
+}
+
+.pending {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-warning);
+  background: var(--color-warning-weak);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
 }
 
 .claim {

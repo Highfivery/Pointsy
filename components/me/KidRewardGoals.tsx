@@ -1,3 +1,4 @@
+import { Hourglass } from "lucide-react";
 import { IconByName } from "@/components/icons/registry";
 import { RedeemButton } from "@/components/redeem/RedeemButton";
 import type { GoalProgress } from "@/lib/redemptions/service";
@@ -5,7 +6,8 @@ import hype from "./hype.module.css";
 import styles from "./special.module.css";
 
 /** A cheer that scales with how close the kid is — small wins feel like wins. */
-function cheer(pct: number, moreNeeded: number): string {
+function cheer(pct: number, moreNeeded: number, pending: boolean): string {
+  if (pending) return "Requested — waiting for a grown-up ⏳";
   if (moreNeeded === 0) return "You saved enough — go claim it! 🎉";
   if (pct >= 75) return "So close — almost there! 💪";
   if (pct >= 50) return "Over halfway! Keep going! 🚀";
@@ -29,24 +31,37 @@ export function KidRewardGoals({ rewards }: { rewards: GoalProgress[] }) {
       <ul className={styles.list}>
         {rewards.map((g) => {
           const ready = g.moreNeeded === 0;
-          const have = Math.max(0, g.available);
+          const have = Math.max(0, g.saved);
           return (
             <li
               key={g.reward.id}
-              className={ready ? `${styles.card} ${styles.ready}` : styles.card}
+              className={
+                g.pending
+                  ? `${styles.card} ${styles.pendingCard}`
+                  : ready
+                    ? `${styles.card} ${styles.ready}`
+                    : styles.card
+              }
             >
               <div className={styles.top}>
-                <Ring pct={g.pct} emoji={g.reward.emoji} ready={ready} />
+                <Ring
+                  pct={g.pct}
+                  emoji={g.reward.emoji}
+                  ready={ready && !g.pending}
+                  pending={g.pending}
+                />
                 <div className={styles.info}>
                   <span className={styles.name}>{g.reward.name}</span>
                   <span className={styles.cheer}>
-                    {cheer(g.pct, g.moreNeeded)}
+                    {cheer(g.pct, g.moreNeeded, g.pending)}
                   </span>
                 </div>
               </div>
 
               <progress
-                className={hype.bar}
+                className={
+                  g.pending ? `${hype.bar} ${hype.pendingBar}` : hype.bar
+                }
                 value={have}
                 max={g.reward.cost}
                 aria-label={`${have} of ${g.reward.cost} points toward ${g.reward.name}`}
@@ -56,7 +71,12 @@ export function KidRewardGoals({ rewards }: { rewards: GoalProgress[] }) {
                 <span className={styles.count}>
                   {have} / {g.reward.cost} pts
                 </span>
-                {ready ? (
+                {g.pending ? (
+                  <span className={styles.pending}>
+                    <Hourglass size={13} aria-hidden="true" />
+                    Pending
+                  </span>
+                ) : ready ? (
                   <RedeemButton
                     rewardId={g.reward.id}
                     name={g.reward.name}
@@ -81,14 +101,21 @@ function Ring({
   pct,
   emoji,
   ready,
+  pending,
 }: {
   pct: number;
   emoji: string;
   ready: boolean;
+  pending: boolean;
 }) {
   const r = 30;
   const circumference = 2 * Math.PI * r;
   const dash = (Math.min(100, Math.max(0, pct)) / 100) * circumference;
+  const fillClass = pending
+    ? hype.ringFillPending
+    : ready
+      ? styles.ringFillReady
+      : hype.ringFill;
   return (
     <div className={hype.ringWrap} aria-hidden="true">
       <svg viewBox="0 0 72 72" className={hype.ring}>
@@ -97,7 +124,7 @@ function Ring({
           cx="36"
           cy="36"
           r={r}
-          className={ready ? styles.ringFillReady : hype.ringFill}
+          className={fillClass}
           strokeDasharray={`${dash} ${circumference}`}
           transform="rotate(-90 36 36)"
           strokeLinecap="round"

@@ -63,9 +63,10 @@ describe("kid-specific rewards", () => {
     const robinGoals = await listKidAssignedRewards(db, fam.familyId, robin.id);
     expect(robinGoals).toHaveLength(1);
     expect(robinGoals[0].reward.name).toBe("Bike ride");
-    expect(robinGoals[0].available).toBe(12);
+    expect(robinGoals[0].saved).toBe(12);
     expect(robinGoals[0].moreNeeded).toBe(8);
     expect(robinGoals[0].pct).toBe(60); // 12/20
+    expect(robinGoals[0].pending).toBe(false);
 
     // Sam has none.
     expect(await listKidAssignedRewards(db, fam.familyId, sam.id)).toHaveLength(

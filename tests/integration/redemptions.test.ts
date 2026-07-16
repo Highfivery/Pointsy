@@ -13,7 +13,11 @@ import {
   listKidRedemptions,
   listPendingRedemptions,
   listAwaitingFulfillment,
+  getKidGoal,
+  listKidAssignedRewards,
+  setKidGoal,
   InsufficientPointsError,
+  DuplicateRequestError,
 } from "@/lib/redemptions/service";
 import { createTestDb, type TestDb } from "../helpers/test-db";
 
@@ -111,6 +115,103 @@ describe("redemptions", () => {
     await expect(
       requestRedemption(db, fam.familyId, kid.id, pricey.id),
     ).rejects.toBeInstanceOf(InsufficientPointsError);
+  });
+
+  it("rejects a second pending request for the same reward", async () => {
+    const { db } = ctx;
+    const { fam, kid, reward } = await setup(db);
+    await requestRedemption(db, fam.familyId, kid.id, reward.id);
+
+    await expect(
+      requestRedemption(db, fam.familyId, kid.id, reward.id),
+    ).rejects.toBeInstanceOf(DuplicateRequestError);
+    // Only one reserve, not two.
+    expect(await getAvailable(db, fam.familyId, kid.id)).toBe(5);
+    expect(await listKidRedemptions(db, fam.familyId, kid.id)).toHaveLength(1);
+  });
+
+  it("allows re-requesting once a prior request is resolved", async () => {
+    const { db } = ctx;
+    const { fam, kid, reward } = await setup(db);
+    const first = await requestRedemption(db, fam.familyId, kid.id, reward.id);
+    await cancelRedemption(db, fam.familyId, first.id, kid.id);
+    // No longer pending → can be requested again.
+    await expect(
+      requestRedemption(db, fam.familyId, kid.id, reward.id),
+    ).resolves.toMatchObject({ status: "requested" });
+  });
+
+  it("marks a reward the kid already requested as pending", async () => {
+    const { db } = ctx;
+    const { fam, kid, reward } = await setup(db);
+    await requestRedemption(db, fam.familyId, kid.id, reward.id);
+
+    const { rewards } = await listRedeemableRewards(db, fam.familyId, kid.id);
+    const screen = rewards.find((r) => r.id === reward.id);
+    expect(screen?.pending).toBe(true);
+  });
+
+  it("keeps a goal's own progress full while it's pending (no collapse)", async () => {
+    const { db } = ctx;
+    const { fam, kid, reward } = await setup(db);
+    await setKidGoal(db, fam.familyId, kid.id, reward.id);
+    // Before: 10 points, 5-cost goal → 100% (has enough).
+    let goal = await getKidGoal(db, fam.familyId, kid.id);
+    expect(goal?.pct).toBe(100);
+    expect(goal?.pending).toBe(false);
+
+    // Requesting it reserves the 5, but its OWN progress must not collapse.
+    await requestRedemption(db, fam.familyId, kid.id, reward.id);
+    goal = await getKidGoal(db, fam.familyId, kid.id);
+    expect(goal?.pending).toBe(true);
+    expect(goal?.saved).toBe(5);
+    expect(goal?.moreNeeded).toBe(0);
+    expect(goal?.pct).toBe(100);
+  });
+
+  it("subtracts OTHER pending reservations from a goal's progress", async () => {
+    const { db } = ctx;
+    const { fam, kid, reward } = await setup(db); // 10 pts, "Screen time" cost 5
+    const goalReward = await createReward(db, fam.familyId, {
+      name: "Big toy",
+      emoji: "gift",
+      cost: 10,
+    });
+    await setKidGoal(db, fam.familyId, kid.id, goalReward.id);
+    // Full progress toward the 10-cost goal with 10 points.
+    expect((await getKidGoal(db, fam.familyId, kid.id))?.pct).toBe(100);
+
+    // Reserving 5 for a *different* reward eats into the goal's progress.
+    await requestRedemption(db, fam.familyId, kid.id, reward.id);
+    const goal = await getKidGoal(db, fam.familyId, kid.id);
+    expect(goal?.pending).toBe(false);
+    expect(goal?.saved).toBe(5);
+    expect(goal?.moreNeeded).toBe(5);
+    expect(goal?.pct).toBe(50);
+  });
+
+  it("sorts pending assigned rewards below actionable ones", async () => {
+    const { db } = ctx;
+    const { fam, kid } = await setup(db);
+    await awardCustom(db, fam.familyId, kid.id, 40, "more", fam.personId); // 50 total
+    const a = await createReward(db, fam.familyId, {
+      name: "Assigned A",
+      emoji: "gift",
+      cost: 10,
+      assignedToKidId: kid.id,
+    });
+    const b = await createReward(db, fam.familyId, {
+      name: "Assigned B",
+      emoji: "gift",
+      cost: 10,
+      assignedToKidId: kid.id,
+    });
+    await requestRedemption(db, fam.familyId, kid.id, a.id);
+
+    const goals = await listKidAssignedRewards(db, fam.familyId, kid.id);
+    // B (actionable) sorts above A (pending, needs no action).
+    expect(goals.map((g) => g.reward.id)).toEqual([b.id, a.id]);
+    expect(goals[1].pending).toBe(true);
   });
 
   it("marks an approved redemption as fulfilled", async () => {
