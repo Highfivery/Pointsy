@@ -32,7 +32,7 @@ jobs:
       # bumps the version, and updates CHANGELOG.md. Merging it cuts a release.
       # (No npm publish — Pointsy is a deployed app, not a package.)
       - name: Create release pull request
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
           version: npm run version
           commit: "chore(release): version packages"
