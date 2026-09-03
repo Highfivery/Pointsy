@@ -7,6 +7,8 @@ export interface FormState {
   ok?: boolean;
   /** Echoes which way a points change went, so the UI can confirm it precisely. */
   direction?: "award" | "deduct";
+  /** Who a points change landed for, so the UI can name them back. */
+  kidIds?: string[];
 }
 
 /** First error message per field, keyed by the field name. */

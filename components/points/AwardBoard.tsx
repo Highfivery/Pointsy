@@ -22,35 +22,27 @@ export interface AwardChore {
   isCore: boolean;
 }
 
-export interface AwardKid {
-  id: string;
-  name: string;
-  avatar: string;
-  color: string;
-}
-
 /**
- * The parent award surface: search, optional extra recipients, and chores
- * grouped into Most used → Favourites → category sections. Tapping a chore
- * awards it (instantly) to the current kid plus any "also give to" picks.
+ * The parent chore board: search plus chores grouped into Most used →
+ * Favourites → category sections. Tapping a chore awards it (instantly) to the
+ * current kid plus any "also give to" picks made above (`alsoIds`).
  */
 export function AwardBoard({
   kidId,
   chores,
   categories,
   mostUsedIds,
-  otherKids,
+  alsoIds,
 }: {
   kidId: string;
   chores: AwardChore[];
   categories: CategoryMeta[];
   mostUsedIds: string[];
-  otherKids: AwardKid[];
+  alsoIds: string[];
 }) {
   const [query, setQuery] = useState("");
-  const [also, setAlso] = useState<string[]>([]);
 
-  const recipients = useMemo(() => [kidId, ...also], [kidId, also]);
+  const recipients = useMemo(() => [kidId, ...alsoIds], [kidId, alsoIds]);
   const byId = useMemo(() => new Map(chores.map((c) => [c.id, c])), [chores]);
 
   const q = query.trim().toLowerCase();
@@ -63,12 +55,6 @@ export function AwardBoard({
     .filter((c): c is AwardChore => Boolean(c))
     .slice(0, 6);
   const favourites = chores.filter((c) => c.pinned);
-
-  function toggleAlso(id: string) {
-    setAlso((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
-  }
 
   function card(c: AwardChore) {
     const limit = formatChoreLimit(c.limitPeriod, c.limitCount);
@@ -100,36 +86,6 @@ export function AwardBoard({
 
   return (
     <div className={styles.board}>
-      {otherKids.length > 0 && (
-        <div className={styles.alsoRow}>
-          <span className={styles.alsoLabel} id="also-label">
-            Also give to
-          </span>
-          <div className={styles.chips} aria-labelledby="also-label">
-            {otherKids.map((k) => {
-              const on = also.includes(k.id);
-              return (
-                <button
-                  key={k.id}
-                  type="button"
-                  aria-pressed={on}
-                  className={on ? styles.chipOn : styles.chip}
-                  onClick={() => toggleAlso(k.id)}
-                >
-                  <span
-                    className={styles.chipAvatar}
-                    style={{ background: k.color }}
-                  >
-                    <IconByName name={k.avatar} size={16} />
-                  </span>
-                  {k.name}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
       <div className={styles.searchRow}>
         <Search size={18} aria-hidden="true" className={styles.searchIcon} />
         <input
