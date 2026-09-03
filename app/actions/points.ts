@@ -6,7 +6,7 @@ import { getDb } from "@/lib/db/client";
 import { requireParent } from "@/lib/auth/session";
 import {
   awardChore,
-  changePoints,
+  changePointsForKids,
   undoEarn,
   AlreadyReversedError,
   NotFoundError,
@@ -76,6 +76,9 @@ export async function awardChoreAction(formData: FormData): Promise<void> {
  * positive number; `direction` decides the sign and the ledger semantics —
  * awards are `earn` rows (and notify + count toward challenges), deductions are
  * negative `adjust` rows (a correction, not "un-earning").
+ *
+ * The form posts one `kidId` per recipient — the kid whose screen this is plus
+ * any "also give to" picks (issue #159) — and they all land together.
  */
 export async function changePointsAction(
   _prev: FormState,
@@ -83,20 +86,24 @@ export async function changePointsAction(
 ): Promise<FormState> {
   const session = await requireParent();
   const parsed = changePointsSchema.safeParse({
-    kidId: formData.get("kidId"),
+    kidIds: formData.getAll("kidId"),
     direction: formData.get("direction"),
     amount: formData.get("amount"),
     reason: formData.get("reason"),
   });
-  if (!parsed.success) return { fieldErrors: toFieldErrors(parsed.error) };
+  if (!parsed.success) {
+    const { kidIds: recipients, ...fieldErrors } = toFieldErrors(parsed.error);
+    // No field owns the recipient list, so show that one at form level.
+    return recipients ? { error: recipients, fieldErrors } : { fieldErrors };
+  }
 
-  const { kidId, direction, amount, reason } = parsed.data;
+  const { kidIds, direction, amount, reason } = parsed.data;
 
   try {
-    await changePoints(
+    await changePointsForKids(
       getDb(),
       session.familyId,
-      kidId,
+      kidIds,
       direction,
       amount,
       reason,
@@ -112,12 +119,14 @@ export async function changePointsAction(
   }
 
   if (direction === "award") {
-    await notifyKidEarned(session.familyId, kidId, amount, reason);
     const tz = await getFamilyTimezone(getDb(), session.familyId);
-    await evaluateChallenges(getDb(), session.familyId, kidId, tz);
+    for (const kidId of kidIds) {
+      await notifyKidEarned(session.familyId, kidId, amount, reason);
+      await evaluateChallenges(getDb(), session.familyId, kidId, tz);
+    }
   }
-  revalidateFor(kidId);
-  return { ok: true, direction };
+  for (const kidId of kidIds) revalidateFor(kidId);
+  return { ok: true, direction, kidIds };
 }
 
 /**

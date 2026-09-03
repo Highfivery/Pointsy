@@ -263,7 +263,12 @@ export const challengeSchema = z
  * to type a minus sign.
  */
 export const changePointsSchema = z.object({
-  kidId: z.string().uuid(),
+  // One or more recipients: the kid whose screen this is, plus any "also give
+  // to" picks (issue #159).
+  kidIds: z
+    .array(z.string().uuid())
+    .min(1, "Pick at least one child.")
+    .transform((ids) => Array.from(new Set(ids))),
   direction: z.enum(["award", "deduct"]),
   amount: z.coerce
     .number()

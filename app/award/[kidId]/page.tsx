@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { getPersonById } from "@/lib/db/queries";
@@ -12,8 +11,7 @@ import {
   mostUsedChoreIds,
   getKidBalances,
 } from "@/lib/points/service";
-import { AwardBoard } from "@/components/points/AwardBoard";
-import { AwardExtras } from "@/components/points/AwardExtras";
+import { AwardSurface } from "@/components/points/AwardSurface";
 import { ActivityList } from "@/components/points/ActivityList";
 import { IconByName } from "@/components/icons/registry";
 import { AwardNav } from "@/components/manage/AwardNav";
@@ -86,30 +84,19 @@ export default async function AwardPage({
         </span>
       </div>
 
-      <AwardExtras kidId={kidId} initialMode={initialMode} />
-
-      <section aria-labelledby="chores-title">
-        <h2 id="chores-title" className={styles.sectionTitle}>
-          Award a chore
-        </h2>
-        {activeChores.length > 0 ? (
-          <AwardBoard
-            kidId={kidId}
-            chores={activeChores}
-            categories={categories.map((c) => ({
-              id: c.id,
-              name: c.name,
-              icon: c.icon,
-            }))}
-            mostUsedIds={mostUsedIds}
-            otherKids={otherKids}
-          />
-        ) : (
-          <p className={styles.empty}>
-            No chores yet. <Link href="/manage/chores">Add some first</Link>.
-          </p>
-        )}
-      </section>
+      <AwardSurface
+        kidId={kidId}
+        kidName={kid.name}
+        chores={activeChores}
+        categories={categories.map((c) => ({
+          id: c.id,
+          name: c.name,
+          icon: c.icon,
+        }))}
+        mostUsedIds={mostUsedIds}
+        otherKids={otherKids}
+        initialMode={initialMode}
+      />
 
       <section aria-labelledby="recent-title">
         <h2 id="recent-title" className={styles.sectionTitle}>

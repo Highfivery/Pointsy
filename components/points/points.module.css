@@ -277,15 +277,43 @@
   gap: var(--space-5);
 }
 
-.alsoRow {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+/* "Also give to" — shared by the manual form and the chore board, so it sits
+   above both as its own subtle (sunken, not raised) panel. */
+.alsoCard {
+  min-inline-size: 0;
+  margin: 0;
+  padding: var(--space-4);
+  /* Same treatment as .manualCard, so the sunken chips inside it read as
+     controls the way the form's own inputs do. */
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
 }
 
+/* Floated so it lays out as a plain block instead of the browser's "rendered
+   legend" sitting in the top border gap. */
 .alsoLabel {
+  float: left;
+  width: 100%;
+  margin: 0 0 var(--space-3);
+  padding: 0;
   font-weight: 600;
   font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.alsoBody {
+  clear: both;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.alsoHint {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
   color: var(--color-text-muted);
 }
 
