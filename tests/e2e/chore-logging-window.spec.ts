@@ -1,6 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright";
-import { enterPin } from "./_helpers";
+import { enterPin, expectNoA11yViolations } from "./_helpers";
 
 function uniqueEmail() {
   return `win.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
@@ -146,9 +145,6 @@ test.describe("chore logging windows", () => {
     });
 
     // Accessibility on the kid's chores screen with the new states present.
-    const results = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
-      .analyze();
-    expect(results.violations).toEqual([]);
+    await expectNoA11yViolations(page, "/me/chores with logging windows");
   });
 });

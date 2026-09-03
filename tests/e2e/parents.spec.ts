@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright";
+import { expectNoA11yViolations } from "./_helpers";
 
 function uniqueEmail(p: string) {
   return `${p}.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
@@ -53,10 +53,7 @@ test("a co-parent joins via an invite code and shares the dashboard", async ({
   const code = await createInvite(page);
 
   // The manage screen is accessible.
-  const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
-    .analyze();
-  expect(results.violations).toEqual([]);
+  await expectNoA11yViolations(page, "/manage/parents");
 
   await signOut(page);
   await joinAs(page, code, "Sam", uniqueEmail("co"));

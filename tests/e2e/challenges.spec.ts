@@ -1,11 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright";
-
-const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa"];
-async function expectNoA11yViolations(page: Page, label: string) {
-  const results = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
-  expect(results.violations, `axe violations on ${label}`).toEqual([]);
-}
+import { expectNoA11yViolations } from "./_helpers";
 
 function uniqueEmail() {
   return `chal.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
@@ -40,7 +34,7 @@ test("a parent creates a challenge and sees it in the list", async ({
   await expect(
     page.getByRole("heading", { name: "Challenges", level: 1 }),
   ).toBeVisible();
-  await expect(page).toHaveTitle(/challenges/i); // settle soft-nav title
+  await expect(page).toHaveTitle(/challenges/i);
   await expectNoA11yViolations(page, "/manage/challenges (empty)");
 
   // Create a points challenge (dates come pre-filled).
@@ -57,7 +51,7 @@ test("a parent creates a challenge and sees it in the list", async ({
   await expect(page.getByText("Super Saver Week")).toBeVisible();
   await expect(page.getByText(/Earn 100 points/)).toBeVisible();
   await expect(page.getByText("+20")).toBeVisible();
-  await expect(page).toHaveTitle(/challenges/i); // settle soft-nav title
+  await expect(page).toHaveTitle(/challenges/i);
   await expectNoA11yViolations(page, "/manage/challenges (one)");
 
   // A recurring weekly challenge shows a "Weekly" tag in the list meta.

@@ -1,12 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright";
-import { enterPin, addChore } from "./_helpers";
-
-const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa"];
-async function expectNoA11yViolations(page: Page, label: string) {
-  const results = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
-  expect(results.violations, `axe violations on ${label}`).toEqual([]);
-}
+import { addChore, enterPin, expectNoA11yViolations } from "./_helpers";
 
 function uniqueEmail() {
   return `kidexp.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
