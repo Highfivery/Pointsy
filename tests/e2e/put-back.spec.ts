@@ -8,6 +8,10 @@ function uniqueEmail() {
 
 const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa"];
 async function expectNoA11yViolations(page: Page, label: string) {
+  // App Router sets <title> after a soft navigation, so axe can sample the
+  // document mid-update and report a spurious `document-title` violation.
+  // Let the title settle first.
+  await expect(page).toHaveTitle(/\S/);
   const results = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
   expect(results.violations, `axe violations on ${label}`).toEqual([]);
 }
