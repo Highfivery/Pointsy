@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright";
+import { expectNoA11yViolations } from "./_helpers";
 
 test.describe("landing page", () => {
   test("renders the hero", async ({ page }) => {
@@ -7,11 +7,8 @@ test.describe("landing page", () => {
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 
-  test("has no WCAG A/AA/AAA violations", async ({ page }) => {
+  test("has no WCAG A/AA violations", async ({ page }) => {
     await page.goto("/");
-    const results = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
-      .analyze();
-    expect(results.violations).toEqual([]);
+    await expectNoA11yViolations(page, "/");
   });
 });

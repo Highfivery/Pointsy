@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright";
+import { expectNoA11yViolations } from "./_helpers";
 
 function uniqueEmail() {
   return `parent.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
@@ -54,13 +54,10 @@ test.describe("parent auth", () => {
     await expect(page.getByText(/incorrect email or password/i)).toBeVisible();
   });
 
-  test("auth pages have no WCAG A/AA/AAA violations", async ({ page }) => {
+  test("auth pages have no WCAG A/AA violations", async ({ page }) => {
     for (const path of ["/sign-up", "/sign-in"]) {
       await page.goto(path);
-      const results = await new AxeBuilder({ page })
-        .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
-        .analyze();
-      expect(results.violations, `axe violations on ${path}`).toEqual([]);
+      await expectNoA11yViolations(page, path);
     }
   });
 });
