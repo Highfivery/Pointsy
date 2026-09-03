@@ -1,6 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { enterPin } from "./_helpers";
-import AxeBuilder from "@axe-core/playwright";
+import { enterPin, expectNoA11yViolations } from "./_helpers";
 
 function uniqueEmail() {
   return `home.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
@@ -130,11 +129,7 @@ test("a known device shows the PIN-gated profile picker at / — never marketing
     page.getByRole("link", { name: /create your family/i }),
   ).toHaveCount(0);
 
-  // No WCAG violations on the picker home.
-  const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
-    .analyze();
-  expect(results.violations).toEqual([]);
+  await expectNoA11yViolations(page, "/ (profile picker)");
 
   // A PIN is required to reach a dashboard.
   await page.getByRole("button", { name: /Robin/i }).click();

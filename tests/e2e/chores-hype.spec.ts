@@ -1,22 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright";
-import { enterPin, addChore } from "./_helpers";
+import { addChore, enterPin, expectNoA11yViolations } from "./_helpers";
 
 function uniqueEmail() {
   return `hype.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
-}
-
-const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa"];
-async function expectNoA11yViolations(page: Page, label: string) {
-  // Let entrance animations (e.g. the points "pop") settle so axe doesn't
-  // sample a mid-fade, translucent color and report a false contrast failure.
-  await page.evaluate(() =>
-    Promise.all(
-      document.getAnimations().map((a) => a.finished.catch(() => undefined)),
-    ),
-  );
-  const results = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
-  expect(results.violations, `axe violations on ${label}`).toEqual([]);
 }
 
 async function signUpParent(page: Page) {
@@ -60,7 +46,6 @@ test("award screen groups by category, searches, and awards to several kids", as
   await page.goto("/dashboard");
   await page.getByRole("link", { name: /manage robin/i }).click();
   await expect(page).toHaveURL(/\/award\//);
-  await expect(page).toHaveTitle(/\S/);
 
   // Category sections render.
   await expect(page.getByText("Self-care")).toBeVisible();

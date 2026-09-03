@@ -1,12 +1,9 @@
 import { test, expect, type Page } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright";
-import { addChore, enterPin } from "./_helpers";
+import { addChore, enterPin, expectNoA11yViolations } from "./_helpers";
 
 function uniqueEmail() {
   return `parent.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
 }
-
-const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa"];
 
 async function signUpParent(page: Page) {
   await page.goto("/sign-up");
@@ -35,9 +32,7 @@ test.describe("custom chore categories", () => {
     // Seeded defaults are present.
     await expect(page.getByText("Bedroom", { exact: true })).toBeVisible();
 
-    // No accessibility violations on the management screen.
-    const results = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
-    expect(results.violations).toEqual([]);
+    await expectNoA11yViolations(page, "/manage/categories");
 
     // Add a custom category.
     await page.getByText("Add a category").click();

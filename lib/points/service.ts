@@ -242,6 +242,54 @@ export async function changePoints(
     : adjustPoints(db, familyId, kidId, -amount, reason, awardedBy);
 }
 
+/**
+ * The same custom change for several kids at once — the award screen's "also
+ * give to" picks (issue #159). One transaction, so a multi-kid change either
+ * lands for everyone or for nobody: no half-awarded set to unpick by hand.
+ */
+export async function changePointsForKids(
+  db: Database,
+  familyId: string,
+  kidIds: readonly string[],
+  direction: PointsDirection,
+  amount: number,
+  reason: string,
+  awardedBy: string,
+): Promise<LedgerEntry[]> {
+  const ids = Array.from(new Set(kidIds));
+  if (ids.length === 0) return [];
+  if (ids.length === 1) {
+    return [
+      await changePoints(
+        db,
+        familyId,
+        ids[0],
+        direction,
+        amount,
+        reason,
+        awardedBy,
+      ),
+    ];
+  }
+  return db.transaction(async (tx) => {
+    const rows: LedgerEntry[] = [];
+    for (const kidId of ids) {
+      rows.push(
+        await changePoints(
+          tx,
+          familyId,
+          kidId,
+          direction,
+          amount,
+          reason,
+          awardedBy,
+        ),
+      );
+    }
+    return rows;
+  });
+}
+
 /** A single kid's balance = SUM(ledger.amount). May be negative. */
 export async function getBalance(
   db: Database,

@@ -1,15 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright";
-import { addChore } from "./_helpers";
+import { addChore, expectNoA11yViolations } from "./_helpers";
 
 function uniqueEmail() {
   return `parent.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
-}
-
-const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa"];
-async function expectNoA11yViolations(page: Page, label: string) {
-  const results = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
-  expect(results.violations, `axe violations on ${label}`).toEqual([]);
 }
 
 async function signUpParent(page: Page) {
@@ -46,7 +39,6 @@ test.describe("points engine", () => {
     // Open the kid's award screen.
     await page.getByRole("link", { name: /manage kiddo/i }).click();
     await expect(page).toHaveURL(/\/award\//);
-    await expect(page).toHaveTitle(/\S/); // let the soft-nav <title> settle
     await expectNoA11yViolations(page, "/award");
 
     // One-tap chore award.
@@ -59,6 +51,39 @@ test.describe("points engine", () => {
     await custom.getByLabel("Reason").fill("Helped out");
     await custom.getByRole("button", { name: /^award points$/i }).click();
     await expect(page.getByText("8 pts")).toBeVisible();
+  });
+
+  test('"also give to" applies custom points to every picked kid', async ({
+    page,
+  }) => {
+    await signUpParent(page);
+    await addKid(page, "Robin");
+    await addKid(page, "Andy");
+
+    await page.goto("/dashboard");
+    await page.getByRole("link", { name: /manage robin/i }).click();
+    await expect(page).toHaveURL(/\/award\//);
+
+    // The picker sits above the custom form and applies to it (issue #159).
+    await page.getByRole("button", { name: /^andy$/i }).click();
+    await expect(
+      page.getByText(/points and chores below apply to robin and andy/i),
+    ).toBeVisible();
+    await expectNoA11yViolations(page, "/award with an extra recipient");
+
+    const panel = page.getByRole("region", { name: "Award or deduct points" });
+    await panel.getByLabel("Points").fill("7");
+    await panel.getByLabel("Reason").fill("Tidied together");
+    await panel
+      .getByRole("button", { name: /^award to robin and andy$/i })
+      .click();
+    await expect(
+      page.getByText(/points awarded to robin and andy/i),
+    ).toBeVisible();
+
+    // Both kids got it, not just the one whose screen this is.
+    await page.goto("/dashboard");
+    await expect(page.getByText("7 pts")).toHaveCount(2);
   });
 
   test("deducting points can take the balance below zero", async ({ page }) => {

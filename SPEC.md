@@ -320,6 +320,10 @@ actions). Sleek, modern, lots of whitespace, playful color per kid. Dark mode su
 - Pick kid (skip if entered from a kid card).
 - **Chore catalog grid** (emoji + name + points). Tap one or many → running total → Confirm.
 - "Custom" option: amount + reason. Optimistic update + toast with undo (soft undo = `adjust`).
+- **"Also give to"**: pick other kids once, above everything else on the screen.
+  Every award on it — a custom amount, a deduction, or a chore tap — applies to
+  the kid whose screen it is _plus_ everyone picked. Custom amounts and
+  deductions are written in one transaction (all recipients or none).
 
 ### 6.5 Parent — Rewards & Chores management
 

@@ -1,15 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
-import { enterPin } from "./_helpers";
-import AxeBuilder from "@axe-core/playwright";
+import { enterPin, expectNoA11yViolations } from "./_helpers";
 
 function uniqueEmail() {
   return `parent.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
-}
-
-const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa"];
-async function expectNoA11yViolations(page: Page, label: string) {
-  const results = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
-  expect(results.violations, `axe violations on ${label}`).toEqual([]);
 }
 
 /** Sign up a fresh parent and return the family join code from the dashboard. */

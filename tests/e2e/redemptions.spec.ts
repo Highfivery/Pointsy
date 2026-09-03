@@ -1,16 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
-import { enterPin } from "./_helpers";
-import AxeBuilder from "@axe-core/playwright";
+import { enterPin, expectNoA11yViolations } from "./_helpers";
 
 function uniqueEmail() {
   return `parent.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
-}
-
-async function expectNoA11yViolations(page: Page, label: string) {
-  const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
-    .analyze();
-  expect(results.violations, `axe violations on ${label}`).toEqual([]);
 }
 
 const PASSWORD = "supersecret123";
@@ -86,7 +78,7 @@ test.describe("redemption loop", () => {
     // Navigate via the kid tab bar.
     await page.getByRole("link", { name: "Rewards", exact: true }).click();
     await expect(page).toHaveURL(/\/redeem$/);
-    await expect(page).toHaveTitle(/redeem/i); // let the soft-nav title settle
+    await expect(page).toHaveTitle(/redeem/i);
     await expectNoA11yViolations(page, "/redeem");
 
     await page.getByRole("button", { name: /sticker/i }).click();

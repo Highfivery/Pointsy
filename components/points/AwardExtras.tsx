@@ -4,23 +4,34 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import { changePointsAction } from "@/app/actions/points";
 import { Field } from "@/components/auth/Field";
+import { formatNameList } from "@/lib/domain/names";
 import type { FormState } from "@/lib/validation/form";
 import form from "@/components/auth/auth-form.module.css";
 import styles from "./points.module.css";
 
 const initial: FormState = {};
 
+export interface AwardRecipient {
+  id: string;
+  name: string;
+}
+
 /**
- * Manual points control for a kid: award a custom amount or take points away.
- * A segmented toggle picks the direction so the parent always types a plain
+ * Manual points control: award a custom amount or take points away. A
+ * segmented toggle picks the direction so the parent always types a plain
  * positive number — no minus-sign guesswork — and the submit button restates
- * exactly what will happen.
+ * exactly what will happen, including who gets it when "also give to" picks
+ * add recipients (issue #159).
  */
 export function AwardExtras({
-  kidId,
+  recipients,
+  nameById,
   initialMode = "award",
 }: {
-  kidId: string;
+  /** Everyone this form posts to, the kid whose screen this is first. */
+  recipients: AwardRecipient[];
+  /** Names for every kid on the screen, so the result can name them back. */
+  nameById: Record<string, string>;
   initialMode?: "award" | "deduct";
 }) {
   const [state, action, pending] = useActionState(changePointsAction, initial);
@@ -32,6 +43,33 @@ export function AwardExtras({
   }, [state.ok]);
 
   const isDeduct = mode === "deduct";
+  const shared = recipients.length > 1;
+  const who = formatNameList(recipients.map((r) => r.name));
+
+  // With extra recipients the button names them, so a parent can see who a
+  // typed amount is about to reach before they commit it (issue #159).
+  const submitLabel = pending
+    ? isDeduct
+      ? "Deducting…"
+      : "Awarding…"
+    : isDeduct
+      ? shared
+        ? `Deduct from ${who}`
+        : "Deduct points"
+      : shared
+        ? `Award to ${who}`
+        : "Award points";
+
+  const done = (state.kidIds ?? [])
+    .map((id) => nameById[id])
+    .filter((name): name is string => Boolean(name));
+  const successMessage = isDeduct
+    ? done.length > 1
+      ? `Points deducted from ${formatNameList(done)}.`
+      : "Points deducted."
+    : done.length > 1
+      ? `Points awarded to ${formatNameList(done)}!`
+      : "Points awarded!";
 
   return (
     <section
@@ -42,7 +80,9 @@ export function AwardExtras({
         Award or deduct points
       </h2>
       <form ref={ref} action={action} className={form.form} noValidate>
-        <input type="hidden" name="kidId" value={kidId} />
+        {recipients.map((r) => (
+          <input key={r.id} type="hidden" name="kidId" value={r.id} />
+        ))}
         <input type="hidden" name="direction" value={mode} />
 
         <fieldset className={styles.segment}>
@@ -93,18 +133,10 @@ export function AwardExtras({
           className={isDeduct ? styles.deductSubmit : form.submit}
           disabled={pending}
         >
-          {pending
-            ? isDeduct
-              ? "Deducting…"
-              : "Awarding…"
-            : isDeduct
-              ? "Deduct points"
-              : "Award points"}
+          {submitLabel}
         </button>
         {state.ok && state.direction === mode ? (
-          <p className={styles.success}>
-            {isDeduct ? "Points deducted." : "Points awarded!"}
-          </p>
+          <p className={styles.success}>{successMessage}</p>
         ) : null}
       </form>
     </section>

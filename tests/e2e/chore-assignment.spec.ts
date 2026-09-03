@@ -1,12 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright";
-import { enterPin } from "./_helpers";
-
-const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa"];
-async function expectNoA11yViolations(page: Page, label: string) {
-  const results = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
-  expect(results.violations, `axe violations on ${label}`).toEqual([]);
-}
+import { enterPin, expectNoA11yViolations } from "./_helpers";
 
 function uniqueEmail() {
   return `assign.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.com`;
@@ -54,7 +47,7 @@ test("a rotating chore only appears for whoever's turn it is", async ({
 
   // The overview shows whose turn it is.
   await expect(page.getByText("Robin's turn")).toBeVisible();
-  await expect(page).toHaveTitle(/chores/i); // let the soft-nav title settle
+  await expect(page).toHaveTitle(/chores/i);
   await expectNoA11yViolations(page, "/manage/chores");
 
   // Sign in as Sky — it isn't her turn, so Dishes isn't on her chores at all.
