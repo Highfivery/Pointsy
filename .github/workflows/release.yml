@@ -31,11 +31,13 @@ jobs:
       # Opens/updates a "Version Packages" PR that applies pending changesets,
       # bumps the version, and updates CHANGELOG.md. Merging it cuts a release.
       # (No npm publish — Pointsy is a deployed app, not a package.)
+      # v2 renamed every input we pass (version → version-script, commit →
+      # commit-message, title → pr-title) and dropped support for the
+      # GITHUB_TOKEN env var — the token must come in through `github-token`.
       - name: Create release pull request
         uses: changesets/action@v2
         with:
-          version: npm run version
-          commit: "chore(release): version packages"
-          title: "chore(release): version packages"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          version-script: npm run version
+          commit-message: "chore(release): version packages"
+          pr-title: "chore(release): version packages"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
