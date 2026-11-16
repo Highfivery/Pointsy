@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LogOut, ArrowRight, X, Hourglass } from "lucide-react";
+import { LogOut, ArrowRight, X, Hourglass, Medal } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
 import { getDb } from "@/lib/db/client";
@@ -183,6 +183,12 @@ export default async function MePage() {
                 ? "Earn points for chores and good habits!"
                 : "Keep up the great work!"}
         </p>
+        {milestones.lifetime > 0 ? (
+          <p className={styles.lifetime}>
+            <Medal size={16} aria-hidden="true" />
+            {milestones.lifetime.toLocaleString("en-US")} earned all time
+          </p>
+        ) : null}
         {pendingPoints > 0 ? (
           <p className={styles.pending}>
             +{pendingPoints} waiting for approval

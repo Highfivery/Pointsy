@@ -34,7 +34,10 @@ import {
 import { decideTeamAction, fulfillTeamAction } from "@/app/actions/team";
 import { listChallengeApprovals } from "@/lib/challenges/service";
 import { decideChallengeAwardAction } from "@/app/actions/challenges";
-import { listOwedUnlocks } from "@/lib/milestones/service";
+import {
+  getLifetimeEarnedByKid,
+  listOwedUnlocks,
+} from "@/lib/milestones/service";
 import { fulfillUnlockAction } from "@/app/actions/milestones";
 import { IconByName } from "@/components/icons/registry";
 import { Chip } from "@/components/ui/Chip";
@@ -66,6 +69,7 @@ export default async function DashboardPage() {
 
   const [
     kids,
+    lifetime,
     pending,
     awaiting,
     choreSubs,
@@ -75,6 +79,7 @@ export default async function DashboardPage() {
     milestoneRewards,
   ] = await Promise.all([
     getKidBalances(db, session.familyId),
+    getLifetimeEarnedByKid(db, session.familyId),
     listPendingRedemptions(db, session.familyId),
     listAwaitingFulfillment(db, session.familyId),
     listPendingSubmissions(db, session.familyId),
@@ -341,8 +346,14 @@ export default async function DashboardPage() {
                         k.balance < 0 ? styles.kidBalanceNeg : styles.kidBalance
                       }
                     >
-                      {k.balance} pts
+                      {k.balance.toLocaleString("en-US")} pts
                     </span>
+                    {(lifetime.get(k.id) ?? 0) > 0 ? (
+                      <span className={styles.kidLifetime}>
+                        {(lifetime.get(k.id) ?? 0).toLocaleString("en-US")}{" "}
+                        earned all time
+                      </span>
+                    ) : null}
                   </span>
                 </Link>
                 <div className={styles.kidActions}>

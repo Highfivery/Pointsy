@@ -342,3 +342,15 @@
   border-radius: var(--radius-full);
   text-decoration: none;
 }
+
+/* Lifetime-earned total (#181): spending never lowers it. */
+.lifetime {
+  display: inline-flex;
+  align-self: center;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
