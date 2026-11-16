@@ -5,9 +5,9 @@ import styles from "./kid-milestones.module.css";
 const fmt = (n: number) => n.toLocaleString("en-US");
 
 /**
- * The kid's long-term goals (issue #181): their lifetime-earned total, progress
- * to each milestone's next unlock, and rewards reached but not yet handed out.
- * Spending never lowers any of it, which the copy says plainly.
+ * The kid's long-term goals (issue #181): progress to each milestone's next
+ * unlock, and rewards reached but not yet handed out. The lifetime-earned total
+ * itself lives in the points card at the top of the screen.
  */
 export function KidMilestones({ data }: { data: KidMilestonesData }) {
   // A reached one-time milestone whose reward is still owed already has its
@@ -23,10 +23,6 @@ export function KidMilestones({ data }: { data: KidMilestonesData }) {
           <Flag size={20} aria-hidden="true" />
           Milestones
         </h2>
-        <p className={styles.lifetime}>
-          <span className={styles.lifetimeNum}>{fmt(data.lifetime)}</span>{" "}
-          points earned ever
-        </p>
       </div>
 
       {data.owed.length > 0 ? (

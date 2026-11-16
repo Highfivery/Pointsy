@@ -24,11 +24,22 @@ docker run -d --rm --name "$NAME" \
   -e POSTGRES_USER=pointsy -e POSTGRES_PASSWORD=pointsy -e POSTGRES_DB=pointsy \
   -p "${PORT}:5432" postgres:16 >/dev/null
 
+# Check over TCP, not the socket: on first boot the image runs a socket-only
+# temporary server for initdb, so a socket check can pass before the real
+# server is up and the migration then fails.
 echo "Waiting for Postgres on :${PORT}…"
-for _ in $(seq 1 30); do
-  docker exec "$NAME" pg_isready -U pointsy >/dev/null 2>&1 && break
+ready=0
+for _ in $(seq 1 60); do
+  if docker exec "$NAME" pg_isready -h 127.0.0.1 -U pointsy >/dev/null 2>&1; then
+    ready=1
+    break
+  fi
   sleep 1
 done
+if [ "$ready" != 1 ]; then
+  echo "Postgres didn't start in time." >&2
+  exit 1
+fi
 
 # Both vars set so drizzle-kit (which prefers DIRECT_DATABASE_URL) and the app
 # use the throwaway DB, never the one in .env.local.

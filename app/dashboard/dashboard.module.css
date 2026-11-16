@@ -159,6 +159,11 @@
   color: var(--color-primary);
 }
 
+.kidLifetime {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
 .kidBalanceNeg {
   font-weight: 600;
   color: var(--color-danger);

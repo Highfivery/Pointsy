@@ -80,7 +80,7 @@ test.describe("milestones (#181)", () => {
     await enterPin(page, "4321");
     await expect(page).toHaveURL(/\/me$/);
     const section = page.getByRole("region", { name: "Milestones" });
-    await expect(section.getByText(/points earned ever/i)).toContainText("50");
+    await expect(page.getByText(/earned all time/i)).toContainText("50");
     await expect(
       section.getByText(/a grown-up will hand it out/i),
     ).toBeVisible();
@@ -122,5 +122,26 @@ test.describe("milestones (#181)", () => {
     ).toBeVisible();
     await expect(page.getByLabel("Points earned")).toBeDisabled();
     await expectNoA11yViolations(page, "/manage/milestones/[id] locked");
+  });
+
+  test("the lifetime total shows even with no milestones set up", async ({
+    page,
+  }) => {
+    await signUpWithKid(page);
+    await awardCustom(page, 30, "Helped cook");
+
+    await page.goto("/dashboard");
+    await expect(page.getByText("30 earned all time")).toBeVisible();
+
+    await page.getByRole("button", { name: /sign out/i }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await page.getByRole("button", { name: /^Robin$/i }).click();
+    await enterPin(page, "4321");
+    await expect(page).toHaveURL(/\/me$/);
+    await expect(page.getByText("30 earned all time")).toBeVisible();
+    // No milestones yet, so no Milestones card.
+    await expect(page.getByRole("region", { name: "Milestones" })).toHaveCount(
+      0,
+    );
   });
 });
