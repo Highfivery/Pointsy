@@ -2,6 +2,7 @@
 
 import {
   House,
+  Flag,
   Gift,
   ListChecks,
   Tags,
@@ -14,7 +15,13 @@ import type { LucideIcon } from "lucide-react";
 import { BottomNav, type BottomNavItem } from "@/components/ui/BottomNav";
 
 type Section =
-  "rewards" | "chores" | "categories" | "challenges" | "kids" | "parents";
+  | "rewards"
+  | "chores"
+  | "categories"
+  | "challenges"
+  | "milestones"
+  | "kids"
+  | "parents";
 
 const SECTIONS: Record<
   Section,
@@ -52,6 +59,13 @@ const SECTIONS: Record<
     Icon: Trophy,
     addHref: "/manage/challenges/new",
     addLabel: "Add a challenge",
+  },
+  milestones: {
+    href: "/manage/milestones",
+    label: "Milestones",
+    Icon: Flag,
+    addHref: "/manage/milestones/new",
+    addLabel: "Add a milestone",
   },
   kids: {
     href: "/manage/kids",

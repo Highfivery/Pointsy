@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, Trophy } from "lucide-react";
+import { ChevronRight, Flag, Trophy } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { getFamilyTimezone } from "@/lib/family/settings";
@@ -46,7 +46,12 @@ export default async function ChallengesPage() {
       <ScreenHeader
         title="Challenges"
         intro="Time-boxed goals that pay a bonus when a kid (or the whole family) hits them."
-      />
+      >
+        <Link href="/manage/milestones" className={manage.headerLink}>
+          <Flag size={16} aria-hidden="true" />
+          Milestones
+        </Link>
+      </ScreenHeader>
 
       {sorted.length === 0 ? (
         <p className={styles.empty}>

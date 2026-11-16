@@ -103,6 +103,12 @@ export const challengeAwardStatusEnum = pgEnum("challenge_award_status", [
   "denied",
 ]);
 
+/** Where a milestone starts counting: every point ever, or only from now on. */
+export const milestoneStartEnum = pgEnum("milestone_start", [
+  "lifetime",
+  "from_now",
+]);
+
 /* --------------------------------------------------------------- families */
 
 export const families = pgTable("families", {
@@ -660,6 +666,115 @@ export const challengeAwards = pgTable(
   ],
 );
 
+/* ------------------------------------------------------------- milestones */
+
+/**
+ * A long-term goal on a kid's lifetime-earned points (issue #181). Spending
+ * never lowers progress. One-time milestones unlock once; repeatable ones unlock
+ * every `target` points. The reward is a real-world thing a parent hands out,
+ * not more points. `allKids` covers every kid, including ones added later.
+ */
+export const milestones = pgTable(
+  "milestones",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    familyId: uuid("family_id")
+      .notNull()
+      .references(() => families.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    /** The real-world reward, e.g. "Special outing". */
+    reward: text("reward").notNull(),
+    /** Points needed (per unlock, for a repeatable milestone). */
+    target: integer("target").notNull(),
+    repeats: boolean("repeats").notNull().default(false),
+    startMode: milestoneStartEnum("start_mode").notNull().default("lifetime"),
+    /** True ⇒ every kid (incl. kids added later); false ⇒ participant rows. */
+    allKids: boolean("all_kids").notNull().default(true),
+    isActive: boolean("is_active").notNull().default(true),
+    createdBy: uuid("created_by").references(() => people.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [index("milestones_family_idx").on(t.familyId)],
+);
+
+/**
+ * The kids picked for a milestone (only used when `allKids` is false). Rows are
+ * never deleted on edit: unticking a kid sets `isActive` false, so ticking them
+ * again keeps their original `countedFrom` and unlock history lined up.
+ */
+export const milestoneParticipants = pgTable(
+  "milestone_participants",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    familyId: uuid("family_id")
+      .notNull()
+      .references(() => families.id, { onDelete: "cascade" }),
+    milestoneId: uuid("milestone_id")
+      .notNull()
+      .references(() => milestones.id, { onDelete: "cascade" }),
+    personId: uuid("person_id")
+      .notNull()
+      .references(() => people.id, { onDelete: "cascade" }),
+    /** For "from_now" milestones: only points earned at/after this count. */
+    countedFrom: timestamp("counted_from", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    isActive: boolean("is_active").notNull().default(true),
+  },
+  (t) => [
+    index("milestone_participants_family_idx").on(t.familyId),
+    uniqueIndex("milestone_participants_unique").on(t.milestoneId, t.personId),
+  ],
+);
+
+/**
+ * One row per time a kid reaches a milestone (seq 1, 2, 3… for repeatables).
+ * Title, reward and target are snapshotted so later edits don't rewrite what
+ * was unlocked, and the row survives deleting the milestone (set null) so an
+ * owed reward is never lost. Never revoked by a later put-back.
+ */
+export const milestoneUnlocks = pgTable(
+  "milestone_unlocks",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    familyId: uuid("family_id")
+      .notNull()
+      .references(() => families.id, { onDelete: "cascade" }),
+    milestoneId: uuid("milestone_id").references(() => milestones.id, {
+      onDelete: "set null",
+    }),
+    personId: uuid("person_id")
+      .notNull()
+      .references(() => people.id, { onDelete: "cascade" }),
+    seq: integer("seq").notNull(),
+    title: text("title").notNull(),
+    reward: text("reward").notNull(),
+    /** Progress points this unlock stands for (target × seq). */
+    points: integer("points").notNull(),
+    unlockedAt: timestamp("unlocked_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    /** Set when a parent marks the reward as handed out. */
+    fulfilledAt: timestamp("fulfilled_at", { withTimezone: true }),
+    fulfilledBy: uuid("fulfilled_by").references(() => people.id, {
+      onDelete: "set null",
+    }),
+  },
+  (t) => [
+    index("milestone_unlocks_family_idx").on(t.familyId),
+    index("milestone_unlocks_person_idx").on(t.personId),
+    uniqueIndex("milestone_unlocks_unique").on(
+      t.milestoneId,
+      t.personId,
+      t.seq,
+    ),
+  ],
+);
+
 /* ------------------------------------------------------------------ types */
 
 export type Family = typeof families.$inferSelect;
@@ -697,6 +812,10 @@ export type ChallengeRecurrence =
   (typeof challengeRecurrenceEnum.enumValues)[number];
 export type ChallengeParticipant = typeof challengeParticipants.$inferSelect;
 export type ChallengeAward = typeof challengeAwards.$inferSelect;
+export type Milestone = typeof milestones.$inferSelect;
+export type MilestoneStart = (typeof milestoneStartEnum.enumValues)[number];
+export type MilestoneParticipant = typeof milestoneParticipants.$inferSelect;
+export type MilestoneUnlock = typeof milestoneUnlocks.$inferSelect;
 
 export const schema = {
   families,
@@ -716,6 +835,9 @@ export const schema = {
   challenges,
   challengeParticipants,
   challengeAwards,
+  milestones,
+  milestoneParticipants,
+  milestoneUnlocks,
   roleEnum,
   ledgerTypeEnum,
   redemptionStatusEnum,
@@ -728,4 +850,5 @@ export const schema = {
   challengeGoalEnum,
   challengeRecurrenceEnum,
   challengeAwardStatusEnum,
+  milestoneStartEnum,
 };

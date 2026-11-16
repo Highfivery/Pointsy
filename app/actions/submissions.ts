@@ -15,7 +15,7 @@ import {
   InvalidSubmissionError,
 } from "@/lib/submissions/service";
 import { notifyParents, notifyPerson } from "@/lib/push/send";
-import { evaluateChallenges } from "@/lib/challenges/service";
+import { afterEarn } from "@/lib/points/after-earn";
 
 const idSchema = z.string().uuid();
 const decisionSchema = z.enum(["approved", "rejected"]);
@@ -102,9 +102,10 @@ export async function decideSubmissionAction(
       body: `+${decided.points} for ${decided.choreName}`,
       url: "/me",
     });
-    // Approving points may complete a challenge → pay out any earned bonus.
+    // Approving points may complete a challenge (pay any bonus) or reach a
+    // milestone.
     const tz = await getFamilyTimezone(db, session.familyId);
-    await evaluateChallenges(db, session.familyId, decided.personId, tz);
+    await afterEarn(db, session.familyId, [decided.personId], tz);
     revalidatePath("/me");
   } else {
     await notifyPerson(db, session.familyId, decided.personId, {

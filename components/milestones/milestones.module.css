@@ -1,0 +1,37 @@
+/* Milestones: parent list + editor extras, kid progress cards, dashboard. */
+
+.lockNote,
+.pastNote {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.lockNote svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.pastNote {
+  color: var(--color-text);
+  border-color: var(--color-primary);
+}
+
+.kidName {
+  flex: 1;
+  min-width: 0;
+}
+
+.kidMeta {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}

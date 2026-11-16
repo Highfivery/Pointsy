@@ -34,6 +34,8 @@ import {
 import { decideTeamAction, fulfillTeamAction } from "@/app/actions/team";
 import { listChallengeApprovals } from "@/lib/challenges/service";
 import { decideChallengeAwardAction } from "@/app/actions/challenges";
+import { listOwedUnlocks } from "@/lib/milestones/service";
+import { fulfillUnlockAction } from "@/app/actions/milestones";
 import { IconByName } from "@/components/icons/registry";
 import { Chip } from "@/components/ui/Chip";
 import { ConfirmDeleteDisclosure } from "@/components/account/ConfirmDeleteDisclosure";
@@ -70,6 +72,7 @@ export default async function DashboardPage() {
     teamReady,
     teamAwaiting,
     challengeApprovals,
+    milestoneRewards,
   ] = await Promise.all([
     getKidBalances(db, session.familyId),
     listPendingRedemptions(db, session.familyId),
@@ -78,6 +81,7 @@ export default async function DashboardPage() {
     listTeamRedemptionsAwaitingApproval(db, session.familyId),
     listTeamRedemptionsAwaitingFulfillment(db, session.familyId),
     listChallengeApprovals(db, session.familyId),
+    listOwedUnlocks(db, session.familyId),
   ]);
 
   return (
@@ -369,6 +373,43 @@ export default async function DashboardPage() {
           </p>
         )}
       </section>
+
+      {milestoneRewards.length > 0 ? (
+        <section aria-labelledby="milestone-rewards-heading">
+          <h2 id="milestone-rewards-heading" className={styles.sectionTitle}>
+            Milestone rewards to hand out
+          </h2>
+          <ul className={styles.queueList}>
+            {milestoneRewards.map((u) => (
+              <li key={u.id} className={styles.queueCard}>
+                <span
+                  className={styles.kidAvatar}
+                  style={{ background: u.color }}
+                >
+                  <IconByName name={u.avatar} size={22} />
+                </span>
+                <span className={styles.queueText}>
+                  <span className={styles.queueTitle}>
+                    {u.kidName} · {u.reward}
+                  </span>
+                  <span className={styles.queueMeta}>Reached {u.title}</span>
+                </span>
+                <form action={fulfillUnlockAction}>
+                  <input type="hidden" name="unlockId" value={u.id} />
+                  <button
+                    type="submit"
+                    className={styles.deliverBtn}
+                    aria-label={`Mark ${u.reward} as delivered to ${u.kidName}`}
+                  >
+                    <PackageCheck size={16} aria-hidden="true" />
+                    Delivered
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {awaiting.length > 0 ? (
         <section aria-labelledby="awaiting-heading">
