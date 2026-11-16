@@ -8,7 +8,7 @@
 
 ## Checklist
 
-- [ ] `npm run typecheck`, `npm run lint`, `npm test` pass locally
+- [ ] `npm run verify:full` passes locally (there is no GitHub CI)
 - [ ] Added/updated unit or integration tests for the change
 - [ ] Tenant isolation preserved (all queries scoped by `familyId` from session)
 - [ ] Accessibility: keyboard + screen-reader checked; AAA contrast held (see `docs/accessibility.md`)

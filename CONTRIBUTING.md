@@ -17,13 +17,25 @@ skills under [`.claude/`](.claude). Please read [SPEC.md](SPEC.md) first.
 4. **Accessibility** — meet the WCAG 2.1 **AA** checklist in
    [`docs/accessibility.md`](docs/accessibility.md).
 5. **Changeset** — run `npm run changeset` for any user-facing change.
-6. **Open a PR** — fill in the template; CI + E2E + Lighthouse must pass.
+6. **Open a PR** — fill in the template. Checks run locally, not on GitHub
+   Actions: `npm run verify:full` must pass before you merge.
 
-## Quality gate (run before pushing)
+## Quality gate (all local)
 
 ```bash
-npm run typecheck && npm run lint && npm run format:check && npm test && npm run build
+npm run verify          # typecheck, lint, format, tests + coverage, build
+npm run test:e2e:local  # Playwright + axe on a throwaway Postgres (needs Docker)
+npm run verify:full     # both — required before merging
+npm run lighthouse      # optional: performance/a11y budgets on a production build
 ```
+
+A pre-push hook runs typecheck, lint, format and tests automatically.
+
+## Releasing
+
+From an up-to-date `main` with pending changesets, run `npm run release`. It
+bumps the version, writes `CHANGELOG.md`, and opens a `release/vX.Y.Z` PR.
+Merge it; Vercel deploys `main` and applies migrations.
 
 ## Commit messages
 

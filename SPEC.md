@@ -481,21 +481,24 @@ pointsy/
 
 ## 10. CI/CD, GitHub workflows & versioning
 
-### 10.1 GitHub Actions
+### 10.1 Local checks (no GitHub Actions)
 
-- **`ci.yml`** (on PR + push): install → typecheck (`tsc --noEmit`) → lint (ESLint) →
-  format check (Prettier) → unit + integration (Vitest, pglite) → build.
-- **`e2e.yml`** (on PR): provision ephemeral Neon branch → migrate → `next build` →
-  Playwright (mobile + desktop) + axe → tear down branch. Uploads traces on failure.
-- **`lighthouse.yml`** (on PR preview): run Lighthouse CI against the Vercel preview URL,
-  assert budgets.
-- **`release.yml`** (on push to `main`): Changesets → version bump + changelog + GitHub release
-  - tag. Vercel auto-deploys `main` to production.
-- **`codeql.yml`** (security scanning) + Dependabot for dependency updates.
+Since 2026-11 every check runs locally; the repo has no Actions workflows.
+
+- **`npm run verify`**: typecheck (`tsc --noEmit`) → lint (ESLint) → format check
+  (Prettier) → unit + integration (Vitest, pglite) with coverage → build. A
+  husky pre-push hook runs the same minus build.
+- **`npm run test:e2e:local`**: throwaway `postgres:16` container → migrate →
+  Playwright (mobile + desktop) + axe → container removed.
+- **`npm run verify:full`**: both; required before merging.
+- **`npm run lighthouse`**: Lighthouse CI budgets against a local production build.
+- **`npm run release`**: Changesets → version bump + changelog on a
+  `release/vX.Y.Z` PR. Vercel auto-deploys `main` to production.
+- Dependabot for dependency updates.
 
 ### 10.2 Branch protection
 
-- PRs required; CI + E2E must pass; at least one review (Claude `/code-review` can gate).
+- PRs required; `npm run verify:full` must pass locally; at least one review (Claude `/code-review` can gate).
 - Conventional Commits enforced (commitlint) to drive Changesets/semver.
 
 ### 10.3 Versioning

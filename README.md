@@ -73,7 +73,7 @@ redemption, and adjustment is auditable.
 
 Next.js 16 (App Router) · React 19 · TypeScript (strict) · CSS Modules · lucide-react ·
 Neon Postgres + Drizzle ORM · jose (sessions) · argon2 (hashing) · Zod (validation) ·
-Serwist (PWA) · Vitest + PGlite + Playwright/axe · GitHub Actions · Changesets.
+Serwist (PWA) · Vitest + PGlite + Playwright/axe · Changesets.
 
 The brand is a dark-only design system, **"Emerald Noir"** (emerald→cyan on
 forest-black), defined as design tokens in [`app/globals.css`](app/globals.css).
@@ -160,12 +160,18 @@ A few rules are non-negotiable (full detail in [`AGENTS.md`](AGENTS.md) and
 
 ## Quality & automation
 
-- **CI** (`.github/workflows/ci.yml`): typecheck, lint, format, unit + integration
-  tests, build.
-- **E2E** (`e2e.yml`): Playwright across mobile + desktop with axe assertions.
-- **Lighthouse** (`lighthouse.yml`): performance/accessibility budgets on PRs.
-- **Release** (`release.yml`): Changesets-driven versioning + changelog.
-- **CodeQL** + **Dependabot**: security scanning and dependency updates.
+All checks run **locally** — there are no GitHub Actions workflows.
+
+- **`npm run verify`**: typecheck, lint, format, unit + integration tests with
+  coverage, build. A pre-push hook runs the fast part (no build).
+- **`npm run test:e2e:local`**: Playwright across mobile + desktop with axe
+  assertions, against a throwaway Postgres container (needs Docker).
+- **`npm run verify:full`**: both of the above — run it before merging.
+- **`npm run lighthouse`**: performance/accessibility budgets on a production
+  build (reports saved to `.lighthouseci/`).
+- **`npm run release`**: applies Changesets (version bump + changelog) and opens
+  a release PR. Vercel deploys `main` and runs migrations.
+- **Dependabot**: dependency updates.
 - **`.claude/`**: house rules (`AGENTS.md`), skills, and slash commands so the app can
   be specced, built, reviewed, and shipped with Claude following the project's
   conventions. Pointsy is, by design, built largely _with_ Claude.
@@ -173,7 +179,7 @@ A few rules are non-negotiable (full detail in [`AGENTS.md`](AGENTS.md) and
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). In short: branch off `main`, use Conventional
-Commits, add tests + a changeset, meet the accessibility bar, and keep CI green.
+Commits, add tests + a changeset, meet the accessibility bar, and run `npm run verify:full` before merging.
 
 ## License
 
