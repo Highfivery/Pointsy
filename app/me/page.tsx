@@ -23,6 +23,7 @@ import {
   getCoreStreak,
 } from "@/lib/submissions/service";
 import { listKidChallenges } from "@/lib/challenges/service";
+import { listKidMilestones } from "@/lib/milestones/service";
 import { cancelSubmissionAction } from "@/app/actions/submissions";
 import { cancelRedemptionAction } from "@/app/actions/redemptions";
 import { IconByName } from "@/components/icons/registry";
@@ -30,6 +31,7 @@ import { ActivityList } from "@/components/points/ActivityList";
 import { Celebration } from "@/components/me/Celebration";
 import { CoreProgress } from "@/components/me/CoreProgress";
 import { KidChallenges } from "@/components/me/KidChallenges";
+import { KidMilestones } from "@/components/me/KidMilestones";
 import { RewardShelf } from "@/components/me/RewardShelf";
 import { KidGoal } from "@/components/me/KidGoal";
 import { KidRewardGoals } from "@/components/me/KidRewardGoals";
@@ -64,6 +66,7 @@ export default async function MePage() {
     submittable,
     challenges,
     redemptions,
+    milestones,
   ] = await Promise.all([
     getBalance(db, session.familyId, session.personId),
     getPendingPoints(db, session.familyId, session.personId),
@@ -76,6 +79,7 @@ export default async function MePage() {
     listSubmittableChores(db, session.familyId, session.personId, tz),
     listKidChallenges(db, session.familyId, session.personId, tz),
     listKidRedemptions(db, session.familyId, session.personId, 20),
+    listKidMilestones(db, session.familyId, session.personId),
   ]);
   const waiting = submissions.filter((s) => s.status === "pending");
   const pendingRewards = redemptions.filter((r) => r.status === "requested");
@@ -254,6 +258,8 @@ export default async function MePage() {
       ) : null}
 
       <KidChallenges items={challenges} />
+
+      <KidMilestones data={milestones} />
 
       <KidGoal goal={goal} rewardOptions={rewardOptions} />
 

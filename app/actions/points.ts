@@ -15,7 +15,7 @@ import { changePointsSchema, undoEarnSchema } from "@/lib/validation/schemas";
 import { toFieldErrors, type FormState } from "@/lib/validation/form";
 import { notifyPerson } from "@/lib/push/send";
 import { getFamilyTimezone } from "@/lib/family/settings";
-import { evaluateChallenges } from "@/lib/challenges/service";
+import { afterEarn } from "@/lib/points/after-earn";
 
 async function notifyKidEarned(
   familyId: string,
@@ -66,7 +66,7 @@ export async function awardChoreAction(formData: FormData): Promise<void> {
       session.personId,
     );
     await notifyKidEarned(session.familyId, kidId, entry.amount, entry.reason);
-    await evaluateChallenges(getDb(), session.familyId, kidId, tz);
+    await afterEarn(getDb(), session.familyId, [kidId], tz);
     revalidateFor(kidId);
   }
 }
@@ -122,7 +122,7 @@ export async function changePointsAction(
     const tz = await getFamilyTimezone(getDb(), session.familyId);
     for (const kidId of kidIds) {
       await notifyKidEarned(session.familyId, kidId, amount, reason);
-      await evaluateChallenges(getDb(), session.familyId, kidId, tz);
+      await afterEarn(getDb(), session.familyId, [kidId], tz);
     }
   }
   for (const kidId of kidIds) revalidateFor(kidId);

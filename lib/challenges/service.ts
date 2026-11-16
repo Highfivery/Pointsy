@@ -571,15 +571,18 @@ export async function listChallengeApprovals(
     .orderBy(challengeAwards.awardedAt);
 }
 
-/** Approve (pay the held bonus) or deny a pending challenge completion. */
+/**
+ * Approve (pay the held bonus) or deny a pending challenge completion. Returns
+ * the kid who was paid (so the caller can re-check their milestones), or null.
+ */
 export async function decideChallengeAward(
   db: Database,
   familyId: string,
   awardId: string,
   decision: "approved" | "denied",
   decidedBy: string,
-): Promise<void> {
-  await db.transaction(async (tx) => {
+): Promise<string | null> {
+  return db.transaction(async (tx) => {
     const [row] = await tx
       .select({
         personId: challengeAwards.personId,
@@ -596,7 +599,7 @@ export async function decideChallengeAward(
         ),
       )
       .limit(1);
-    if (!row) return;
+    if (!row) return null;
 
     if (decision === "approved") {
       await tx
@@ -611,11 +614,12 @@ export async function decideChallengeAward(
         reason: `Challenge: ${row.title}`,
         createdBy: decidedBy,
       });
-    } else {
-      await tx
-        .update(challengeAwards)
-        .set({ status: "denied" })
-        .where(eq(challengeAwards.id, awardId));
+      return row.personId;
     }
+    await tx
+      .update(challengeAwards)
+      .set({ status: "denied" })
+      .where(eq(challengeAwards.id, awardId));
+    return null;
   });
 }

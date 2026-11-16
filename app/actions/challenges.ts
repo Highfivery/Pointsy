@@ -14,6 +14,7 @@ import {
   deleteChallenge,
   decideChallengeAward,
 } from "@/lib/challenges/service";
+import { afterBonus } from "@/lib/points/after-earn";
 
 const idSchema = z.string().uuid();
 
@@ -68,13 +69,15 @@ export async function decideChallengeAwardAction(
     .enum(["approved", "denied"])
     .safeParse(formData.get("decision"));
   if (!awardId.success || !decision.success) return;
-  await decideChallengeAward(
+  const paidKid = await decideChallengeAward(
     getDb(),
     session.familyId,
     awardId.data,
     decision.data,
     session.personId,
   );
+  // A paid bonus raises the kid's earned total, so it may reach a milestone.
+  if (paidKid) await afterBonus(getDb(), session.familyId, paidKid);
   revalidatePath("/dashboard");
   revalidatePath("/me");
 }

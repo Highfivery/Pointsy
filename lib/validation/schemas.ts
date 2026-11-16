@@ -255,6 +255,37 @@ export const challengeSchema = z
     }
   });
 
+/* --------------------------------------------------------------- milestones */
+
+export const milestoneSchema = z
+  .object({
+    title: z.string().trim().min(1, "Name is required.").max(60),
+    reward: z
+      .string()
+      .trim()
+      .min(1, "Say what they get, e.g. a special outing.")
+      .max(120),
+    target: z.coerce
+      .number()
+      .int("Use a whole number.")
+      .min(1, "Set at least 1 point.")
+      .max(1_000_000),
+    repeats: z.enum(["once", "repeat"]).transform((v) => v === "repeat"),
+    startMode: z.enum(["lifetime", "from_now"]),
+    who: z.enum(["all", "some"]),
+    kidIds: z.array(z.string().uuid()).default([]),
+  })
+  .superRefine((d, ctx) => {
+    if (d.who === "some" && d.kidIds.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Pick at least one kid.",
+        path: ["kidIds"],
+      });
+    }
+  })
+  .transform(({ who, ...rest }) => ({ ...rest, allKids: who === "all" }));
+
 /* ---------------------------------------------------- points & redemptions */
 
 /**
