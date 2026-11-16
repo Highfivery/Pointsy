@@ -1,5 +1,29 @@
 # pointsy
 
+## 0.46.0
+
+### Minor Changes
+
+- 4a9b191: Add Milestones (#181): long-term goals on the points kids earn over time.
+  Spending points on rewards never lowers milestone progress. Parents set a
+  points target and a real-world reward, make it one-time or repeating ("every
+  500 points"), and count either all points so far or only new ones. Kids see
+  their lifetime total and progress on their home screen. When a kid reaches a
+  milestone, parents get a notification and the reward waits on the dashboard
+  until they mark it delivered. Find it under Challenges → Milestones.
+
+### Patch Changes
+
+- cc0a676: Add categories right from the chore editor (#182). A "New category" button
+  beside the Category field creates a group such as "Good habits" or "Social
+  skills" without leaving a half-filled chore. The Categories and Chores screens
+  now say that categories can hold habits as well as chores.
+- cc0a676: Fix kids being sent back to the profile picker on tablets. Tapping a name on a
+  Wi-Fi-only tablet showed the PIN pad, then the app reloaded itself the moment
+  Wi-Fi reconnected and threw the kid back to the picker. The app no longer
+  reloads when the network comes back, and the picker now remembers the tapped
+  profile for two minutes, so any reload lands back on the PIN pad.
+
 ## 0.45.1
 
 ### Patch Changes
