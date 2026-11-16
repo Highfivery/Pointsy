@@ -46,6 +46,31 @@ export async function createCategoryAction(
   return { ok: true };
 }
 
+export type InlineCategoryResult =
+  | { ok: true; category: { id: string; name: string } }
+  | { ok: false; error: string };
+
+/**
+ * Create a category from inside the chore editor (issue #182), without leaving
+ * the page, so a half-filled chore isn't lost. Returns the new row so the
+ * editor can add it to its select and pick it.
+ */
+export async function createCategoryInlineAction(
+  name: string,
+): Promise<InlineCategoryResult> {
+  const session = await requireParent();
+  const parsed = categorySchema.safeParse({ name, icon: "sparkles" });
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Enter a category name.",
+    };
+  }
+  const row = await createCategory(getDb(), session.familyId, parsed.data);
+  revalidateCategories();
+  return { ok: true, category: { id: row.id, name: row.name } };
+}
+
 export async function updateCategoryAction(
   _prev: FormState,
   formData: FormData,

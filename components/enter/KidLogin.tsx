@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useSyncExternalStore } from "react";
 import {
   lookupFamilyAction,
   forgetFamilyAction,
@@ -12,6 +12,14 @@ import { PinPad } from "@/components/auth/PinPad";
 import { IconByName } from "@/components/icons/registry";
 import form from "@/components/auth/auth-form.module.css";
 import styles from "./enter.module.css";
+import {
+  clearPickedProfile,
+  pickFor,
+  getPickedProfileServerSnapshot,
+  getPickedProfileSnapshot,
+  rememberPickedProfile,
+  subscribePickedProfile,
+} from "./picked-profile";
 
 const pinInitial: KidSignInState = {};
 
@@ -27,7 +35,24 @@ export function KidLogin({
   initialFamily?: FamilyLookup | null;
 }) {
   const [family, setFamily] = useState<FamilyLookup | null>(initialFamily);
-  const [selected, setSelected] = useState<PickerMember | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // A profile tapped just before a reload/remount (e.g. an app update landing
+  // on a shared tablet) comes back to its PIN pad instead of the picker.
+  const picked = useSyncExternalStore(
+    subscribePickedProfile,
+    getPickedProfileSnapshot,
+    getPickedProfileServerSnapshot,
+  );
+  const activeId =
+    selectedId ?? (family ? pickFor(picked, family.familyId) : null);
+  const selected: PickerMember | null =
+    (activeId && family?.members.find((m) => m.id === activeId)) || null;
+
+  function select(m: PickerMember | null) {
+    setSelectedId(m?.id ?? null);
+    if (m && family) rememberPickedProfile(family.familyId, m.id);
+    else clearPickedProfile();
+  }
   const [code, setCode] = useState("");
   const [codeError, setCodeError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -51,7 +76,7 @@ export function KidLogin({
   async function forget() {
     await forgetFamilyAction();
     setFamily(null);
-    setSelected(null);
+    select(null);
     setCode("");
   }
 
@@ -121,7 +146,7 @@ export function KidLogin({
       <>
         <button
           type="button"
-          onClick={() => setSelected(null)}
+          onClick={() => select(null)}
           className={styles.textBtn}
         >
           ← Choose someone else
@@ -138,7 +163,13 @@ export function KidLogin({
               <IconByName name={selected.avatar} size={40} />
             </span>
           </div>
-          <form action={pinAction} className={form.form} noValidate>
+          <form
+            action={pinAction}
+            // The PIN is on its way; a later visit should start at the picker.
+            onSubmit={() => clearPickedProfile()}
+            className={form.form}
+            noValidate
+          >
             <input type="hidden" name="familyId" value={family.familyId} />
             <input type="hidden" name="personId" value={selected.id} />
             <PinPad
@@ -184,7 +215,7 @@ export function KidLogin({
                 <button
                   type="button"
                   className={styles.profileBtn}
-                  onClick={() => setSelected(m)}
+                  onClick={() => select(m)}
                 >
                   <span
                     className={styles.bigAvatar}

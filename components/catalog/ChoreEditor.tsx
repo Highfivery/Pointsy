@@ -6,6 +6,7 @@ import { Plus, X, Eye } from "lucide-react";
 import { Field } from "@/components/auth/Field";
 import { IconPicker } from "@/components/icons/IconPicker";
 import { LogWindowFields } from "@/components/catalog/LogWindowFields";
+import { CategoryField } from "@/components/catalog/CategoryField";
 import { IconByName } from "@/components/icons/registry";
 import { ICON_KEYS, DEFAULT_CHORE_ICON } from "@/lib/icons";
 import { saveChoreAction } from "@/app/actions/catalog";
@@ -104,7 +105,6 @@ export function ChoreEditor({
   const [count, setCount] = useState<string>(String(defaults?.limitCount ?? 1));
   const shared = period !== "none" && scope === "total";
   const [subtasks, setSubtasks] = useState<string[]>(defaults?.subtasks ?? []);
-  const categoryId = useId();
   const periodId = useId();
   const selected = new Set(defaults?.kidIds ?? []);
 
@@ -140,30 +140,10 @@ export function ChoreEditor({
           autoComplete="off"
           required
         />
-        <div className={form.field}>
-          <label htmlFor={categoryId} className={form.label}>
-            Category
-          </label>
-          {categories.length > 0 ? (
-            <select
-              id={categoryId}
-              name="categoryId"
-              defaultValue={defaults?.categoryId ?? categories[0].id}
-              className={styles.select}
-            >
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <p className={styles.muted}>
-              No categories yet.{" "}
-              <Link href="/manage/categories">Add one first</Link>.
-            </p>
-          )}
-        </div>
+        <CategoryField
+          categories={categories}
+          defaultValue={defaults?.categoryId}
+        />
       </section>
 
       <section className={styles.section}>
