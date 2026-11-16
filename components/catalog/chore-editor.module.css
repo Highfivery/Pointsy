@@ -360,3 +360,28 @@
   border: 1px solid var(--color-danger);
   font-weight: 600;
 }
+
+/* ------------------------------------------- inline "New category" control */
+
+.newCategory {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.newCategoryActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.newCategoryActions .cancel {
+  background: none;
+  border: none;
+  cursor: pointer;
+}

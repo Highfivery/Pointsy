@@ -150,3 +150,41 @@ test("the picker offers a parent email + password fallback", async ({
     page.getByRole("link", { name: /sign in with email/i }).first(),
   ).toBeVisible();
 });
+
+test("a reload on the PIN pad keeps the picked kid (tablet bounce fix)", async ({
+  page,
+}) => {
+  await signUp(page);
+  await page.goto("/manage/kids/new");
+  await page.getByLabel("Name").fill("Tabby");
+  await page.getByRole("radio", { name: "Cat", exact: true }).check();
+  await page.getByLabel("4-digit PIN").fill("2468");
+  await page.getByRole("button", { name: /add child/i }).click();
+  await expect(page.getByText("Tabby")).toBeVisible();
+
+  await page.goto("/dashboard");
+  await page.getByRole("button", { name: /sign out/i }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await page.getByRole("button", { name: /Tabby/i }).click();
+  await expect(page.getByRole("heading", { name: /Hi Tabby/i })).toBeVisible();
+
+  // An app update reloading the page must not throw the kid back to the picker.
+  await page.reload();
+  await expect(page.getByRole("heading", { name: /Hi Tabby/i })).toBeVisible();
+
+  // "Choose someone else" still works, and a reload then stays on the picker.
+  await page.getByRole("button", { name: /choose someone else/i }).click();
+  await expect(
+    page.getByRole("heading", { name: /who.?s signing in/i }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: /who.?s signing in/i }),
+  ).toBeVisible();
+
+  // And signing in works from the restored pad.
+  await page.getByRole("button", { name: /Tabby/i }).click();
+  await page.reload();
+  await enterPin(page, "2468");
+  await expect(page).toHaveURL(/\/me$/);
+});

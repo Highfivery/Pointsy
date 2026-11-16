@@ -73,7 +73,10 @@ export default async function ChoresPage() {
 
   return (
     <main id="main" className={manage.main}>
-      <ScreenHeader title="Chores" intro="Ways for kids to earn points.">
+      <ScreenHeader
+        title="Chores"
+        intro="Chores and good habits kids earn points for."
+      >
         <Link href="/manage/categories" className={manage.headerLink}>
           <Tags size={16} aria-hidden="true" />
           Categories

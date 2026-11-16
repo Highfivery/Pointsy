@@ -21,7 +21,7 @@ export default async function ManageCategoriesPage() {
     <main id="main" className={styles.main}>
       <ScreenHeader
         title="Categories"
-        intro="The groups your chores are organised into. Add, rename, reorder, or remove them."
+        intro="Group chores and habits any way you like — Bedroom, Good habits, Social skills. Add, rename, reorder, or remove them."
       />
 
       <CategoryManager

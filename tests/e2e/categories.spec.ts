@@ -83,4 +83,43 @@ test.describe("custom chore categories", () => {
     await page.goto("/manage/categories");
     await expect(page).toHaveURL(/\/me$/);
   });
+
+  test("a parent adds a category from inside the chore editor (#182)", async ({
+    page,
+  }) => {
+    await signUpParent(page);
+    await page.goto("/manage/chores/new");
+    await page.getByLabel("Name").fill("Say please and thank you");
+    await page.getByLabel("Points").fill("3");
+
+    await page.getByRole("button", { name: /new category/i }).click();
+    const nameField = page.getByLabel("New category name");
+    await expect(nameField).toBeFocused();
+    await expectNoA11yViolations(page, "chore editor – new category");
+
+    // An empty name is refused without losing the chore form.
+    await page.getByRole("button", { name: /add category/i }).click();
+    await expect(page.getByRole("alert")).toBeVisible();
+
+    await nameField.fill("Good habits");
+    await page.keyboard.press("Enter");
+    // The field closes and the new category is picked.
+    await expect(nameField).toBeHidden();
+    await expect(
+      page.getByLabel("Category", { exact: true }).locator("option:checked"),
+    ).toHaveText("Good habits");
+    // The chore name typed earlier is still there.
+    await expect(page.getByLabel("Name")).toHaveValue(
+      "Say please and thank you",
+    );
+
+    await page.getByRole("button", { name: /save chore/i }).click();
+    await page.waitForURL(/\/manage\/chores$/);
+    await expect(
+      page.getByRole("heading", { name: "Good habits" }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Say please and thank you", { exact: true }),
+    ).toBeVisible();
+  });
 });
