@@ -15,8 +15,3 @@ updates:
       # propose majors that run ahead of it.
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
-
-  - package-ecosystem: github-actions
-    directory: "/"
-    schedule:
-      interval: weekly

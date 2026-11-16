@@ -139,7 +139,11 @@ the one to point out obvious visual problems. When in doubt, run the
 - **Conventional Commits** (enforced by commitlint): `feat:`, `fix:`, `docs:`,
   `refactor:`, `test:`, `chore:`, `ci:`, etc.
 - Run `npm run changeset` for any user-facing change.
-- Open a PR; CI + E2E must pass. Use the `review-pr` skill before requesting review.
+- Open a PR. **There is no GitHub CI** — checks run locally. `npm run verify:full`
+  (gate + build + full Playwright/axe suite on a throwaway Postgres) must pass
+  before merging; say so in the PR. Use the `review-pr` skill before requesting
+  review.
+- Release locally with `npm run release` (Changesets → `release/vX.Y.Z` PR).
 
 ## Common commands
 
@@ -153,6 +157,9 @@ the one to point out obvious visual problems. When in doubt, run the
 | Apply migration           | `npm run db:migrate`                                    |
 | Regenerate PWA icons      | `npm run icons:generate`                                |
 | Add a changeset           | `npm run changeset`                                     |
+| Full local gate           | `npm run verify` · `npm run verify:full` (+ E2E)        |
+| E2E on throwaway Postgres | `npm run test:e2e:local`                                |
+| Cut a release             | `npm run release`                                       |
 
 ## Skills available (`.claude/skills/`)
 

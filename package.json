@@ -19,6 +19,10 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "test:e2e:local": "bash scripts/e2e-local.sh",
+    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test:coverage && npm run build",
+    "verify:full": "npm run verify && npm run test:e2e:local",
+    "lighthouse": "npx --yes @lhci/cli@0.16.1 autorun --config=lighthouserc.json --upload.target=filesystem --upload.outputDir=.lighthouseci",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
@@ -26,7 +30,7 @@
     "icons:generate": "node scripts/generate-icons.mjs",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "changeset publish",
+    "release": "node scripts/release.mjs",
     "prepare": "husky"
   },
   "lint-staged": {

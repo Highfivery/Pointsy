@@ -51,3 +51,6 @@ next-env.d.ts
 # Local throwaway screenshot harness
 .shots/
 shots.local.mjs
+
+# Local Lighthouse reports (npm run lighthouse)
+.lighthouseci/
