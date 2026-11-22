@@ -11,6 +11,7 @@ import {
   mostUsedChoreIds,
   getKidBalances,
 } from "@/lib/points/service";
+import { listCashInRewards } from "@/lib/redemptions/service";
 import { AwardSurface } from "@/components/points/AwardSurface";
 import { ActivityList } from "@/components/points/ActivityList";
 import { IconByName } from "@/components/icons/registry";
@@ -38,15 +39,23 @@ export default async function AwardPage({
   const kid = await getPersonById(db, session.familyId, kidId);
   if (!kid || kid.role !== "kid") redirect("/dashboard");
 
-  const [balance, allChores, activity, mostUsedIds, kidBalances, categories] =
-    await Promise.all([
-      getBalance(db, session.familyId, kidId),
-      listChores(db, session.familyId),
-      listKidActivity(db, session.familyId, kidId, 15),
-      mostUsedChoreIds(db, session.familyId, kidId, 6),
-      getKidBalances(db, session.familyId),
-      listCategories(db, session.familyId),
-    ]);
+  const [
+    balance,
+    allChores,
+    activity,
+    mostUsedIds,
+    kidBalances,
+    categories,
+    cashIn,
+  ] = await Promise.all([
+    getBalance(db, session.familyId, kidId),
+    listChores(db, session.familyId),
+    listKidActivity(db, session.familyId, kidId, 15),
+    mostUsedChoreIds(db, session.familyId, kidId, 6),
+    getKidBalances(db, session.familyId),
+    listCategories(db, session.familyId),
+    listCashInRewards(db, session.familyId, kidId),
+  ]);
   const activeChores = allChores
     .filter((c) => c.isActive)
     .map((c) => ({
@@ -96,6 +105,8 @@ export default async function AwardPage({
         mostUsedIds={mostUsedIds}
         otherKids={otherKids}
         initialMode={initialMode}
+        rewards={cashIn.rewards}
+        available={cashIn.available}
       />
 
       <section aria-labelledby="recent-title">
@@ -110,6 +121,7 @@ export default async function AwardPage({
             createdAt: e.createdAt,
             type: e.type,
             reversed: e.reversed,
+            refundable: e.type === "redeem" && e.redemptionId !== null,
           }))}
           undoKidName={kid.name}
         />

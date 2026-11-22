@@ -8,8 +8,10 @@ export interface ActivityRow {
   createdAt: Date;
   kidName?: string;
   type?: "earn" | "redeem" | "adjust" | "bonus";
-  /** This earn was put back — struck through, with a "Put back" label. */
+  /** This earn was put back (or reward refunded) — struck through. */
   reversed?: boolean;
+  /** A paid-for solo reward a parent can refund (issue #189). */
+  refundable?: boolean;
 }
 
 function formatDate(d: Date): string {
@@ -19,7 +21,7 @@ function formatDate(d: Date): string {
 /**
  * Presentational ledger feed. `showKid` includes the kid's name in the meta.
  * `undoKidName` (parent surfaces only) adds a "put back" button to earned
- * entries that haven't already been put back.
+ * entries and a "refund" button to paid-for rewards, unless already undone.
  */
 export function ActivityList({
   entries,
@@ -48,7 +50,11 @@ export function ActivityList({
               {e.reason}
             </span>
             <span className={styles.activityMeta}>
-              {e.reversed ? "Put back · " : ""}
+              {e.reversed
+                ? e.type === "redeem"
+                  ? "Refunded · "
+                  : "Put back · "
+                : ""}
               {showKid && e.kidName ? `${e.kidName} · ` : ""}
               {formatDate(e.createdAt)}
             </span>
@@ -66,12 +72,13 @@ export function ActivityList({
             {e.amount}
           </span>
           {undoKidName ? (
-            e.type === "earn" && !e.reversed ? (
+            (e.type === "earn" || e.refundable) && !e.reversed ? (
               <PutBackButton
                 entryId={e.id}
                 reason={e.reason}
                 amount={e.amount}
                 kidName={undoKidName}
+                kind={e.type === "earn" ? "earn" : "refund"}
               />
             ) : (
               // Keep the amounts column-aligned on rows without a button.

@@ -427,3 +427,115 @@
   font-weight: 600;
   color: var(--color-text-muted);
 }
+
+/* ------------------------------------------ cash in a reward (Deduct, #189) */
+
+.cashInIntro {
+  margin: 0 0 var(--space-3);
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.rewardBtn,
+.rewardBtnLocked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  padding: var(--space-4) var(--space-2);
+  text-align: center;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+}
+
+.rewardBtn:hover {
+  border-color: var(--color-danger);
+}
+
+.rewardBtnLocked {
+  cursor: not-allowed;
+  border-style: dashed;
+}
+
+.rewardBtnLocked .choreIcon {
+  color: var(--color-text-muted);
+  background: var(--color-surface-raised);
+}
+
+.rewardCost {
+  font-weight: 700;
+  color: var(--color-danger);
+}
+
+.rewardCostLocked {
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.rewardNeeds {
+  margin-top: calc(-1 * var(--space-1));
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+/* Result line under the board; empty until a cash-in succeeds. */
+.cashInResult {
+  display: block;
+  margin-top: var(--space-3);
+  font-weight: 600;
+  color: var(--color-success);
+}
+
+/* Stays in the DOM (a live region must exist before it changes). */
+.cashInResult:empty {
+  margin-top: 0;
+}
+
+.cashInForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.handOverRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  text-align: left;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.handOverRow input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--color-primary);
+}
+
+.handOverLabel {
+  display: block;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.handOverHint {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.onlyThisKid {
+  margin: 0 0 var(--space-3);
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}

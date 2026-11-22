@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AlsoGiveTo, type AwardKid } from "./AlsoGiveTo";
 import { AwardBoard, type AwardChore } from "./AwardBoard";
 import { AwardExtras } from "./AwardExtras";
+import { CashInBoard, type CashInOption } from "./CashInBoard";
 import { formatNameList } from "@/lib/domain/names";
 import type { CategoryMeta } from "@/lib/catalog/category";
 import styles from "./points.module.css";
@@ -23,6 +24,8 @@ export function AwardSurface({
   mostUsedIds,
   otherKids,
   initialMode,
+  rewards,
+  available,
 }: {
   kidId: string;
   kidName: string;
@@ -31,8 +34,14 @@ export function AwardSurface({
   mostUsedIds: string[];
   otherKids: AwardKid[];
   initialMode: "award" | "deduct";
+  /** Rewards this kid can cash in from Deduct mode (issue #189). */
+  rewards: CashInOption[];
+  available: number;
 }) {
   const [also, setAlso] = useState<string[]>([]);
+  // Seeded from ?mode=deduct (the dashboard's Deduct link).
+  const [mode, setMode] = useState<"award" | "deduct">(initialMode);
+  const isDeduct = mode === "deduct";
 
   // Keep the picks in the kids' display order, and drop any that no longer
   // exist (a kid removed in another tab).
@@ -68,9 +77,13 @@ export function AwardSurface({
           onToggle={toggleAlso}
           hint={
             alsoKids.length > 0
-              ? `Points and chores below apply to ${formatNameList(
-                  recipients.map((r) => r.name),
-                )}.`
+              ? isDeduct
+                ? `Points below apply to ${formatNameList(
+                    recipients.map((r) => r.name),
+                  )}. Rewards are cashed in for ${kidName} only.`
+                : `Points and chores below apply to ${formatNameList(
+                    recipients.map((r) => r.name),
+                  )}.`
               : undefined
           }
         />
@@ -79,27 +92,42 @@ export function AwardSurface({
       <AwardExtras
         recipients={recipients}
         nameById={nameById}
-        initialMode={initialMode}
+        mode={mode}
+        onModeChange={setMode}
       />
 
-      <section aria-labelledby="chores-title">
-        <h2 id="chores-title" className={styles.sectionTitle}>
-          Award a chore
-        </h2>
-        {chores.length > 0 ? (
-          <AwardBoard
+      {isDeduct ? (
+        <section aria-labelledby="cash-in-title">
+          <h2 id="cash-in-title" className={styles.sectionTitle}>
+            Cash in a reward
+          </h2>
+          <CashInBoard
             kidId={kidId}
-            chores={chores}
-            categories={categories}
-            mostUsedIds={mostUsedIds}
-            alsoIds={alsoKids.map((k) => k.id)}
+            kidName={kidName}
+            available={available}
+            rewards={rewards}
           />
-        ) : (
-          <p className={styles.empty}>
-            No chores yet. <Link href="/manage/chores">Add some first</Link>.
-          </p>
-        )}
-      </section>
+        </section>
+      ) : (
+        <section aria-labelledby="chores-title">
+          <h2 id="chores-title" className={styles.sectionTitle}>
+            Award a chore
+          </h2>
+          {chores.length > 0 ? (
+            <AwardBoard
+              kidId={kidId}
+              chores={chores}
+              categories={categories}
+              mostUsedIds={mostUsedIds}
+              alsoIds={alsoKids.map((k) => k.id)}
+            />
+          ) : (
+            <p className={styles.empty}>
+              No chores yet. <Link href="/manage/chores">Add some first</Link>.
+            </p>
+          )}
+        </section>
+      )}
     </>
   );
 }

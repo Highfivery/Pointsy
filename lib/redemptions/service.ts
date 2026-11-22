@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull, ne, or, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import type { Database } from "@/lib/db/types";
 import {
   redemptions,
@@ -34,12 +34,15 @@ export class DuplicateRequestError extends Error {
     this.name = "DuplicateRequestError";
   }
 }
-class NotFoundError extends Error {}
-class InvalidStateError extends Error {}
+/** The reward, kid, or entry isn't in this family (or isn't usable). */
+export class RedemptionNotFoundError extends Error {}
+/** The request was already decided — e.g. another parent got there first. */
+export class RedemptionStateError extends Error {}
 
 async function assertKid(db: Database, familyId: string, kidId: string) {
   const kid = await getPersonById(db, familyId, kidId);
-  if (!kid || kid.role !== "kid") throw new NotFoundError("Child not found");
+  if (!kid || kid.role !== "kid")
+    throw new RedemptionNotFoundError("Child not found");
   return kid;
 }
 
@@ -147,10 +150,15 @@ export async function requestRedemption(
           eq(rewards.familyId, familyId),
           eq(rewards.id, rewardId),
           eq(rewards.isActive, true),
+          // Family-wide, or this kid's own — never another kid's personal goal.
+          or(
+            isNull(rewards.assignedToKidId),
+            eq(rewards.assignedToKidId, kidId),
+          ),
         ),
       )
       .limit(1);
-    if (!reward) throw new NotFoundError("Reward not found");
+    if (!reward) throw new RedemptionNotFoundError("Reward not found");
     // A team-only reward can't be grabbed solo (the kid UI hides this anyway).
     if (reward.isTeam && !reward.allowSolo) throw new InsufficientPointsError();
 
@@ -210,6 +218,57 @@ export async function cancelRedemption(
     .where(and(...conds));
 }
 
+/**
+ * Move one pending request to `approved` (deducting its request-time cost) or
+ * `denied`, inside the caller's transaction. The status flip is conditional on
+ * the row still being `requested`, so two decisions racing (two parents, or a
+ * parent's cash-in against the dashboard Approve, or a kid cancelling) can
+ * never both win and deduct twice — the loser gets null.
+ */
+async function settlePending(
+  tx: Database,
+  familyId: string,
+  redemptionId: string,
+  decision: "approved" | "denied",
+  decidedBy: string,
+  opts: { note?: string; handedOver?: boolean } = {},
+): Promise<Redemption | null> {
+  const now = new Date();
+  const delivered = decision === "approved" && opts.handedOver === true;
+  const [r] = await tx
+    .update(redemptions)
+    .set({
+      status: delivered ? "fulfilled" : decision,
+      decidedBy,
+      decidedAt: now,
+      note: opts.note?.trim() || null,
+      ...(delivered ? { fulfilledBy: decidedBy, fulfilledAt: now } : {}),
+    })
+    .where(
+      and(
+        eq(redemptions.familyId, familyId),
+        eq(redemptions.id, redemptionId),
+        eq(redemptions.status, "requested"),
+      ),
+    )
+    .returning();
+  if (!r) return null;
+  if (decision === "approved") {
+    // Snapshot on write: charge what the kid asked for at request time.
+    await tx.insert(ledger).values({
+      familyId,
+      personId: r.personId,
+      amount: -r.cost,
+      type: "redeem",
+      reason: r.rewardName,
+      rewardId: r.rewardId,
+      redemptionId: r.id,
+      createdBy: decidedBy,
+    });
+  }
+  return r;
+}
+
 /** Approve (deduct points) or deny (release the reserve) a pending request. */
 export async function decideRedemption(
   db: Database,
@@ -220,42 +279,254 @@ export async function decideRedemption(
   note?: string,
 ): Promise<Redemption> {
   return db.transaction(async (tx) => {
-    const [r] = await tx
+    const r = await settlePending(tx, familyId, redemptionId, decision, decidedBy, { note }); // prettier-ignore
+    if (!r) throw new RedemptionStateError("Redemption is not pending");
+    return r;
+  });
+}
+
+/** The reward can't be cashed in solo (a team-only reward). */
+export class TeamOnlyRewardError extends Error {
+  constructor() {
+    super(
+      "That's a team reward — kids team up for it from their Rewards screen.",
+    );
+    this.name = "TeamOnlyRewardError";
+  }
+}
+
+export interface CashInResult {
+  redemption: Redemption;
+  /** True when it settled the kid's own pending request for this reward. */
+  fromRequest: boolean;
+}
+
+/**
+ * A parent hands a reward to a kid on the spot (issue #189): one step instead
+ * of the kid requesting and the parent approving. Same rules as a kid request
+ * (active, this kid's or family-wide, not team-only, affordable from
+ * *available* points, never while in the red) and the same records — a
+ * redemption with the reward snapshotted plus a `redeem` ledger row — so every
+ * history, queue and balance treats it like an approved request.
+ *
+ * If the kid already asked for this reward, that request is approved instead
+ * (charging its request-time cost) rather than creating a second one.
+ * `handedOver` marks it delivered at once; otherwise it waits in "Awaiting
+ * delivery" on the dashboard.
+ */
+export async function cashInReward(
+  db: Database,
+  familyId: string,
+  kidId: string,
+  rewardId: string,
+  parentId: string,
+  opts: { handedOver: boolean },
+): Promise<CashInResult> {
+  return db.transaction(async (tx) => {
+    await assertKid(tx, familyId, kidId);
+    // Same per-kid lock as requestRedemption, so a cash-in and a kid request
+    // (or two parents) can't both pass the affordability check.
+    await tx.execute(
+      sql`select 1 from ${people} where ${people.id} = ${kidId} and ${people.familyId} = ${familyId} for update`,
+    );
+    const [reward] = await tx
       .select()
+      .from(rewards)
+      .where(
+        and(
+          eq(rewards.familyId, familyId),
+          eq(rewards.id, rewardId),
+          eq(rewards.isActive, true),
+          or(
+            isNull(rewards.assignedToKidId),
+            eq(rewards.assignedToKidId, kidId),
+          ),
+        ),
+      )
+      .limit(1);
+    if (!reward) throw new RedemptionNotFoundError("Reward not found");
+    if (reward.isTeam && !reward.allowSolo) throw new TeamOnlyRewardError();
+
+    const [pending] = await tx
+      .select({ id: redemptions.id })
       .from(redemptions)
       .where(
         and(
           eq(redemptions.familyId, familyId),
-          eq(redemptions.id, redemptionId),
+          eq(redemptions.personId, kidId),
+          eq(redemptions.rewardId, reward.id),
           eq(redemptions.status, "requested"),
         ),
       )
+      .orderBy(redemptions.requestedAt)
       .limit(1);
-    if (!r) throw new InvalidStateError("Redemption is not pending");
-
-    if (decision === "approved") {
-      await tx.insert(ledger).values({
-        familyId,
-        personId: r.personId,
-        amount: -r.cost,
-        type: "redeem",
-        reason: r.rewardName,
-        rewardId: r.rewardId,
-        redemptionId: r.id,
-        createdBy: decidedBy,
-      });
+    if (pending) {
+      // Already reserved when the kid asked — approve it exactly like the
+      // dashboard does (no second affordability check, request-time cost).
+      const r = await settlePending(tx, familyId, pending.id, "approved", parentId, { handedOver: opts.handedOver }); // prettier-ignore
+      if (r) return { redemption: r, fromRequest: true };
+      // Lost a race with another decision on that request: fall through and
+      // treat this as a fresh cash-in, checked against current points.
     }
+
+    const available = await getAvailable(tx, familyId, kidId);
+    if (available < 0 || reward.cost > available) {
+      throw new InsufficientPointsError();
+    }
+
+    const now = new Date();
+    const [row] = await tx
+      .insert(redemptions)
+      .values({
+        familyId,
+        personId: kidId,
+        rewardId: reward.id,
+        rewardName: reward.name,
+        cost: reward.cost,
+        status: opts.handedOver ? "fulfilled" : "approved",
+        requestedAt: now,
+        decidedBy: parentId,
+        decidedAt: now,
+        ...(opts.handedOver ? { fulfilledBy: parentId, fulfilledAt: now } : {}),
+      })
+      .returning();
+    await tx.insert(ledger).values({
+      familyId,
+      personId: kidId,
+      amount: -reward.cost,
+      type: "redeem",
+      reason: reward.name,
+      rewardId: reward.id,
+      redemptionId: row.id,
+      createdBy: parentId,
+    });
+    return { redemption: row, fromRequest: false };
+  });
+}
+
+/** This reward was already refunded. */
+export class AlreadyRefundedError extends Error {
+  constructor() {
+    super("That reward was already refunded.");
+    this.name = "AlreadyRefundedError";
+  }
+}
+
+export interface RefundResult {
+  kidId: string;
+  rewardName: string;
+  amount: number;
+}
+
+/**
+ * Undo a reward that was paid for (a mistaken cash-in, or a reward that fell
+ * through). Writes a linked positive `adjust` row — the `redeem` row is never
+ * touched (append-only ledger) — and marks the redemption `refunded`, which
+ * also takes it out of "Awaiting delivery". An `adjust` never counts as earned,
+ * so milestones and lifetime totals are unaffected. Solo redemptions only:
+ * team-up rows have no redemption to settle.
+ */
+export async function refundRedemption(
+  db: Database,
+  familyId: string,
+  entryId: string,
+  refundedBy: string,
+): Promise<RefundResult> {
+  return db.transaction(async (tx) => {
+    const [entry] = await tx
+      .select()
+      .from(ledger)
+      .where(
+        and(
+          eq(ledger.familyId, familyId),
+          eq(ledger.id, entryId),
+          eq(ledger.type, "redeem"),
+        ),
+      )
+      .limit(1)
+      .for("update");
+    if (!entry || !entry.redemptionId) {
+      throw new RedemptionNotFoundError("Reward entry not found");
+    }
+    const [existing] = await tx
+      .select({ id: ledger.id })
+      .from(ledger)
+      .where(eq(ledger.reversesId, entry.id))
+      .limit(1);
+    if (existing) throw new AlreadyRefundedError();
+
+    await tx.insert(ledger).values({
+      familyId,
+      personId: entry.personId,
+      amount: -entry.amount,
+      type: "adjust",
+      reason: `Refund: ${entry.reason}`,
+      rewardId: entry.rewardId,
+      redemptionId: entry.redemptionId,
+      reversesId: entry.id,
+      createdBy: refundedBy,
+    });
     await tx
       .update(redemptions)
-      .set({
-        status: decision,
-        decidedBy,
-        decidedAt: new Date(),
-        note: note?.trim() || null,
-      })
-      .where(eq(redemptions.id, r.id));
-    return r;
+      .set({ status: "refunded" })
+      .where(
+        and(
+          eq(redemptions.familyId, familyId),
+          eq(redemptions.id, entry.redemptionId),
+          inArray(redemptions.status, ["approved", "fulfilled"]),
+        ),
+      );
+    return {
+      kidId: entry.personId,
+      rewardName: entry.reason,
+      amount: -entry.amount,
+    };
   });
+}
+
+export interface CashInReward {
+  id: string;
+  name: string;
+  emoji: string;
+  cost: number;
+  affordable: boolean;
+  moreNeeded: number;
+  /** The kid already asked for it — cashing in approves that request. */
+  pending: boolean;
+}
+
+/**
+ * Rewards a parent can cash in for this kid: active, family-wide or theirs,
+ * and redeemable solo. A reward the kid already requested counts as
+ * affordable (its points are already set aside), matching how it's approved.
+ */
+export async function listCashInRewards(
+  db: Database,
+  familyId: string,
+  kidId: string,
+): Promise<{ available: number; rewards: CashInReward[] }> {
+  const { available, rewards: list } = await listRedeemableRewards(
+    db,
+    familyId,
+    kidId,
+  );
+  return {
+    available,
+    rewards: list
+      .filter((r) => !r.isTeam || r.allowSolo)
+      .map((r) => {
+        const affordable = r.pending || (available >= 0 && r.cost <= available);
+        return {
+          id: r.id,
+          name: r.name,
+          emoji: r.emoji,
+          cost: r.cost,
+          affordable,
+          moreNeeded: affordable ? 0 : Math.max(0, r.cost - available),
+          pending: r.pending,
+        };
+      }),
+  };
 }
 
 /** Mark an approved redemption as delivered (no ledger effect). */
@@ -478,7 +749,7 @@ export async function setKidGoal(
       .from(rewards)
       .where(and(eq(rewards.familyId, familyId), eq(rewards.id, rewardId)))
       .limit(1);
-    if (!reward) throw new NotFoundError("Reward not found");
+    if (!reward) throw new RedemptionNotFoundError("Reward not found");
   }
   await db
     .update(people)
