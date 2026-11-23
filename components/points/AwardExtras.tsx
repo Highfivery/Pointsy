@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Minus, Plus } from "lucide-react";
 import { changePointsAction } from "@/app/actions/points";
 import { Field } from "@/components/auth/Field";
@@ -26,16 +26,18 @@ export interface AwardRecipient {
 export function AwardExtras({
   recipients,
   nameById,
-  initialMode = "award",
+  mode,
+  onModeChange,
 }: {
   /** Everyone this form posts to, the kid whose screen this is first. */
   recipients: AwardRecipient[];
   /** Names for every kid on the screen, so the result can name them back. */
   nameById: Record<string, string>;
-  initialMode?: "award" | "deduct";
+  /** Owned by AwardSurface: Deduct also swaps the chore board for rewards. */
+  mode: "award" | "deduct";
+  onModeChange: (mode: "award" | "deduct") => void;
 }) {
   const [state, action, pending] = useActionState(changePointsAction, initial);
-  const [mode, setMode] = useState<"award" | "deduct">(initialMode);
   const ref = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -91,7 +93,7 @@ export function AwardExtras({
             type="button"
             className={isDeduct ? styles.segBtn : styles.segBtnAward}
             aria-pressed={!isDeduct}
-            onClick={() => setMode("award")}
+            onClick={() => onModeChange("award")}
           >
             <Plus size={16} aria-hidden="true" />
             Award
@@ -100,7 +102,7 @@ export function AwardExtras({
             type="button"
             className={isDeduct ? styles.segBtnDeduct : styles.segBtn}
             aria-pressed={isDeduct}
-            onClick={() => setMode("deduct")}
+            onClick={() => onModeChange("deduct")}
           >
             <Minus size={16} aria-hidden="true" />
             Deduct

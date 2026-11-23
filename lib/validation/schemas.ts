@@ -324,6 +324,19 @@ export const decideRedemptionSchema = z.object({
   note: z.string().trim().max(280).optional(),
 });
 
+/** A parent cashes in a reward for a kid on the spot (#189). */
+export const cashInRewardSchema = z.object({
+  kidId: z.string().uuid(),
+  rewardId: z.string().uuid(),
+  /** Ticked ⇒ handed over now (delivered); unticked ⇒ Awaiting delivery. */
+  handedOver: z.coerce.boolean().default(false),
+});
+
+/** Refund a paid-for reward from the activity feed. */
+export const refundRewardSchema = z.object({
+  entryId: z.string().uuid(),
+});
+
 /** Put back an earned ledger entry from the activity feed. */
 export const undoEarnSchema = z.object({
   entryId: z.string().uuid(),

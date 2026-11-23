@@ -1,0 +1,1 @@
+ALTER TYPE "public"."redemption_status" ADD VALUE 'refunded';

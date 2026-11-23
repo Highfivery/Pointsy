@@ -37,6 +37,8 @@ export const redemptionStatusEnum = pgEnum("redemption_status", [
   "fulfilled",
   "denied",
   "cancelled",
+  /** Approved (points taken), then a parent gave the points back. */
+  "refunded",
 ]);
 
 /** A team redemption: kids opt in, then a parent approves the whole thing. */
