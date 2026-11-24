@@ -25,6 +25,7 @@ import {
 } from "@/lib/validation/schemas";
 import type { FormState } from "@/lib/validation/form";
 import { getPersonById } from "@/lib/db/queries";
+import { formatNameList } from "@/lib/domain/names";
 import { notifyParents, notifyPerson } from "@/lib/push/send";
 
 const idSchema = z.string().uuid();
@@ -160,9 +161,12 @@ function revalidateKid(kidId: string) {
 export type CashInState = FormState & { message?: string };
 
 /**
- * A parent cashes in a reward for a kid from the award screen's Deduct mode
- * (issue #189). The kid comes from the form but is checked against the
- * session's family in the service; the family never comes from the client.
+ * A parent cashes in a reward from the award screen's Deduct mode (issue
+ * #189) for the screen's kid plus any "Also give to" picks. Each kid gets the
+ * reward and pays its full cost in their own transaction, with every rule
+ * checked per kid; a kid who can't have it is skipped and named in the
+ * message. Kids are checked against the session's family in the service — the
+ * family never comes from the client.
  */
 export async function cashInRewardAction(
   _prev: CashInState,
@@ -170,48 +174,71 @@ export async function cashInRewardAction(
 ): Promise<CashInState> {
   const session = await requireParent();
   const parsed = cashInRewardSchema.safeParse({
-    kidId: formData.get("kidId"),
+    kidIds: formData.getAll("kidId"),
     rewardId: formData.get("rewardId"),
     handedOver: formData.get("handedOver") === "on",
   });
   if (!parsed.success) return { error: "Pick a reward to cash in." };
-  const { kidId, rewardId, handedOver } = parsed.data;
+  const { kidIds, rewardId, handedOver } = parsed.data;
+  const db = getDb();
 
-  let result;
-  try {
-    result = await cashInReward(
-      getDb(),
-      session.familyId,
-      kidId,
-      rewardId,
-      session.personId,
-      { handedOver },
-    );
-  } catch (err) {
-    if (err instanceof InsufficientPointsError) {
-      revalidateKid(kidId);
-      return { error: "Not enough points available for that reward." };
+  const done: string[] = [];
+  const skipped: string[] = [];
+  let rewardName = "";
+  let cost = 0;
+  for (const kidId of kidIds) {
+    const kid = await getPersonById(db, session.familyId, kidId);
+    const name = kid?.name ?? "A child";
+    try {
+      const result = await cashInReward(
+        db,
+        session.familyId,
+        kidId,
+        rewardId,
+        session.personId,
+        { handedOver },
+      );
+      ({ rewardName, cost } = result.redemption);
+      done.push(name);
+      await notifyPerson(db, session.familyId, kidId, {
+        title: `You got ${rewardName}! 🎁`,
+        body: `−${cost} points`,
+        url: "/me",
+      });
+    } catch (err) {
+      if (err instanceof InsufficientPointsError) {
+        skipped.push(`${name} (not enough points)`);
+      } else if (
+        err instanceof TeamOnlyRewardError ||
+        err instanceof RedemptionNotFoundError
+      ) {
+        skipped.push(`${name} (not available)`);
+      } else {
+        throw err;
+      }
     }
-    if (err instanceof TeamOnlyRewardError) return { error: err.message };
-    if (err instanceof RedemptionNotFoundError) {
-      revalidateKid(kidId);
-      return { error: "That reward isn't available any more." };
-    }
-    throw err;
+    revalidateKid(kidId);
   }
 
-  const { rewardName, cost } = result.redemption;
-  await notifyPerson(getDb(), session.familyId, kidId, {
-    title: `You got ${rewardName}! 🎁`,
-    body: `−${cost} points`,
-    url: "/me",
-  });
-  revalidateKid(kidId);
+  if (done.length === 0) {
+    return {
+      error:
+        kidIds.length === 1
+          ? skipped[0]?.includes("not enough")
+            ? "Not enough points available for that reward."
+            : "That reward isn't available any more."
+          : `Nobody could have it: ${formatNameList(skipped)}.`,
+    };
+  }
+  const forWho = kidIds.length > 1 ? ` for ${formatNameList(done)}` : "";
+  const later = handedOver
+    ? ""
+    : " It's in Awaiting delivery on your dashboard.";
+  const skippedNote =
+    skipped.length > 0 ? ` Skipped ${formatNameList(skipped)}.` : "";
   return {
     ok: true,
-    message: handedOver
-      ? `${rewardName} cashed in.`
-      : `${rewardName} cashed in. It's in Awaiting delivery on your dashboard.`,
+    message: `${rewardName} cashed in${forWho}.${later}${skippedNote}`,
   };
 }
 

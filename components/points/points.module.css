@@ -539,3 +539,37 @@
   font-size: 0.85rem;
   color: var(--color-text-muted);
 }
+
+/* Sheet: who gets the reward, and who's skipped (Also give to, #189). */
+.cashInWho {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.cashInWhoOk,
+.cashInWhoSkip {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.9rem;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.cashInWhoOk {
+  color: var(--color-text);
+}
+
+.cashInWhoSkip {
+  color: var(--color-text-muted);
+}
+
+.cashInWhoName {
+  font-weight: 700;
+}
