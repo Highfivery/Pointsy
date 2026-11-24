@@ -130,3 +130,67 @@ test.describe("parent cash-in (#189)", () => {
     ).toBeVisible();
   });
 });
+
+test("Also give to: each picked kid gets the reward, short kids are skipped", async ({
+  page,
+}) => {
+  await setup(page); // Robin has 50
+  // A second kid, Sky, with only 10 points, and a third, Max, with 40.
+  for (const [name, pts] of [
+    ["Sky", 10],
+    ["Max", 40],
+  ] as const) {
+    await page.goto("/manage/kids/new");
+    await page.getByLabel("Name").fill(name);
+    await page.getByRole("radio", { name: "Dog", exact: true }).check();
+    await page.getByLabel("4-digit PIN").fill("1111");
+    await page.getByRole("button", { name: /add child/i }).click();
+    await expect(page.getByText(name).first()).toBeVisible();
+    await page.goto("/dashboard");
+    await page
+      .getByRole("link", { name: new RegExp(`manage ${name}`, "i") })
+      .click();
+    const panel = page.getByRole("region", { name: "Award or deduct points" });
+    await panel.getByLabel("Points").fill(String(pts));
+    await panel.getByLabel("Reason").fill("Seed");
+    await panel.getByRole("button", { name: /^award points$/i }).click();
+    await expect(page.getByText(/points awarded/i)).toBeVisible();
+  }
+
+  await page.goto("/dashboard");
+  await page.getByRole("link", { name: /deduct points from robin/i }).click();
+  await page.getByRole("button", { name: "Sky", exact: true }).click();
+  await page.getByRole("button", { name: "Max", exact: true }).click();
+  await expect(
+    page.getByText(/points and rewards below apply to/i),
+  ).toBeVisible();
+
+  const board = page.getByRole("region", { name: "Cash in a reward" });
+  const card = board.getByRole("button", {
+    name: /cash in ice cream for 30 points each, 2 of 3 can have it/i,
+  });
+  await card.click();
+  const sheet = page.getByRole("dialog", {
+    name: /cash in ice cream for robin and max/i,
+  });
+  await expect(sheet.getByText(/skipped · needs 20 more/i)).toBeVisible();
+  await expectNoA11yViolations(page, "cash-in sheet for several kids");
+  await sheet.getByRole("button", { name: /30 points each/i }).click();
+  await expect(sheet).toBeHidden();
+  await expect(
+    page.getByText(
+      "Ice cream cashed in for Robin and Max. Skipped Sky (not enough points).",
+    ),
+  ).toBeVisible();
+
+  await page.goto("/dashboard");
+  for (const [name, pts] of [
+    ["Robin", "20 pts"],
+    ["Max", "10 pts"],
+    ["Sky", "10 pts"],
+  ]) {
+    await expect(
+      page.getByRole("link", { name: new RegExp(`manage ${name}`, "i") }),
+    ).toContainText(pts);
+  }
+});

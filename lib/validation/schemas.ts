@@ -326,7 +326,11 @@ export const decideRedemptionSchema = z.object({
 
 /** A parent cashes in a reward for a kid on the spot (#189). */
 export const cashInRewardSchema = z.object({
-  kidId: z.string().uuid(),
+  /** The screen's kid plus any "Also give to" picks; each pays the full cost. */
+  kidIds: z
+    .array(z.string().uuid())
+    .min(1, "Pick at least one child.")
+    .transform((ids) => Array.from(new Set(ids))),
   rewardId: z.string().uuid(),
   /** Ticked ⇒ handed over now (delivered); unticked ⇒ Awaiting delivery. */
   handedOver: z.coerce.boolean().default(false),

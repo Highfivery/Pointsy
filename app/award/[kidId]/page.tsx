@@ -70,6 +70,22 @@ export default async function AwardPage({
       limitScope: c.limitScope,
       isCore: c.isCore,
     }));
+  // What each other kid could cash in, so "Also give to" picks can share a
+  // reward (#189 follow-up). Small per family; the server re-checks anyway.
+  const otherCashIn = await Promise.all(
+    kidBalances
+      .filter((k) => k.id !== kidId)
+      .map(async (k) => ({
+        kidId: k.id,
+        ...(await listCashInRewards(db, session.familyId, k.id)),
+      })),
+  );
+  const cashInByKid = Object.fromEntries(
+    [{ kidId, ...cashIn }, ...otherCashIn].map((c) => [
+      c.kidId,
+      { available: c.available, rewards: c.rewards },
+    ]),
+  );
   const otherKids = kidBalances
     .filter((k) => k.id !== kidId)
     .map((k) => ({
@@ -106,7 +122,7 @@ export default async function AwardPage({
         otherKids={otherKids}
         initialMode={initialMode}
         rewards={cashIn.rewards}
-        available={cashIn.available}
+        cashInByKid={cashInByKid}
       />
 
       <section aria-labelledby="recent-title">

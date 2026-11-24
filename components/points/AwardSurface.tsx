@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AlsoGiveTo, type AwardKid } from "./AlsoGiveTo";
 import { AwardBoard, type AwardChore } from "./AwardBoard";
 import { AwardExtras } from "./AwardExtras";
-import { CashInBoard, type CashInOption } from "./CashInBoard";
+import { CashInBoard, type CashInOption, type KidCashIn } from "./CashInBoard";
 import { formatNameList } from "@/lib/domain/names";
 import type { CategoryMeta } from "@/lib/catalog/category";
 import styles from "./points.module.css";
@@ -25,7 +25,7 @@ export function AwardSurface({
   otherKids,
   initialMode,
   rewards,
-  available,
+  cashInByKid,
 }: {
   kidId: string;
   kidName: string;
@@ -36,7 +36,8 @@ export function AwardSurface({
   initialMode: "award" | "deduct";
   /** Rewards this kid can cash in from Deduct mode (issue #189). */
   rewards: CashInOption[];
-  available: number;
+  /** Each kid's cash-in view, for "Also give to" picks on rewards. */
+  cashInByKid: Record<string, KidCashIn>;
 }) {
   const [also, setAlso] = useState<string[]>([]);
   // Seeded from ?mode=deduct (the dashboard's Deduct link).
@@ -77,13 +78,9 @@ export function AwardSurface({
           onToggle={toggleAlso}
           hint={
             alsoKids.length > 0
-              ? isDeduct
-                ? `Points below apply to ${formatNameList(
-                    recipients.map((r) => r.name),
-                  )}. Rewards are cashed in for ${kidName} only.`
-                : `Points and chores below apply to ${formatNameList(
-                    recipients.map((r) => r.name),
-                  )}.`
+              ? `Points and ${isDeduct ? "rewards" : "chores"} below apply to ${formatNameList(
+                  recipients.map((r) => r.name),
+                )}.`
               : undefined
           }
         />
@@ -102,10 +99,9 @@ export function AwardSurface({
             Cash in a reward
           </h2>
           <CashInBoard
-            kidId={kidId}
-            kidName={kidName}
-            available={available}
+            recipients={recipients}
             rewards={rewards}
+            cashInByKid={cashInByKid}
           />
         </section>
       ) : (
